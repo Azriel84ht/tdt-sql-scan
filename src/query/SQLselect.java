@@ -5,12 +5,14 @@ import java.util.List;
 
 public class SQLselect extends SQLQuery{
 	private List<String> columnList = new ArrayList<String>();
+	private List<String> fromList = new ArrayList<String>();
 	private boolean inSubquery = false;
-	int unionquery = 0;
+	int unionquery = 0, endofcols = 0;
 	
 	public SQLselect(String query) {
 		super(query);
 		this.columnList = setColumns();
+		this.fromList = setFrom();
 		this.unionquery = super.buscaP("UNION", 0);
 	}
 	private List<String> setColumns(){
@@ -40,7 +42,14 @@ public class SQLselect extends SQLQuery{
 			}
 			i++;
 		}
+		this.endofcols = i;
 		return listCol;
+	}
+	
+	private List<String> setFrom(){
+		List<String> listFrom = new ArrayList<String>();
+		
+		return listFrom;
 	}
 	
 	public String getCol(int i) {

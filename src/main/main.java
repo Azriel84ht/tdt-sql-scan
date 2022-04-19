@@ -10,7 +10,7 @@ public class main {
 
 	public static void main(String[] args) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
 		
-		File fichero = new File("query-examples/pruebasql.txt");
+		File fichero = new File("query_examples/select_ex.sql");
 		try {
 			FileReader fr = new FileReader(fichero);
 			BufferedReader br = new BufferedReader(fr);

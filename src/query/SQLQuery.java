@@ -32,7 +32,7 @@ public class SQLQuery {
 		}
 		
 		//SEPARAMOS LA QUERY EN UN ARRAY PARA MANEJARLA CON FACILIDAD
-		this.queryPP = this.queryTratada.split(" ");
+		this.queryPP = this.queryTratada.trim().split(" ");
 		if (supportedTypes.contains(this.queryPP[0])) {
 			this.tipo = supportedTypes.get(supportedTypes.indexOf(this.queryPP[0]));
 		}else {
