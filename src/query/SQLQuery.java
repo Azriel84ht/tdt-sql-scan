@@ -45,7 +45,10 @@ public class SQLQuery {
 	}
 	
 	public String getPos(int position) {
-		return queryPP[position];
+		if (this.queryPP.length > position) {
+			return this.queryPP[position];
+		} else
+			return "";
 	}
 	public int buscaP (String palabra, int iter) {
 		int i = 0, c = 0;

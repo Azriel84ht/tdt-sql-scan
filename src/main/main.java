@@ -24,6 +24,11 @@ public class main {
 				System.out.println("Columna " + x +": " + my_query.getCol(x));
 				x++;
 			}
+			x = 0;
+			while (my_query.getSubQCol(0, x) != null) {
+				System.out.println("Columna " + x +": " + my_query.getSubQCol(0,x));
+				x++;
+			}
 		}catch(Exception ex) {
 			ex.printStackTrace();
 		}

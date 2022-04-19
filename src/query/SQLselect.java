@@ -6,8 +6,8 @@ import java.util.List;
 public class SQLselect extends SQLQuery{
 	private List<String> columnList = new ArrayList<String>();
 	private List<String> fromList = new ArrayList<String>();
-	private boolean inSubquery = false;
-	int unionquery = 0, endofcols = 0;
+	private List<SQLselect> subQuery = new ArrayList<SQLselect>(); 
+	int unionquery = 0, endofcols = 0, endoffrom = 0;
 	
 	public SQLselect(String query) {
 		super(query);
@@ -42,13 +42,47 @@ public class SQLselect extends SQLQuery{
 			}
 			i++;
 		}
-		this.endofcols = i;
+		this.endofcols = i - 1;
 		return listCol;
 	}
 	
 	private List<String> setFrom(){
 		List<String> listFrom = new ArrayList<String>();
+		String tmpPP;
+		int z = this.endofcols + 1;
+		boolean eof = false;
+		while (!eof) {
+			tmpPP = super.getPos(z);
+			if(tmpPP.equals("WHERE") ||
+					tmpPP.equals("GROUP") ||
+					tmpPP.equals("ORDER") ||
+					tmpPP.isEmpty()) {
+				eof = true;
+			}else if (tmpPP.equals("(")) {
+				z++;
+				int parentesis = 1;
+				String subqtext = "";
+				while (parentesis > 0) {
+					tmpPP = super.getPos(z);
+					if (tmpPP.contains("(")) {
+						parentesis++;
+					}else if (tmpPP.contains(")")) {
+						parentesis--;
+					}
+					if (parentesis == 0 && tmpPP.equals(")")) {
+						z++;
+					}else {
+						subqtext = subqtext + tmpPP + " ";
+						z++;
+					}
+				}
+				this.subQuery.add(new SQLselect(subqtext));
+			}
+			z++;
+		}
 		
+		
+
 		return listFrom;
 	}
 	
@@ -58,7 +92,13 @@ public class SQLselect extends SQLQuery{
 		}else {
 			return null;
 		}
-		
+	}
+	public String getSubQCol(int qid, int i) {
+		if (this.subQuery.size() > qid) {
+			return this.subQuery.get(qid).getCol(i);
+		}else {
+			return null;
+		}
 	}
 }
 

@@ -1,1 +1,1 @@
-SELECT * FROM BASEDATOS.TABLA;
+SELECT * FROM (select columna1,columna2 from dabesatos.tabla)
