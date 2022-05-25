@@ -19,16 +19,22 @@ public class main {
 				query = query + " " + line;
 			}
 			SQLselect my_query = new SQLselect(query);
-			int x = 0;
-			while (my_query.getCol(x) != null) {
-				System.out.println("Columna " + x +": " + my_query.getCol(x));
-				x++;
+			
+			//Usamos este bloque para validar los resultados
+			
+			System.out.println("RESULTADOS:");
+			System.out.println("Uniones: " + my_query.getUnionCount());
+			int i = 0, w = 0;
+			while (my_query.getUnionCount() > i) {
+				System.out.println("UNION " + i);
+				w=0;
+				while (my_query.getUnionCol(i,w) != null) {
+					System.out.println("COLUMNA " + w + ": " + my_query.getUnionCol(i,w));
+					w++;
+				}
+				i++;
 			}
-			x = 0;
-			while (my_query.getSubQCol(0, x) != null) {
-				System.out.println("Columna " + x +": " + my_query.getSubQCol(0,x));
-				x++;
-			}
+			
 		}catch(Exception ex) {
 			ex.printStackTrace();
 		}

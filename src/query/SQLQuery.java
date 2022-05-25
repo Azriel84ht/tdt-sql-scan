@@ -14,6 +14,7 @@ public class SQLQuery {
 	private String query = "" ,queryTratada = "";
 	private String tipo;
 	private String[] queryPP;
+	private int queryLength = 0;
 	
 	// CONSTRUCTOR PRINCIPAL
 	public SQLQuery(String query) {
@@ -38,6 +39,12 @@ public class SQLQuery {
 		}else {
 			this.tipo = null;
 		}
+		
+		this.queryLength = this.queryPP.length;
+	}
+	
+	public int getLength() {
+		return this.queryLength;
 	}
 	
 	public String getTipo() {
@@ -52,14 +59,14 @@ public class SQLQuery {
 	}
 	public int buscaP (String palabra, int iter) {
 		int i = 0, c = 0;
-		if (iter == 0) {
-			while (this.queryPP.length < i) {
+		if (iter == 0) { //SACAMOS EL NUMERO TOTAL
+			while (i < this.queryPP.length) {
 				if (this.queryPP[i].equals(palabra)) {
 					c++;
 				}
 				i++;
 			}
-		}else {
+		}else { //BUSCAMOS LA POSICION DE LA ITERACION DADA
 			int y = 0, n = 0;
 			while (c == 0) {
 				if (this.queryPP[n].equals(palabra)) {
@@ -72,6 +79,9 @@ public class SQLQuery {
 			}
 		}
 		return c;
+	}
+	public String[] getQueryPP() {
+		return this.queryPP;
 	}
 }
 
