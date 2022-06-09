@@ -1,180 +1,140 @@
 package query;
 
+/********************************************************/
+/*** IDEAS:                                             */
+/***        1.- En SQLselect crear una funcion para     */
+/***            ejecutar en el constructor que se       */
+/*              encargue de recorrer la consulta y      */
+/*              detecte las posiciones de las palabras  */
+/*              clave mas importantes (FROM, WHERE, etc)*/
+/*          2.- Utilizar listas multidimensionales para */
+/*              las diferentes caracteristicas de las   */
+/*              partes como columnas, from, etc         */
+/********************************************************/
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class SQLselect extends SQLQuery{
-	private List<String> columnList = new ArrayList<String>();
-	private List<String> fromList = new ArrayList<String>();
-	private List<SQLselect> unionQuery = new ArrayList<SQLselect>();
-	private List<SQLselect> subQuery = new ArrayList<SQLselect>();
-	private int endofcols = 0, endoffrom = 0;
-	private int unionCount = 0;
+	/********************************************************/
+	/* Indicadores de palabras clave                        */
+	/********************************************************/
+
+	private int idxSelect = 0, idxFrom = 0, idxEOQ = 0;
+	private List<Integer> unionPosition = null;
 	
-	private String[] queryPP;
+	private boolean union = false, subquerys = false;
 	
-	//METODO CONSTRUCTOR
-	//DESDE ESTE, SE LLAMAN A OTROS METODOS
-	//DE LA CLASE POR SEPARAR Y MANTENER LA LIMPIEZA
+	private List<SQLselect> unionQuery = null;
+	private List<SQLselect> subQuery = null;
+	
+	
+	
+	
 	public SQLselect(String query) {
 		super(query);
-		this.queryPP = super.getQueryPP();
-		this.columnList = setColumns();
-		setUnions();
-		this.fromList = setFrom();
+		keyWordSearch();
+		fromAnalize();
 	}
 	
-	//METODOS DEL CONSTRUCTOR
-	//ESTOS METODOS SOLO SE LLAMAN DESDE EL CONSTRUCTOR
-	//PARA SEPARAR Y MANTENER LA LIMPIEZA
-	private List<String> setColumns(){
-		List<String> listCol = new ArrayList<String>();
-		int i = 1, parentesis = 0;
-		boolean eos = false;
-		String tmpColDef = "", tmpPP = "";
-		while (!eos) {
-			//PARA NO ABUSAR DE LA FUNCION DE LA SUPERCLASE, RECOGEMOS EN UNA VARIABLE
-			// LA PALABRA QUE VAMOS A ANALIZAR
-			tmpPP = super.getPos(i);
-			if (tmpPP.equals("(")) {
-				parentesis++;
-				tmpColDef = tmpColDef + " " + tmpPP;
-			} else if (tmpPP.equals(")")) {
-				parentesis--;
-				tmpColDef = tmpColDef + " " + tmpPP;
-			} else if (parentesis == 0 && tmpPP.equals(",")) {
-				listCol.add(tmpColDef);
-				tmpColDef = "";
-			} else if (parentesis == 0 && tmpPP.equals("FROM")) {
-				listCol.add(tmpColDef);
-				eos = true;
-			} else {
-				//SOLO PARA EVITAR BUCLES INFINITOS
-				tmpColDef = tmpColDef + " " + tmpPP;
+	private void keyWordSearch() {
+		// LOCALIZAMOS PALABRAS CLAVE
+		int i = 0, par = 0;
+		String palabra = "";
+		while (i < super.getLength()) {
+			palabra = super.getPos(i);
+			if (palabra.equals("(")) {
+				par ++;
+			}else if (palabra.equals(")")) {
+				par --;
+			}
+			
+			if (par == 0) {
+				if (palabra.equals("SEL") || palabra.equals("SELECT")) {
+					this.idxSelect = i;
+				}else if (palabra.equals("FROM")) {
+					this.idxFrom = i;
+				}else if (palabra.equals("UNION")) {
+					this.union = true;
+					this.unionQuery = new ArrayList<SQLselect>();
+					this.unionPosition = new ArrayList<Integer>();
+					this.unionPosition.add(i);
+					this.idxEOQ = i-1;
+					i++;
+					String unionSQL = "";
+					int par2 = 0;
+					while (i < super.getLength()) {
+						palabra = super.getPos(i);
+						if (palabra.equals("(")) {
+							par2 ++;
+						}else if (palabra.equals(")")) {
+							par2 --;
+						}
+						if ((par2 == 0 && palabra.equals("UNION")) || super.getPos(i+1) == null) {
+							if (palabra.equals("UNION")) {
+								this.unionPosition.add(i);
+							}
+							this.unionQuery.add(new SQLselect(unionSQL));
+							unionSQL = "";
+						}else {
+							unionSQL = unionSQL + " " + palabra;
+						}
+						i++;
+					}
+				}
 			}
 			i++;
 		}
-		this.endofcols = i - 1;
-		return listCol;
 	}
 	
-	//LISTAMOS LOS OBJETOS DE ORIGEN DE NUESTRA QUERY
-	//SI EL ORIGEN ES UNA SUBQUERY, LA INSTANCIAMOS
-	private List<String> setFrom(){
-		List<String> listFrom = new ArrayList<String>();
-		String tmpPP;
-		int z = this.endofcols + 1;
-		boolean eof = false;
-		while (!eof) {
-			tmpPP = super.getPos(z);
-			if(tmpPP.equals("WHERE") ||
-					tmpPP.equals("GROUP") ||
-					tmpPP.equals("ORDER") ||
-					tmpPP.equals(";") ||
-					tmpPP.isEmpty()) {
-				eof = true;
-			}else if (tmpPP.equals("(")) {
-				z++;
+	private void fromAnalize() {
+		int i = this.idxFrom, fin = 0;
+		String palabra = "";
+		if (this.union) {
+			fin = this.unionPosition.get(0);
+		}else {
+			fin = this.idxEOQ;
+		}
+		while (i < fin) {
+			palabra = super.getPos(i);
+			if (palabra.equals("(")) {
+				this.subQuery = new ArrayList<SQLselect>();
+				this.subquerys = true;
+				String subQuerytxt = "";
 				int parentesis = 1;
-				String subqtext = "";
+				i++;
 				while (parentesis > 0) {
-					tmpPP = super.getPos(z);
-					if (tmpPP.contains("(")) {
+					palabra = super.getPos(i);
+					if (palabra.equals("(")) {
 						parentesis++;
-					}else if (tmpPP.contains(")")) {
+					}else if (palabra.equals(")")) {
 						parentesis--;
 					}
-					if (parentesis == 0 && tmpPP.equals(")")) {
-						z++;
+					if (parentesis == 0) {
+						this.subQuery.add(new SQLselect(subQuerytxt));
 					}else {
-						subqtext = subqtext + tmpPP + " ";
-						z++;
+						subQuerytxt = subQuerytxt + " " + palabra;
 					}
+					i++;
 				}
-				this.subQuery.add(new SQLselect(subqtext));
-			}
-			z++;
-		}
-		
-		
-
-		return listFrom;
-	}
-	
-	//DEVOLVEMOS EL NUMERO DE UNIONES E INSTANCIAMOS
-	//CADA UNA DE ELLAS COMO OTRO OBJETO
-	private void setUnions() {
-		//************************************************************//
-		//**** EN ESTA PARTE OBTENEMOS EL NUMERO Y LAS POSICIONES ****//
-		//**** DE LA PALABRA "UNION" PARA SEPARAR LAS QUERYS      ****//
-		//************************************************************//
-		int parentesis = 0, i = 0, unions = 0;
-		List<Integer> unionPos = new ArrayList<Integer>();
-		while (i < this.queryPP.length) {
-			if (this.queryPP[i].equals("(")) {
-				parentesis++;
-			}else if (this.queryPP[i].equals(")")) {
-				parentesis--;
-			}else if (parentesis == 0 && this.queryPP[i].equals("UNION")) {
-				unionPos.add(i);
-				unions++;
 			}
 			i++;
 		}
-		this.unionCount = unions;
-		if (this.unionCount > 0) {
-			//************************************************************//
-			//**** OBTENEMOS LAS QUERYS E INSTANCIAMOS                ****//
-			//************************************************************//
-			int init, fin;
-			i = 0;
-			while (i < this.unionCount) {
-				String queryUnion = "";
-				init = unionPos.get(i) + 1;
-				if (this.unionCount > (i + 1)) {
-					fin = unionPos.get(i+1) - 1;
-				}else {
-					fin = this.queryPP.length - 1;
-				}
-				while (init <= fin) {
-					queryUnion = queryUnion + " " + this.queryPP[init];
-					init++;
-				}
-				this.unionQuery.add(new SQLselect(queryUnion));
-				i++;
-			}
-		}
-	}
-
-
-	//METODOS GETTER PARA OBTENER INFORMACION
-	public String getCol(int i) {
-		if (this.columnList.size() > i) {
-			return this.columnList.get(i);
-		}else {
-			return null;
-		}
 	}
 	
-	public String getSubQCol(int qid, int i) {
-		if (this.subQuery.size() > qid) {
-			return this.subQuery.get(qid).getCol(i);
-		}else {
-			return null;
-		}
+	public boolean isUnion() {
+		return this.union;
 	}
-
+	
+	public boolean isSubQuery() {
+		return this.subquerys;
+	}
+	
 	public int getUnionCount() {
-		return this.unionCount;
+		return this.unionPosition.size();
 	}
-	
-	public String getUnionCol(int qid, int i) {
-		if (this.unionCount >= qid) {
-			return this.unionQuery.get(qid).getCol(i);
-		}else {
-			return null;
-		}
-	}
+
 }
 
 

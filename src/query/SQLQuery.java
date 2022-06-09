@@ -53,11 +53,11 @@ public class SQLQuery {
 	
 	public String getPos(int position) {
 		if (this.queryPP.length > position) {
-			return this.queryPP[position];
+			return this.queryPP[position].trim();
 		} else
-			return "";
+			return null;
 	}
-	public int buscaP (String palabra, int iter) {
+	public int buscaP (String palabra, int iter,boolean par) {
 		int i = 0, c = 0;
 		if (iter == 0) { //SACAMOS EL NUMERO TOTAL
 			while (i < this.queryPP.length) {

@@ -21,20 +21,13 @@ public class main {
 			SQLselect my_query = new SQLselect(query);
 			
 			//Usamos este bloque para validar los resultados
-			
 			System.out.println("RESULTADOS:");
-			System.out.println("Uniones: " + my_query.getUnionCount());
-			int i = 0, w = 0;
-			while (my_query.getUnionCount() > i) {
-				System.out.println("UNION " + i);
-				w=0;
-				while (my_query.getUnionCol(i,w) != null) {
-					System.out.println("COLUMNA " + w + ": " + my_query.getUnionCol(i,w));
-					w++;
-				}
-				i++;
+			if (my_query.isUnion() == true) {
+				System.out.println("Uniones: " + my_query.getUnionCount());
 			}
 			
+			
+
 		}catch(Exception ex) {
 			ex.printStackTrace();
 		}
