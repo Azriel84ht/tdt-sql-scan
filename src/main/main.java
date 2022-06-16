@@ -26,6 +26,16 @@ public class main {
 				System.out.println("Uniones: " + my_query.getUnionCount());
 			}
 			
+			if (my_query.isSubQuery() == true) {
+				System.out.println("Subquerys: "+ my_query.getSubqueryCount());
+			}
+			System.out.println("Lista de origenes: " + my_query.getFromCount());
+			int fc = 0;
+			while (fc < my_query.getFromCount()) {
+				System.out.println("Origen " + fc + ": " + my_query.getFrom(fc));
+				fc++;
+			}
+			
 			
 
 		}catch(Exception ex) {

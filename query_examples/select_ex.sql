@@ -1,4 +1,6 @@
 SELECT * FROM (select columna1,columna2 from dbsq1.tabla)
+INNER JOIN BDJOIN.TABLEJOIN
+ON PARABA = PEREBE
 UNION 
 select UNION1,UNION2 from dbuq1.tabla
 UNION 

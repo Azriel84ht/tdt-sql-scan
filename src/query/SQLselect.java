@@ -29,6 +29,8 @@ public class SQLselect extends SQLQuery{
 	private List<SQLselect> unionQuery = null;
 	private List<SQLselect> subQuery = null;
 	
+	private List<String> fromList = new ArrayList<String>();
+	
 	
 	
 	
@@ -71,9 +73,11 @@ public class SQLselect extends SQLQuery{
 						}else if (palabra.equals(")")) {
 							par2 --;
 						}
-						if ((par2 == 0 && palabra.equals("UNION")) || super.getPos(i+1) == null) {
+						if ((par2 == 0 && (palabra.equals("UNION")) || super.getPos(i+1) == null)) {
 							if (palabra.equals("UNION")) {
 								this.unionPosition.add(i);
+							}else {
+								unionSQL = unionSQL + " " + palabra;
 							}
 							this.unionQuery.add(new SQLselect(unionSQL));
 							unionSQL = "";
@@ -90,13 +94,13 @@ public class SQLselect extends SQLQuery{
 	
 	private void fromAnalize() {
 		int i = this.idxFrom, fin = 0;
-		String palabra = "";
+		String palabra = "", fromString = "";
 		if (this.union) {
 			fin = this.unionPosition.get(0);
 		}else {
 			fin = this.idxEOQ;
 		}
-		while (i < fin) {
+		while (i <= fin) {
 			palabra = super.getPos(i);
 			if (palabra.equals("(")) {
 				this.subQuery = new ArrayList<SQLselect>();
@@ -113,16 +117,31 @@ public class SQLselect extends SQLQuery{
 					}
 					if (parentesis == 0) {
 						this.subQuery.add(new SQLselect(subQuerytxt));
+						break;
 					}else {
 						subQuerytxt = subQuerytxt + " " + palabra;
 					}
 					i++;
 				}
+				fromString = fromString + " [SUBQUERYID_" + (this.subQuery.size() - 1) + "]";
+			}else if (palabra.equals(",")) {
+				this.fromList.add(fromString);
+				fromString = "";
+			}else if (i + 1 == fin) {
+				fromString = fromString + " " + palabra;
+				this.fromList.add(fromString);
+				fromString = "";
+			}else if (palabra.endsWith("_JOIN") && fromString.trim().length() > 0) {
+				this.fromList.add(fromString);
+				fromString = palabra;
+			}else {
+				fromString = fromString + " " + palabra;
 			}
 			i++;
 		}
 	}
-	
+
+	//METODOS PARA OBTENER LOS INDICADORES ESPECIFICOS
 	public boolean isUnion() {
 		return this.union;
 	}
@@ -131,10 +150,28 @@ public class SQLselect extends SQLQuery{
 		return this.subquerys;
 	}
 	
+		//METODOS PARA OBTENER CONTADORES
 	public int getUnionCount() {
 		return this.unionPosition.size();
 	}
+	
+	public int getSubqueryCount() {
+		return this.subQuery.size();
+	}
+	
+	public int getFromCount() {
+		return this.fromList.size();
+	}
 
+	//METODOS PARA OBTENER ELEMENTOS CONCRETOS
+	public String getFrom(int i) {
+		if (this.fromList.size() > i) {
+			return this.fromList.get(i);
+		}else {
+			return null;
+		}
+		
+	}
 }
 
 

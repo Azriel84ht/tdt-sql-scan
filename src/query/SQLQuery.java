@@ -31,6 +31,14 @@ public class SQLQuery {
 		while (this.queryTratada.contains("  ")) {
 			this.queryTratada = this.queryTratada.replace("  ", " ").trim();
 		}
+		//REEMPLAZAMOS PALABRAS CLAVE PARA FACILITAR EL TRATAMIENTO
+		this.queryTratada = this.queryTratada.replace("LEFT OUTER JOIN", "LEFT_OUTER_JOIN");
+		this.queryTratada = this.queryTratada.replace("LEFT JOIN", "LEFT_JOIN");
+		this.queryTratada = this.queryTratada.replace("RIGHT OUTER JOIN", "RIGHT_OUTER_JOIN");
+		this.queryTratada = this.queryTratada.replace("RIGHT JOIN", "RIGHT_JOIN");
+		this.queryTratada = this.queryTratada.replace("FULL OUTER JOIN", "FULL_OUTER_JOIN");
+		this.queryTratada = this.queryTratada.replace("INNER JOIN", "INNER_JOIN");
+		this.queryTratada = this.queryTratada.replace("CROSS JOIN", "CROSS_JOIN");		
 		
 		//SEPARAMOS LA QUERY EN UN ARRAY PARA MANEJARLA CON FACILIDAD
 		this.queryPP = this.queryTratada.trim().split(" ");
