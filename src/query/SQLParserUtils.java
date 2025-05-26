@@ -2,70 +2,185 @@ package query;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 public class SQLParserUtils {
-    public static int skipSpaces(String text, int pos) {
-        int len = text.length();
-        while (pos < len && Character.isWhitespace(text.charAt(pos))) pos++;
+
+    /**
+     * Avanza la posición saltando espacios en blanco.
+     */
+    public static int skipSpaces(String s, int pos) {
+        while (pos < s.length() && Character.isWhitespace(s.charAt(pos))) {
+            pos++;
+        }
         return pos;
     }
 
-    public static int findTopLevelKeyword(String text, String keyword, int start) {
-        String up = text.toUpperCase();
-        String key = keyword.toUpperCase();
-        int len = text.length(), keyLen = key.length();
+    /**
+     * Compara una región de la cadena ignorando mayúsculas/minúsculas.
+     */
+    public static boolean regionMatchesIgnoreCase(String s, int toffset, String other) {
+        if (toffset < 0 || toffset + other.length() > s.length()) {
+            return false;
+        }
+        return s.regionMatches(true, toffset, other, 0, other.length());
+    }
+
+    /**
+     * Busca la primera ocurrencia de la palabra clave a nivel top-level (parenCount == 0)
+     * a partir de la posición 'start'. Devuelve el índice o -1 si no la encuentra.
+     */
+    public static int findTopLevelKeyword(String s, String keyword, int start) {
         int paren = 0;
-        boolean inSingle = false, inDouble = false;
-        for (int i = start; i + keyLen <= len; i++) {
-            char c = text.charAt(i);
-            if (c == '\'' && !inDouble) inSingle = !inSingle;
-            else if (c == '"' && !inSingle) inDouble = !inDouble;
-            else if (!inSingle && !inDouble) {
-                if (c == '(') paren++;
-                else if (c == ')') paren--;
-                if (paren == 0 && up.startsWith(key, i)) {
-                    boolean beforeOk = (i == 0) || Character.isWhitespace(text.charAt(i - 1));
-                    boolean afterOk = (i + keyLen == len) || Character.isWhitespace(text.charAt(i + keyLen));
-                    if (beforeOk && afterOk) return i;
-                }
+        int len = s.length();
+        int kwLen = keyword.length();
+        for (int i = start; i + kwLen <= len; i++) {
+            char c = s.charAt(i);
+            if (c == '(') {
+                paren++;
+            } else if (c == ')') {
+                paren--;
+            }
+            if (paren == 0
+                && regionMatchesIgnoreCase(s, i, keyword)
+                && isBoundary(s, i, kwLen)) {
+                return i;
             }
         }
         return -1;
     }
 
-    public static Segment splitTopLevel(String text, int start, String[] separators) {
-        int len = text.length();
-        int endIdx = len;
-        for (String sep : separators) {
-            int idx = findTopLevelKeyword(text, sep, start);
-            if (idx >= 0 && idx < endIdx) endIdx = idx;
+    /**
+     * Separa la cadena en dos partes: desde 'start' hasta antes de cualquiera de los separadores,
+     * y el resto. Considera solo ocurrencias a nivel top-level (parenCount == 0).
+     * Retorna un array de dos elementos: [parte, resto].
+     */
+    public static String[] splitTopLevel(String s, int start, String[] separators) {
+        int paren = 0;
+        int len = s.length();
+        for (int i = start; i < len; i++) {
+            char c = s.charAt(i);
+            if (c == '(') {
+                paren++;
+            } else if (c == ')') {
+                paren--;
+            }
+            if (paren == 0) {
+                for (String sep : separators) {
+                    if (regionMatchesIgnoreCase(s, i, sep)
+                        && isBoundary(s, i, sep.length())) {
+                        String part = s.substring(start, i).trim();
+                        String rest = s.substring(i).trim();
+                        return new String[] { part, rest };
+                    }
+                }
+            }
         }
-        String segment = text.substring(start, endIdx);
-        String remaining = endIdx < len ? text.substring(endIdx) : "";
-        return new Segment(segment, remaining);
+        String part = s.substring(start).trim();
+        return new String[] { part, "" };
     }
 
-    public static String parseClause(String text, String clause, Consumer<String> consumer) {
-        String trimmed = text.trim();
-        String up = trimmed.toUpperCase();
-        if (!up.startsWith(clause.toUpperCase())) return text;
-        int pos = skipSpaces(trimmed, clause.length());
-        String rest = trimmed.substring(pos);
-        String[] all = new String[]{"WHERE","GROUP BY","HAVING","QUALIFY","ORDER BY"};
-        List<String> next = new ArrayList<>();
-        for (String s : all) if (!s.equalsIgnoreCase(clause)) next.add(s);
-        Segment seg = splitTopLevel(rest, 0, next.toArray(new String[0]));
-        consumer.accept(seg.segment.trim());
-        return seg.remaining;
+    /**
+     * Divide la cadena por el delimitador dado a nivel top-level (parenCount == 0).
+     * Devuelve una lista de trozos.
+     * Ahora aplica isBoundary solo si el delimitador es alfanumérico.
+     */
+    public static List<String> splitTopLevel(String s, String delimiter) {
+        List<String> parts = new ArrayList<>();
+        int paren = 0;
+        int len = s.length();
+        int dlen = delimiter.length();
+        boolean delimiterIsWord = delimiter.chars().allMatch(Character::isLetterOrDigit);
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < len; ) {
+            char c = s.charAt(i);
+            if (c == '(') {
+                paren++;
+                sb.append(c);
+                i++;
+            } else if (c == ')') {
+                paren--;
+                sb.append(c);
+                i++;
+            } else if (paren == 0
+                       && regionMatchesIgnoreCase(s, i, delimiter)
+                       && (!delimiterIsWord || isBoundary(s, i, dlen))) {
+                parts.add(sb.toString().trim());
+                sb.setLength(0);
+                i += dlen;
+            } else {
+                sb.append(c);
+                i++;
+            }
+        }
+        parts.add(sb.toString().trim());
+        return parts;
     }
 
-    public static class Segment {
-        public final String segment;
-        public final String remaining;
-        public Segment(String segment, String remaining) {
-            this.segment = segment;
-            this.remaining = remaining;
+    /**
+     * Divide la cadena por múltiples delimitadores (e.g. tipos de JOIN) a nivel top-level,
+     * conservando cada delimitador al inicio de su fragmento. El primer fragmento
+     * (antes de cualquier delimitador) se devuelve tal cual.
+     */
+    public static List<String> splitTopLevel(String s, String[] separators) {
+        List<String> parts = new ArrayList<>();
+        int pos = 0;
+        int len = s.length();
+
+        while (pos < len) {
+            // buscar el siguiente separador
+            int nextIdx = -1;
+            String foundSep = null;
+            for (String sep : separators) {
+                int idx = findTopLevelKeyword(s, sep, pos);
+                if (idx >= 0 && (nextIdx < 0 || idx < nextIdx)) {
+                    nextIdx = idx;
+                    foundSep = sep;
+                }
+            }
+
+            if (nextIdx < 0) {
+                // no hay más separadores: resto completo
+                parts.add(s.substring(pos).trim());
+                break;
+            }
+
+            if (nextIdx > pos) {
+                // parte antes del separador
+                parts.add(s.substring(pos, nextIdx).trim());
+            }
+
+            // extraer bloque que incluye el separador
+            int sepEnd = nextIdx + foundSep.length();
+            int paren = 0;
+            int i = sepEnd;
+            for (; i < len; i++) {
+                char c2 = s.charAt(i);
+                if (c2 == '(') paren++;
+                else if (c2 == ')') paren--;
+                if (paren == 0) {
+                    boolean isNext = false;
+                    for (String sep2 : separators) {
+                        if (regionMatchesIgnoreCase(s, i, sep2)) {
+                            isNext = true;
+                            break;
+                        }
+                    }
+                    if (isNext) break;
+                }
+            }
+            parts.add(s.substring(nextIdx, i).trim());
+            pos = i;
         }
+
+        return parts;
+    }
+
+    /** Comprueba límites de palabra antes y después de la región. */
+    private static boolean isBoundary(String s, int pos, int len) {
+        boolean before = pos == 0 || !Character.isLetterOrDigit(s.charAt(pos - 1));
+        boolean after  = pos + len >= s.length()
+                          || !Character.isLetterOrDigit(s.charAt(pos + len));
+        return before && after;
     }
 }

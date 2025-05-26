@@ -10,45 +10,69 @@ public class SQLTableRef {
     private SQLselect subquery;
     private List<String> columnAliases = new ArrayList<>();
 
+    /**
+     * Construye una referencia de tabla o subconsulta a partir de la cadena dada.
+     * @param ref Cadena con la tabla (con posible esquema), alias y/o subconsulta.
+     */
     public SQLTableRef(String ref) {
         String s = ref.trim();
+        // Caso subconsulta derivada (empieza con '(')
         if (s.startsWith("(")) {
             int closeIdx = findMatchingParen(s, 0);
             String subSql = s.substring(1, closeIdx);
             this.subquery = new SQLselect(subSql);
+
+            // Resto tras la subconsulta
             String rest = s.substring(closeIdx + 1).trim();
+            // Desechamos el literal "AS " si existe
             if (rest.toUpperCase().startsWith("AS ")) {
                 rest = rest.substring(3).trim();
             }
-            String aliasPart;
-            if (rest.contains("(")) {
-                int idx = rest.indexOf("(");
-                aliasPart = rest.substring(0, idx).trim();
-                String cols = rest.substring(idx + 1, rest.lastIndexOf(")"));
+            // Si hay alias de columna (entre paréntesis)
+            int parenIdx = rest.indexOf('(');
+            if (parenIdx >= 0) {
+                // Alias de la subconsulta
+                this.alias = rest.substring(0, parenIdx).trim();
+                // Aliases de columnas dentro de los paréntesis
+                String cols = rest.substring(parenIdx + 1, rest.lastIndexOf(')'));
                 for (String col : cols.split(",")) {
                     columnAliases.add(col.trim());
                 }
             } else {
-                aliasPart = rest.split("\\s+")[0];
+                // Solo alias de subconsulta
+                String[] parts = rest.split("\\s+", 2);
+                this.alias = parts[0];
             }
-            this.alias = aliasPart;
         } else {
+            // Caso tabla física con posible esquema y alias
             String[] parts = s.split("\\s+", 2);
             String namePart = parts[0];
-            String rest = parts.length > 1 ? parts[1].trim() : "";
+            String rest     = parts.length > 1 ? parts[1].trim() : "";
+
+            // Separar esquema.tabla si existe
             String[] qual = namePart.split("\\.");
             if (qual.length == 2) {
                 this.schemaName = qual[0];
-                this.tableName = qual[1];
+                this.tableName  = qual[1];
             } else {
                 this.tableName = namePart;
             }
+
+            // Procesar alias si hay
             if (!rest.isEmpty()) {
-                this.alias = rest.split("\\s+")[0];
+                // Desechar "AS " si está presente
+                if (rest.toUpperCase().startsWith("AS ")) {
+                    rest = rest.substring(3).trim();
+                }
+                String[] aliasParts = rest.split("\\s+", 2);
+                this.alias = aliasParts[0];
             }
         }
     }
 
+    /**
+     * Encuentra el índice del paréntesis de cierre correspondiente al de posición pos.
+     */
     private int findMatchingParen(String s, int pos) {
         int count = 0;
         for (int i = pos; i < s.length(); i++) {
@@ -59,7 +83,7 @@ public class SQLTableRef {
                 if (count == 0) return i;
             }
         }
-        return -1;
+        throw new SQLParseException("No matching parenthesis in: " + s);
     }
 
     public boolean isSubquery() {

@@ -1,225 +1,248 @@
 package query;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
+/**
+ * Analiza una sentencia SELECT de Teradata SQL y expone sus componentes.
+ */
 public class SQLselect {
+
+    private final String sql;
 
     private boolean distinct;
     private Integer topN;
     private boolean topPercent;
-    private List<SQLExpression> columns;
-    private List<SQLTableRef> tables;
-    private List<SQLJoin> joins;
-    private SQLCondition whereCondition;
-    private List<SQLExpression> groupBy;
-    private SQLCondition havingCondition;
-    private SQLCondition qualifyCondition;
-    private List<SQLOrderItem> orderBy;
 
-    public SQLselect(String sqlText) throws SQLParseException {
-        this.columns = new ArrayList<>();
-        this.tables = new ArrayList<>();
-        this.joins = new ArrayList<>();
-        this.groupBy = new ArrayList<>();
-        this.orderBy = new ArrayList<>();
-        parse(sqlText.trim());
+    private List<SQLExpression> columns          = new ArrayList<>();
+    private List<SQLTableRef>  tables           = new ArrayList<>();
+    private List<SQLJoin>      joins            = new ArrayList<>();
+    private SQLCondition       whereCondition   = null;
+    private List<SQLExpression> groupBy         = new ArrayList<>();
+    private SQLCondition       havingCondition  = null;
+    private SQLCondition       qualifyCondition = null;
+    private List<SQLOrderItem> orderBy          = new ArrayList<>();
+
+    /**
+     * Construye y parsea la sentencia SELECT.
+     * @param sqlText Texto completo de la consulta (puede terminar en ';').
+     */
+    public SQLselect(String sqlText) {
+        this.sql = sqlText.trim();
+        parse(this.sql);
     }
 
-    private void parse(String sql) throws SQLParseException {
-        String text = sql.replaceAll(";+$", "").trim();
-        int pos = 0;
-        // Detect SELECT
-        if (!text.regionMatches(true, 0, "SELECT", 0, 6)) {
-            throw new SQLParseException("La consulta no comienza con SELECT");
+    /** Parsea la consulta completa en sus componentes. */
+    private void parse(String input) {
+        String text = input.trim();
+        if (text.endsWith(";")) {
+            text = text.substring(0, text.length() - 1).trim();
         }
-        pos = 6;
-        // Skip spaces
-        while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) pos++;
-        // TOP N
-        if (text.regionMatches(true, pos, "TOP", 0, 3)) {
+
+        // 1) Procesar SELECT [TOP N [%]] [DISTINCT]
+        int pos = SQLParserUtils.findTopLevelKeyword(text, "SELECT", 0);
+        pos += "SELECT".length();
+        pos = SQLParserUtils.skipSpaces(text, pos);
+
+        // TOP N [PERCENT]
+        if (SQLParserUtils.regionMatchesIgnoreCase(text, pos, "TOP")) {
             pos += 3;
-            skipSpaces(text);
+            pos = SQLParserUtils.skipSpaces(text, pos);
             int start = pos;
-            while (pos < text.length() && Character.isDigit(text.charAt(pos))) pos++;
-            topN = Integer.valueOf(text.substring(start, pos));
-            skipSpaces(text);
-            if (text.regionMatches(true, pos, "PERCENT", 0, 7)) {
+            while (pos < text.length() && Character.isDigit(text.charAt(pos))) {
+                pos++;
+            }
+            topN = Integer.parseInt(text.substring(start, pos));
+            pos = SQLParserUtils.skipSpaces(text, pos);
+            if (SQLParserUtils.regionMatchesIgnoreCase(text, pos, "PERCENT")) {
                 topPercent = true;
-                pos += 7;
-                skipSpaces(text);
+                pos += "PERCENT".length();
             }
+            pos = SQLParserUtils.skipSpaces(text, pos);
         }
-        // DISTINCT or ALL
-        if (text.regionMatches(true, pos, "DISTINCT", 0, 8)) {
+
+        // DISTINCT
+        if (SQLParserUtils.regionMatchesIgnoreCase(text, pos, "DISTINCT")) {
             distinct = true;
-            pos += 8; skipSpaces(text);
-        } else if (text.regionMatches(true, pos, "ALL", 0, 3)) {
-            distinct = false;
-            pos += 3; skipSpaces(text);
+            pos += "DISTINCT".length();
+            pos = SQLParserUtils.skipSpaces(text, pos);
         }
-        // Locate FROM at top-level
-        int fromIdx = findTopLevelKeyword(text, "FROM", pos);
-        if (fromIdx < 0) throw new SQLParseException("No se encontró FROM");
-        String selectList = text.substring(pos, fromIdx).trim();
-        // Parse SELECT list
-        this.columns = parseSelectList(selectList);
-        // FROM clause and rest
-        int afterFrom = fromIdx + 4;
-        Segment fromSplit = splitTopLevel(text, afterFrom,
-                new String[]{"WHERE","GROUP BY","HAVING","QUALIFY","ORDER BY"});
-        String fromClause = fromSplit.segment.trim();
-        String rest = fromSplit.remaining.trim();
-        parseFromClause(fromClause);
-        // WHERE
-        rest = parseClause(rest, "WHERE", cond -> this.whereCondition = parseCondition(cond));
-        // GROUP BY
-        rest = parseClause(rest, "GROUP BY", group -> this.groupBy = parseGroupBy(group));
-        // HAVING
-        rest = parseClause(rest, "HAVING", cond -> this.havingCondition = parseCondition(cond));
-        // QUALIFY
-        rest = parseClause(rest, "QUALIFY", cond -> this.qualifyCondition = parseCondition(cond));
-        // ORDER BY
-        if (rest.toUpperCase().startsWith("ORDER BY")) {
-            String order = rest.substring(8).trim();
-            this.orderBy = parseOrderBy(order);
+
+        // 2) Separar SELECT list y resto (FROM...)
+        int fromIdx = SQLParserUtils.findTopLevelKeyword(text, "FROM", pos);
+        if (fromIdx < 0) {
+            throw new SQLParseException("No se encontró cláusula FROM en: " + text);
         }
-    }
+        String selectListStr = text.substring(pos, fromIdx).trim();
+        pos = fromIdx + "FROM".length();
 
-    private static void skipSpaces(String text) {}
-    private static int findTopLevelKeyword(String text, String keyword, int start) { return -1; }
-    private static Segment splitTopLevel(String text, int start, String[] separators) { return new Segment("",""); }
+        // 3) Extraer FROM clause y resto de cláusulas
+        String[] fromAndRest = SQLParserUtils.splitTopLevel(
+            text, pos,
+            new String[] {"WHERE", "GROUP BY", "HAVING", "QUALIFY", "ORDER BY"}
+        );
+        String fromClauseStr = fromAndRest[0].trim();
+        String rest          = fromAndRest[1].trim();
 
-    private static List<SQLExpression> parseSelectList(String selectList) {
-        List<String> items = splitTopLevelElements(selectList, ',');
-        List<SQLExpression> exprs = new ArrayList<>();
-        for (String item : items) {
-            exprs.add(SQLExpression.parse(item));
+        // 4) Parsear SELECT list
+        columns = parseSelectList(selectListStr);
+
+        // 5) Parsear FROM + JOINs
+        parseFromClause(fromClauseStr);
+
+        // 6) WHERE
+        int wIdx = SQLParserUtils.findTopLevelKeyword(rest, "WHERE", 0);
+        if (wIdx >= 0) {
+            String[] whereAndRest = SQLParserUtils.splitTopLevel(
+                rest, wIdx + "WHERE".length(),
+                new String[] {"GROUP BY", "HAVING", "QUALIFY", "ORDER BY"}
+            );
+            whereCondition = new SQLCondition(whereAndRest[0].trim());
+            rest = whereAndRest[1].trim();
         }
-        return exprs;
-    }
 
-    private void parseFromClause(String fromClause) {
-        // TODO: implementar parsing de tablas y joins usando lógica recursiva y splitTopLevel
-    }
-
-    private SQLCondition parseCondition(String cond) {
-        // TODO: invocar a SQLCondition.parse(cond)
-        return new SQLCondition(cond);
-    }
-
-    private List<SQLExpression> parseGroupBy(String groupStr) {
-        List<String> items = splitTopLevelElements(groupStr, ',');
-        List<SQLExpression> list = new ArrayList<>();
-        for (String item : items) {
-            list.add(SQLExpression.parse(item));
+        // 7) GROUP BY
+        int gIdx = SQLParserUtils.findTopLevelKeyword(rest, "GROUP BY", 0);
+        if (gIdx >= 0) {
+            String[] grpAndRest = SQLParserUtils.splitTopLevel(
+                rest, gIdx + "GROUP BY".length(),
+                new String[] {"HAVING", "QUALIFY", "ORDER BY"}
+            );
+            groupBy = parseSelectList(grpAndRest[0].trim());
+            rest = grpAndRest[1].trim();
         }
-        return list;
-    }
 
-    private List<SQLOrderItem> parseOrderBy(String orderStr) {
-        List<String> items = splitTopLevelElements(orderStr, ',');
-        List<SQLOrderItem> list = new ArrayList<>();
-        for (String item : items) {
-            list.add(SQLOrderItem.parse(item));
+        // 8) HAVING
+        int hIdx = SQLParserUtils.findTopLevelKeyword(rest, "HAVING", 0);
+        if (hIdx >= 0) {
+            String[] havAndRest = SQLParserUtils.splitTopLevel(
+                rest, hIdx + "HAVING".length(),
+                new String[] {"QUALIFY", "ORDER BY"}
+            );
+            havingCondition = new SQLCondition(havAndRest[0].trim());
+            rest = havAndRest[1].trim();
         }
-        return list;
-    }
 
-    private static List<String> splitTopLevelElements(String text, char sep) {
-        if (text.isEmpty()) return Collections.emptyList();
-        List<String> parts = new ArrayList<>();
-        StringBuilder cur = new StringBuilder();
-        int paren = 0;
-        boolean inSingle = false, inDouble = false;
-        for (int i = 0; i < text.length(); i++) {
-            char c = text.charAt(i);
-            if (c == ''' && !inDouble) inSingle = !inSingle;
-            else if (c == '"' && !inSingle) inDouble = !inDouble;
-            else if (!inSingle && !inDouble) {
-                if (c == '(') paren++;
-                else if (c == ')') paren--;
-                else if (c == sep && paren == 0) {
-                    parts.add(cur.toString().trim()); cur.setLength(0); continue;
-                }
+        // 9) QUALIFY
+        int qIdx = SQLParserUtils.findTopLevelKeyword(rest, "QUALIFY", 0);
+        if (qIdx >= 0) {
+            String[] qualAndRest = SQLParserUtils.splitTopLevel(
+                rest, qIdx + "QUALIFY".length(),
+                new String[] {"ORDER BY"}
+            );
+            qualifyCondition = new SQLCondition(qualAndRest[0].trim());
+            rest = qualAndRest[1].trim();
+        }
+
+        // 10) ORDER BY
+        int oIdx = SQLParserUtils.findTopLevelKeyword(rest, "ORDER BY", 0);
+        if (oIdx >= 0) {
+            String orderStr = rest.substring(oIdx + "ORDER BY".length()).trim();
+            List<String> items = SQLParserUtils.splitTopLevel(orderStr, ",");
+            for (String item : items) {
+                orderBy.add(new SQLOrderItem(item));
             }
-            cur.append(c);
         }
-        if (cur.length() > 0) parts.add(cur.toString().trim());
-        return parts;
     }
 
-    // Getters omitted por brevedad...
-
-    private static class Segment {
-        String segment;
-        String remaining;
-        Segment(String seg, String rem) { this.segment = seg; this.remaining = rem; }
+    /** Divide la lista SELECT (o GROUP BY) en expresiones individuales. */
+    private List<SQLExpression> parseSelectList(String clause) {
+        List<SQLExpression> list = new ArrayList<>();
+        if (clause.isEmpty()) {
+            return list;
+        }
+        List<String> parts = SQLParserUtils.splitTopLevel(clause, ",");
+        for (String part : parts) {
+            list.add(new SQLExpression(part));
+        }
+        return list;
     }
+
+    /** Parsea la cláusula FROM, instanciando tablas y joins. */
+    private void parseFromClause(String fromClause) {
+        // Primero dividir por top-level commas para tablas independientes
+        List<String> tableParts = SQLParserUtils.splitTopLevel(fromClause, ",");
+        boolean first = true;
+        for (String part : tableParts) {
+            part = part.trim();
+            if (first) {
+                tables.add(new SQLTableRef(part));
+                first = false;
+            } else {
+                // coma entre tablas implícitas => CROSS JOIN
+                joins.add(new SQLJoin("CROSS JOIN " + part));
+            }
+        }
+        // Ahora detectar JOIN explícitos dentro de la primera parte
+        // (p.ej. si fromClause contiene 'A INNER JOIN B ON ...')
+        // Re-parseamos la primera parte generando joins compuestos
+        List<String> joinParts = SQLParserUtils.splitTopLevel(
+            fromClause,
+            new String[] {"JOIN", "LEFT JOIN", "RIGHT JOIN", "FULL JOIN", "INNER JOIN", "LEFT OUTER JOIN", "RIGHT OUTER JOIN", "FULL OUTER JOIN"}
+        );
+        if (joinParts.size() > 1) {
+            // primer elemento antes de JOIN es la tabla base
+            tables.clear();
+            tables.add(new SQLTableRef(joinParts.get(0).trim()));
+            // el resto son cláusulas JOIN completas
+            for (int i = 1; i < joinParts.size(); i++) {
+                joins.add(new SQLJoin(joinParts.get(i).trim()));
+            }
+        }
+    }
+
+    // ------------------------------------------------------------
+    //                       GETTERS PÚBLICOS
+    // ------------------------------------------------------------
+
+    public boolean isDistinct() {
+        return distinct;
+    }
+
+    public Integer getTopN() {
+        return topN;
+    }
+
+    public boolean isTopPercent() {
+        return topPercent;
+    }
+
+    public List<SQLExpression> getColumns() {
+        return columns;
+    }
+
+    public List<SQLTableRef> getTables() {
+        return tables;
+    }
+
+    public List<SQLJoin> getJoins() {
+        return joins;
+    }
+
+    public SQLCondition getWhereCondition() {
+        return whereCondition;
+    }
+
+    public List<SQLExpression> getGroupBy() {
+        return groupBy;
+    }
+
+    public SQLCondition getHavingCondition() {
+        return havingCondition;
+    }
+
+    public SQLCondition getQualifyCondition() {
+        return qualifyCondition;
+    }
+
+    public List<SQLOrderItem> getOrderBy() {
+        return orderBy;
+    }
+    /**
+ * @return El texto completo de la consulta SQL original (sin el ';' final).
+ */
+public String getSql() {
+    return sql;
 }
 
-// Clases auxiliares:
-
-class SQLExpression {
-    private final String expression;
-    private final String alias;
-
-    private SQLExpression(String expr, String alias) {
-        this.expression = expr;
-        this.alias = alias;
-    }
-
-    public static SQLExpression parse(String text) {
-        // TODO: detectar alias usando AS o último token nivel top
-        String expr = text;
-        String alias = null;
-        return new SQLExpression(expr.trim(), alias);
-    }
-}
-
-class SQLTableRef {
-    String name;
-    String alias;
-    SQLselect subquery;
-    // Constructor para tabla física
-    public SQLTableRef(String name, String alias) { this.name = name; this.alias = alias; }
-    // Constructor para subconsulta
-    public SQLTableRef(SQLselect subquery, String alias) { this.subquery = subquery; this.alias = alias; }
-}
-
-class SQLJoin {
-    enum Type { INNER, LEFT, RIGHT, FULL, CROSS, NATURAL }
-    Type type;
-    SQLTableRef right;
-    SQLCondition onCondition;
-    public SQLJoin(Type type, SQLTableRef right, SQLCondition on) {
-        this.type = type; this.right = right; this.onCondition = on;
-    }
-}
-
-class SQLCondition {
-    private final String raw;
-    public SQLCondition(String raw) { this.raw = raw.trim(); }
-    // parse más profundo puede añadirse...
-}
-
-class SQLOrderItem {
-    private final SQLExpression expression;
-    private final boolean ascending;
-    private final Boolean nullsFirst;
-
-    private SQLOrderItem(SQLExpression expr, boolean asc, Boolean nullsFirst) {
-        this.expression = expr; this.ascending = asc; this.nullsFirst = nullsFirst;
-    }
-
-    public static SQLOrderItem parse(String text) {
-        // TODO: extraer ASC/DESC y NULLS FIRST/LAST
-        SQLExpression expr = SQLExpression.parse(text);
-        return new SQLOrderItem(expr, true, null);
-    }
-}
-
-class SQLParseException extends Exception {
-    public SQLParseException(String msg) { super(msg); }
 }
