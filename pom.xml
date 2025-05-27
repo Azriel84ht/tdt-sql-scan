@@ -1,8 +1,9 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"  
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0  
-                             http://maven.apache.org/xsd/maven-4.0.0.xsd">  
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
   <groupId>com.miempresa</groupId>
   <artifactId>tdt-sql-scan</artifactId>
   <version>1.0.0-SNAPSHOT</version>
@@ -18,8 +19,58 @@
     <module>graph</module>
     <module>exporters</module>
     <module>app-cli</module>
-    <!-- omitimos web-ui porque va con NPM/Node -->
   </modules>
 
-  <!-- Aquí puedes definir propiedades compartidas, versiones de dependencias, repositorios, plugins, etc. -->
+  <build>
+    <plugins>
+
+      <!-- Maven Checkstyle Plugin usando las reglas de Google incorporadas -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>3.2.2</version>
+        <configuration>
+          <configLocation>google_checks.xml</configLocation>
+          <encoding>UTF-8</encoding>
+          <consoleOutput>true</consoleOutput>
+          <failsOnError>true</failsOnError>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>validate</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Spotless: auto-formateo con Google Java Format -->
+      <plugin>
+        <groupId>com.diffplug.spotless</groupId>
+        <artifactId>spotless-maven-plugin</artifactId>
+        <version>2.32.0</version>
+        <configuration>
+          <java>
+            <includes>
+              <include>src/main/java/**/*.java</include>
+              <include>src/test/java/**/*.java</include>
+            </includes>
+            <googleJavaFormat>
+              <style>GOOGLE</style>
+            </googleJavaFormat>
+          </java>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>apply</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+    </plugins>
+  </build>
+
 </project>
