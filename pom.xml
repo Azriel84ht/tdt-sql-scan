@@ -1,0 +1,25 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"  
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0  
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">  
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.miempresa</groupId>
+  <artifactId>tdt-sql-scan</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <modules>
+    <module>parser-core</module>
+    <module>parser-select</module>
+    <module>parser-ddl</module>
+    <module>parser-dml</module>
+    <module>parser-etl</module>
+    <module>scanner</module>
+    <module>graph</module>
+    <module>exporters</module>
+    <module>app-cli</module>
+    <!-- omitimos web-ui porque va con NPM/Node -->
+  </modules>
+
+  <!-- Aquí puedes definir propiedades compartidas, versiones de dependencias, repositorios, plugins, etc. -->
+</project>
