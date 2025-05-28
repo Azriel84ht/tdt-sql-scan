@@ -1,7 +1,0 @@
-{
-  "recommendations": [
-    "vscjava.vscode-java-pack",       // Java Language Support + Debug + Maven
-    "editorconfig.editorconfig",      // Soporte a .editorconfig
-    "shengchen.vscode-checkstyle"     // Checkstyle integration
-  ]
-}
