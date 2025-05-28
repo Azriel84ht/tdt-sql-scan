@@ -1,0 +1,4 @@
+com\tdtsqlscan\core\SQLParserUtils.class
+com\tdtsqlscan\core\SQLQuery.class
+com\tdtsqlscan\core\QueryParser.class
+com\tdtsqlscan\core\SQLParseException.class
