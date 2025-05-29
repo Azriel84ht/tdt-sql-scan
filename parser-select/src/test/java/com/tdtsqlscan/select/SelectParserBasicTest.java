@@ -1,5 +1,6 @@
 package com.tdtsqlscan.select;
 
+import com.tdtsqlscan.core.SQLTableRef;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -14,13 +15,20 @@ public class SelectParserBasicTest {
         SelectParser p = new SelectParser();
         SelectQuery q = p.parse(sql);
 
+        // columnas
         assertEquals(3, q.getColumns().size());
         assertTrue(q.getColumns().contains("a"));
         assertTrue(q.getColumns().contains("b"));
         assertTrue(q.getColumns().contains("c"));
 
+        // tablas
         assertEquals(2, q.getTables().size());
-        assertTrue(q.getTables().contains("T1"));
-        assertTrue(q.getTables().contains("T2"));
+        SQLTableRef t1 = q.getTables().get(0);
+        SQLTableRef t2 = q.getTables().get(1);
+
+        assertEquals("T1", t1.getExpression());
+        assertNull("No debe haber alias en T1", t1.getAlias());
+        assertEquals("T2", t2.getExpression());
+        assertNull("No debe haber alias en T2", t2.getAlias());
     }
 }
