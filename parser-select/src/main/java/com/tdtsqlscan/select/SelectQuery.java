@@ -4,6 +4,7 @@ import com.tdtsqlscan.core.SQLQuery;
 import com.tdtsqlscan.core.SQLTableRef;
 import com.tdtsqlscan.core.SQLJoin;
 import com.tdtsqlscan.core.SQLCondition;
+import com.tdtsqlscan.core.SQLOrderItem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +20,10 @@ public class SelectQuery extends SQLQuery {
     private final List<SQLCondition>  whereConds     = new ArrayList<>();
     private final List<String>        groupBy        = new ArrayList<>();
     private final List<SQLCondition>  havingConds    = new ArrayList<>();
+    private final List<SQLOrderItem>  orderBy        = new ArrayList<>();
+
+    private int limit  = -1;
+    private int offset = -1;
 
     public SelectQuery(String sqlText) {
         super(sqlText);
@@ -75,5 +80,29 @@ public class SelectQuery extends SQLQuery {
 
     public List<SQLCondition> getHavingConditions() {
         return havingConds;
+    }
+
+    public void addOrderBy(SQLOrderItem item) {
+        orderBy.add(item);
+    }
+
+    public List<SQLOrderItem> getOrderBy() {
+        return orderBy;
+    }
+
+    public void setLimit(int limit) {
+        this.limit = limit;
+    }
+
+    public int getLimit() {
+        return limit;
+    }
+
+    public void setOffset(int offset) {
+        this.offset = offset;
+    }
+
+    public int getOffset() {
+        return offset;
     }
 }

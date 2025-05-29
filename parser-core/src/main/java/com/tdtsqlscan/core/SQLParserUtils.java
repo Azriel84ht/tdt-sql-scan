@@ -7,6 +7,7 @@ import java.util.List;
  * Utilidades de análisis léxico para SQL:
  * - splitTopLevel: separa según un delimitador sin descender en paréntesis.
  * - findTopLevelKeyword: busca palabras clave a nivel top-level.
+ * - otras ayudas para parsear cláusulas de SELECT.
  */
 public class SQLParserUtils {
 
@@ -38,7 +39,7 @@ public class SQLParserUtils {
                     && i + dlen <= len
                     && regionMatchesIgnoreCase(s, i, delimiter)
                     && (delimiter.equals(",") || isDelimiterBoundary(s, i, dlen))) {
-                // top-level delimiter found
+                // top-level delimiter encontrado
                 parts.add(sb.toString());
                 sb.setLength(0);
                 i += dlen;
@@ -54,8 +55,7 @@ public class SQLParserUtils {
 
     /**
      * Busca la primera aparición de {@code keyword} a nivel top (depth = 0),
-     * ignorando mayúsculas/minúsculas y asegurando que la keyword esté delimitada
-     * (no forme parte de otra palabra).
+     * ignorando mayúsc./minúsc. y asegurando que la keyword esté delimitada.
      */
     public static int findTopLevelKeyword(String s, String keyword, int fromIndex) {
         if (s == null || keyword == null) {
@@ -82,9 +82,74 @@ public class SQLParserUtils {
         return -1;
     }
 
+    /** Comprueba si la keyword existe a nivel top. */
+    public static boolean containsKeyword(String s, String keyword) {
+        return findTopLevelKeyword(s, keyword, 0) >= 0;
+    }
+
+    /** Extrae texto entre start y end (ambos keywords) en nivel top. */
+    public static String extractBetween(String s, String start, String end) {
+        int i = findTopLevelKeyword(s, start, 0);
+        if (i < 0) {
+            return "";
+        }
+        int j = findTopLevelKeyword(s, end, i + start.length());
+        if (j < 0) {
+            j = s.length();
+        }
+        return s.substring(i + start.length(), j).trim();
+    }
+
+    /** Extrae texto entre start y el primero de los ends que aparezca. */
+    public static String extractBetween(String s, String start, String[] ends) {
+        int i = findTopLevelKeyword(s, start, 0);
+        if (i < 0) {
+            return "";
+        }
+        int minJ = s.length();
+        for (String e : ends) {
+            int j = findTopLevelKeyword(s, e, i + start.length());
+            if (j >= 0 && j < minJ) {
+                minJ = j;
+            }
+        }
+        return s.substring(i + start.length(), minJ).trim();
+    }
+
+    /** Convierte una lista separada por comas en una lista de expresiones. */
+    public static List<String> parseExpressionList(String s) {
+        return splitTopLevel(s, ",");
+    }
+
+    /** Devuelve la condición tal cual (sin procesar). */
+    public static String parseCondition(String s) {
+        return s.trim();
+    }
+
     /**
-     * Comprueba coincidencia ignorando mayúsc./minúsc.
+     * Parsea la cláusula ORDER BY, devolviendo objetos SQLOrderItem
+     * con la dirección correcta (ASC/DESC).
      */
+    public static List<SQLOrderItem> parseOrderBy(String s) {
+        List<SQLOrderItem> list = new ArrayList<>();
+        for (String part : splitTopLevel(s, ",")) {
+            String[] toks = part.trim().split("\\s+");
+            String expr = toks[0];
+            boolean asc = toks.length < 2 || !"DESC".equalsIgnoreCase(toks[1]);
+            SQLOrderItem.Direction dir = asc
+                    ? SQLOrderItem.Direction.ASC
+                    : SQLOrderItem.Direction.DESC;
+            list.add(new SQLOrderItem(expr, dir));
+        }
+        return list;
+    }
+
+    /** Separa cláusulas JOIN completas sin descender en paréntesis. */
+    public static List<String> splitJoins(String s) {
+        return splitTopLevel(s, " JOIN ");
+    }
+
+    /** Coincide región ignorando mayúsculas/minúsculas. */
     public static boolean regionMatchesIgnoreCase(String text, int index, String keyword) {
         return text.regionMatches(true, index, keyword, 0, keyword.length());
     }
@@ -97,19 +162,11 @@ public class SQLParserUtils {
         return index + 1 >= s.length() || isBoundaryChar(s.charAt(index + 1));
     }
 
-    /**
-     * Para delimitadores distintos de coma, asegura que antes y después
-     * del delimitador haya un boundary válido.
-     */
     private static boolean isDelimiterBoundary(String s, int index, int delimLen) {
         return isBoundaryBefore(s, index)
                 && (index + delimLen == s.length() || isBoundaryChar(s.charAt(index + delimLen)));
     }
 
-    /**
-     * Define qué caracteres cuentan como límite de palabra:
-     * espacios, paréntesis, comas, punto y coma u otros símbolos.
-     */
     private static boolean isBoundaryChar(char c) {
         return Character.isWhitespace(c)
                 || c == '('
