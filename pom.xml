@@ -22,7 +22,6 @@
   </modules>
 
   <properties>
-    <!-- Versión de Java para todo el multi-módulo -->
     <java.version>8</java.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
@@ -31,7 +30,7 @@
   <build>
     <pluginManagement>
       <plugins>
-        <!-- Compiler Plugin -->
+        <!-- 1) compilador Java -->
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
@@ -42,7 +41,7 @@
           </configuration>
         </plugin>
 
-        <!-- Checkstyle Plugin -->
+        <!-- 2) Checkstyle (Google) -->
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-checkstyle-plugin</artifactId>
@@ -61,7 +60,7 @@
           </executions>
         </plugin>
 
-        <!-- Spotless Plugin -->
+        <!-- 3) Spotless (Google Java Format) -->
         <plugin>
           <groupId>com.diffplug.spotless</groupId>
           <artifactId>spotless-maven-plugin</artifactId>
