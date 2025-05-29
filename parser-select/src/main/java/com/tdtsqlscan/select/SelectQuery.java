@@ -4,6 +4,7 @@ import com.tdtsqlscan.core.SQLQuery;
 import com.tdtsqlscan.core.SQLTableRef;
 import com.tdtsqlscan.core.SQLJoin;
 import com.tdtsqlscan.core.SQLCondition;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,10 +13,12 @@ import java.util.List;
  */
 public class SelectQuery extends SQLQuery {
 
-    private final List<String>        columns    = new ArrayList<>();
-    private final List<SQLTableRef>   tables     = new ArrayList<>();
-    private final List<SQLJoin>       joins      = new ArrayList<>();
-    private final List<SQLCondition>  whereConds = new ArrayList<>();
+    private final List<String>        columns        = new ArrayList<>();
+    private final List<SQLTableRef>   tables         = new ArrayList<>();
+    private final List<SQLJoin>       joins          = new ArrayList<>();
+    private final List<SQLCondition>  whereConds     = new ArrayList<>();
+    private final List<String>        groupBy        = new ArrayList<>();
+    private final List<SQLCondition>  havingConds    = new ArrayList<>();
 
     public SelectQuery(String sqlText) {
         super(sqlText);
@@ -56,5 +59,21 @@ public class SelectQuery extends SQLQuery {
 
     public List<SQLCondition> getWhereConditions() {
         return whereConds;
+    }
+
+    public void addGroupBy(String expr) {
+        groupBy.add(expr.trim());
+    }
+
+    public List<String> getGroupBy() {
+        return groupBy;
+    }
+
+    public void addHavingCondition(SQLCondition cond) {
+        havingConds.add(cond);
+    }
+
+    public List<SQLCondition> getHavingConditions() {
+        return havingConds;
     }
 }
