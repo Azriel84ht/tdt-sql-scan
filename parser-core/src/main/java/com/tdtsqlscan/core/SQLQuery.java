@@ -1,33 +1,39 @@
 package com.tdtsqlscan.core;
 
 /**
- * AST genérico de una consulta SQL.
- * Cada tipo concreto de consulta (SELECT, CREATE, etc.)
- * extenderá esta clase e implementará {@link #getType()}.
+ * Representa una consulta SQL genérica.
  */
 public abstract class SQLQuery {
-    /** Texto original de la consulta (sin ';' final). */
-    private final String sqlText;
 
-    /**
-     * Constructor base.
-     * @param sqlText Consulta SQL completa.
-     */
-    protected SQLQuery(String sqlText) {
-        this.sqlText = sqlText == null ? "" : sqlText.trim();
+    private final String sql;
+
+    public SQLQuery(String sql) {
+        this.sql = sql;
     }
 
     /**
-     * Obtiene el SQL original, sin espacios extremos ni punto y coma.
-     * @return Texto de la consulta.
+     * Tipo de la consulta.
      */
-    public String getSqlText() {
-        return sqlText;
+    public enum Type {
+        SELECT,
+        INSERT,
+        UPDATE,
+        DELETE,
+        CREATE,
+        DROP,
+        ALTER,
+        // otros tipos que necesites...
     }
 
     /**
-     * Tipo de consulta, p. ej. "SELECT", "CREATE", "DROP".
-     * @return Nombre del tipo de consulta.
+     * @return el tipo concreto de la consulta.
      */
-    public abstract String getType();
+    public abstract Type getType();
+
+    /**
+     * @return el SQL original.
+     */
+    public String getSql() {
+        return sql;
+    }
 }
