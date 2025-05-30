@@ -10,99 +10,53 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * AST específico de una consulta SELECT.
+ * Representación AST de una consulta SELECT.
  */
 public class SelectQuery extends SQLQuery {
 
-    private final List<String>        columns        = new ArrayList<>();
-    private final List<SQLTableRef>   tables         = new ArrayList<>();
-    private final List<SQLJoin>       joins          = new ArrayList<>();
-    private final List<SQLCondition>  whereConds     = new ArrayList<>();
-    private final List<String>        groupBy        = new ArrayList<>();
-    private final List<SQLCondition>  havingConds    = new ArrayList<>();
-    private final List<SQLOrderItem>  orderBy        = new ArrayList<>();
+    private final List<String> columns = new ArrayList<>();
+    private final List<SQLTableRef> tables = new ArrayList<>();
+    private final List<SQLJoin> joins = new ArrayList<>();
+    private final List<SQLCondition> whereConditions = new ArrayList<>();
+    private final List<String> groupBy = new ArrayList<>();
+    private final List<SQLCondition> havingConditions = new ArrayList<>();
+    private final List<SQLOrderItem> orderBy = new ArrayList<>();
+    private Integer limit;
+    private Integer offset;
 
-    private int limit  = -1;
-    private int offset = -1;
-
-    public SelectQuery(String sqlText) {
-        super(sqlText);
+    public SelectQuery(String sql) {
+        super(sql);
     }
 
     @Override
-    public String getType() {
-        return "SELECT";
+    public Type getType() {
+        return Type.SELECT;
     }
 
-    public void addColumn(String col) {
-        columns.add(col.trim());
-    }
+    public void addColumn(String col) { columns.add(col.trim()); }
+    public List<String> getColumns() { return columns; }
 
-    public List<String> getColumns() {
-        return columns;
-    }
+    public void addTable(SQLTableRef tbl) { tables.add(tbl); }
+    public List<SQLTableRef> getTables() { return tables; }
 
-    public void addTable(SQLTableRef table) {
-        tables.add(table);
-    }
+    public void addJoin(SQLJoin j) { joins.add(j); }
+    public List<SQLJoin> getJoins() { return joins; }
 
-    public List<SQLTableRef> getTables() {
-        return tables;
-    }
+    public void addWhereCondition(SQLCondition c) { whereConditions.add(c); }
+    public List<SQLCondition> getWhereConditions() { return whereConditions; }
 
-    public void addJoin(SQLJoin join) {
-        joins.add(join);
-    }
+    public void addGroupBy(String expr) { groupBy.add(expr.trim()); }
+    public List<String> getGroupBy() { return groupBy; }
 
-    public List<SQLJoin> getJoins() {
-        return joins;
-    }
+    public void addHavingCondition(SQLCondition c) { havingConditions.add(c); }
+    public List<SQLCondition> getHavingConditions() { return havingConditions; }
 
-    public void addWhereCondition(SQLCondition cond) {
-        whereConds.add(cond);
-    }
+    public void addOrderBy(SQLOrderItem item) { orderBy.add(item); }
+    public List<SQLOrderItem> getOrderBy() { return orderBy; }
 
-    public List<SQLCondition> getWhereConditions() {
-        return whereConds;
-    }
+    public void setLimit(int lim) { this.limit = lim; }
+    public Integer getLimit() { return limit; }
 
-    public void addGroupBy(String expr) {
-        groupBy.add(expr.trim());
-    }
-
-    public List<String> getGroupBy() {
-        return groupBy;
-    }
-
-    public void addHavingCondition(SQLCondition cond) {
-        havingConds.add(cond);
-    }
-
-    public List<SQLCondition> getHavingConditions() {
-        return havingConds;
-    }
-
-    public void addOrderBy(SQLOrderItem item) {
-        orderBy.add(item);
-    }
-
-    public List<SQLOrderItem> getOrderBy() {
-        return orderBy;
-    }
-
-    public void setLimit(int limit) {
-        this.limit = limit;
-    }
-
-    public int getLimit() {
-        return limit;
-    }
-
-    public void setOffset(int offset) {
-        this.offset = offset;
-    }
-
-    public int getOffset() {
-        return offset;
-    }
+    public void setOffset(int off) { this.offset = off; }
+    public Integer getOffset() { return offset; }
 }
