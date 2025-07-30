@@ -13,12 +13,20 @@ public class CreateTableParser implements QueryParser {
 
     @Override
     public boolean supports(String sql) {
-        return sql.trim().toUpperCase().startsWith("CREATE TABLE");
+        String upperSql = sql.trim().toUpperCase();
+        return upperSql.startsWith("CREATE TABLE") || upperSql.startsWith("CREATE VOLATILE TABLE");
     }
 
     @Override
     public CreateTableQuery parse(String sql) throws SQLParseException {
-        String tableName = SQLParserUtils.extractBetweenKeywords(sql, "CREATE TABLE", "(").trim();
+        String upperSql = sql.trim().toUpperCase();
+        String tableName;
+        if (upperSql.startsWith("CREATE VOLATILE TABLE")) {
+            tableName = SQLParserUtils.extractBetweenKeywords(sql, "CREATE VOLATILE TABLE", "(").trim();
+        } else {
+            tableName = SQLParserUtils.extractBetweenKeywords(sql, "CREATE TABLE", "(").trim();
+        }
+
         String colsInside = SQLParserUtils.extractBetweenKeywords(sql, "(", ")");
         List<String> colDefs = SQLParserUtils.splitTopLevel(colsInside, ",");
         List<ColumnDefinition> columns = new ArrayList<>();
