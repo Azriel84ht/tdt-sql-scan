@@ -28,7 +28,10 @@ public class BteqScriptParserTest {
     @Test
     public void testParseBteqScript() {
         String scriptText =
-                ".LOGON myuser,mypass;\n" +
+                ".LOGON myuser,mypass; -- logon line\n" +
+                "/* multiline\n" +
+                "   comment */\n" +
+                ".SET SESSION DATABASE a;\n" +
                 "SELECT * \n" +
                 "FROM my_table\n" +
                 "WHERE id = 1;\n" +
@@ -43,8 +46,8 @@ public class BteqScriptParserTest {
 
         assertEquals(3, commands.size());
 
-        BteqControlCommand logon = assertInstanceOf(BteqControlCommand.class, commands.get(0));
-        assertEquals(BteqCommandType.LOGON, logon.getType());
+        BteqConfigurationCommand config = assertInstanceOf(BteqConfigurationCommand.class, commands.get(0));
+        assertEquals(2, config.getCommands().size());
 
         BteqSqlCommand sqlCommand = assertInstanceOf(BteqSqlCommand.class, commands.get(1));
         assertEquals("SELECT * FROM my_table WHERE id = 1", sqlCommand.getRawText().replaceAll("\\s+", " "));
