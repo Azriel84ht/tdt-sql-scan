@@ -15,7 +15,10 @@ public class BteqScriptGraphConverter {
             String nodeLabel;
             String commandType;
 
-            if (command instanceof com.tdtsqlscan.etl.BteqControlCommand) {
+            if (command instanceof com.tdtsqlscan.etl.BteqConfigurationCommand) {
+                commandType = "CONFIGURATION";
+                nodeLabel = "Configuration";
+            } else if (command instanceof com.tdtsqlscan.etl.BteqControlCommand) {
                 com.tdtsqlscan.etl.BteqControlCommand controlCommand = (com.tdtsqlscan.etl.BteqControlCommand) command;
                 commandType = controlCommand.getType().toString();
                 nodeLabel = "." + commandType;

@@ -2,6 +2,7 @@ package com.tdtsqlscan.etl;
 
 import com.tdtsqlscan.core.QueryParser;
 import com.tdtsqlscan.core.SQLQuery;
+import java.util.ArrayList;
 import java.util.List;
 
 public class BteqScriptParser {
@@ -13,15 +14,28 @@ public class BteqScriptParser {
     }
 
     public BteqScript parse(String bteqScript) {
+        String scriptWithoutComments = bteqScript.replaceAll("--.*|/\\*(?s:.*?)\\*/", "");
         BteqScript script = new BteqScript();
         StringBuilder sqlBuffer = new StringBuilder();
         boolean inSql = false;
 
-        String[] lines = bteqScript.split("\\r?\\n");
+        List<BteqCommand> configCommands = new ArrayList<>();
+
+        String[] lines = scriptWithoutComments.split("\\r?\\n");
         for (String line : lines) {
             String trimmedLine = line.trim();
             if (trimmedLine.isEmpty()) {
                 continue;
+            }
+
+            if (trimmedLine.startsWith(".SET") || trimmedLine.startsWith(".LOGON")) {
+                configCommands.add(parseBteqControlCommand(trimmedLine));
+                continue;
+            }
+
+            if (!configCommands.isEmpty()) {
+                script.addCommand(new BteqConfigurationCommand(configCommands));
+                configCommands = new ArrayList<>();
             }
 
             if (inSql) {
@@ -51,6 +65,11 @@ public class BteqScriptParser {
                 }
             }
         }
+
+        if (!configCommands.isEmpty()) {
+            script.addCommand(new BteqConfigurationCommand(configCommands));
+        }
+
         return script;
     }
 
