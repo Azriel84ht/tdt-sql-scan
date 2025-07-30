@@ -18,20 +18,11 @@ public class CreateIndexParser implements QueryParser {
 
     @Override
     public CreateIndexQuery parse(String sql) throws SQLParseException {
-        // ¿tiene UNIQUE?
-        boolean unique = SQLParserUtils.containsKeyword(sql, "UNIQUE");
-        // nombre del índice
-        String indexName = SQLParserUtils
-            .extractBetween(sql, "INDEX", "ON")
-            .trim();
-        // nombre de la tabla
-        String tableName = SQLParserUtils
-            .extractBetween(sql, "ON", "(")
-            .trim();
-        // lista de columnas
-        String cols = SQLParserUtils
-            .extractBetween(sql, "(", ")");
-        List<String> columns = SQLParserUtils.parseExpressionList(cols);
+        boolean unique = sql.toUpperCase().contains("UNIQUE");
+        String indexName = SQLParserUtils.extractBetweenKeywords(sql, "INDEX", "ON").trim();
+        String tableName = SQLParserUtils.extractBetweenKeywords(sql, "ON", "(").trim();
+        String cols = SQLParserUtils.extractBetweenKeywords(sql, "(", ")");
+        List<String> columns = SQLParserUtils.splitTopLevel(cols, ",");
 
         return new CreateIndexQuery(sql, unique, indexName, tableName, columns);
     }

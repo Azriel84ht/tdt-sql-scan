@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>BTEQ Flow Visualizer</title>
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style type="text/css">
+        #mynetwork {
+            width: 800px;
+            height: 600px;
+            border: 1px solid lightgray;
+        }
+    </style>
+</head>
+<body>
+
+<h1>BTEQ Flow Visualizer</h1>
+
+<form id="upload-form">
+    <input type="file" id="file-input" name="files" multiple/>
+    <button type="submit">Upload and Visualize</button>
+</form>
+
+<div id="mynetwork"></div>
+
+<script type="text/javascript">
+    const form = document.getElementById('upload-form');
+    const fileInput = document.getElementById('file-input');
+    const container = document.getElementById('mynetwork');
+
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        const formData = new FormData();
+        for (const file of fileInput.files) {
+            formData.append('files', file);
+        }
+
+        fetch('/upload', {
+            method: 'POST',
+            body: formData,
+        })
+        .then(response => response.json())
+        .then(data => {
+            const nodes = new vis.DataSet(data.nodes);
+            const edges = new vis.DataSet(data.edges);
+
+            const networkData = {
+                nodes: nodes,
+                edges: edges,
+            };
+            const options = {};
+            const network = new vis.Network(container, networkData, options);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
+</script>
+
+</body>
+</html>
