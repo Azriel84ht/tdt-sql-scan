@@ -15,7 +15,7 @@ public class BteqScriptGraphConverterTest {
     public void testConvert() {
         BteqScript script = new BteqScript();
         script.addCommand(new BteqControlCommand(BteqCommandType.LOGON, ".LOGON myuser,mypass;"));
-        script.addCommand(new BteqSqlCommand("SELECT * FROM my_table;", null));
+        script.addCommand(new BteqSqlCommand("SELECT * FROM my_table;", new com.tdtsqlscan.select.SelectQuery("SELECT * FROM my_table;")));
         script.addCommand(new BteqControlCommand(BteqCommandType.LOGOFF, ".LOGOFF;"));
 
         BteqScriptGraphConverter converter = new BteqScriptGraphConverter();
@@ -24,14 +24,23 @@ public class BteqScriptGraphConverterTest {
         assertEquals(3, graph.getNodes().size());
         assertEquals(2, graph.getEdges().size());
 
-        assertEquals("node-0", graph.getNodes().get(0).getId());
-        assertEquals(".LOGON myuser,mypass;", graph.getNodes().get(0).getLabel());
+        Node node0 = graph.getNodes().get(0);
+        assertEquals("node-0", node0.getId());
+        assertEquals(".LOGON", node0.getLabel());
+        assertEquals("LOGON", node0.getProperties().get("commandType"));
+        assertEquals(".LOGON myuser,mypass;", node0.getProperties().get("fullText"));
 
-        assertEquals("node-1", graph.getNodes().get(1).getId());
-        assertEquals("SELECT * FROM my_table;", graph.getNodes().get(1).getLabel());
+        Node node1 = graph.getNodes().get(1);
+        assertEquals("node-1", node1.getId());
+        assertEquals("SELECT", node1.getLabel());
+        assertEquals("SELECT", node1.getProperties().get("commandType"));
+        assertEquals("SELECT * FROM my_table;", node1.getProperties().get("fullText"));
 
-        assertEquals("node-2", graph.getNodes().get(2).getId());
-        assertEquals(".LOGOFF;", graph.getNodes().get(2).getLabel());
+        Node node2 = graph.getNodes().get(2);
+        assertEquals("node-2", node2.getId());
+        assertEquals(".LOGOFF", node2.getLabel());
+        assertEquals("LOGOFF", node2.getProperties().get("commandType"));
+        assertEquals(".LOGOFF;", node2.getProperties().get("fullText"));
 
         assertEquals("node-0", graph.getEdges().get(0).getSource());
         assertEquals("node-1", graph.getEdges().get(0).getTarget());
