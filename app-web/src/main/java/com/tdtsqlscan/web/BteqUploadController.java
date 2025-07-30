@@ -29,14 +29,35 @@ public class BteqUploadController {
 
     private static final Logger logger = LoggerFactory.getLogger(BteqUploadController.class);
 
+    private final BteqScriptParser bteqScriptParser;
+    private final BteqScriptGraphConverter graphConverter;
+
     public BteqUploadController() {
         logger.info("Initializing BteqUploadController");
+        List<QueryParser> sqlParsers = new ArrayList<>();
+        sqlParsers.add(new SelectParser());
+        sqlParsers.add(new CreateTableParser());
+        sqlParsers.add(new CreateIndexParser());
+        sqlParsers.add(new InsertParser());
+        sqlParsers.add(new UpdateParser());
+        sqlParsers.add(new DeleteParser());
+        this.bteqScriptParser = new BteqScriptParser(sqlParsers);
+        this.graphConverter = new BteqScriptGraphConverter();
+        logger.info("BteqUploadController initialized");
     }
 
     @PostMapping("/upload")
-    public String handleFileUpload(@RequestParam("files") MultipartFile[] files) throws IOException {
+    public Graph handleFileUpload(@RequestParam("files") MultipartFile[] files) throws IOException {
         logger.info("Received {} files for upload", files.length);
-        return "{\"status\": \"ok\"}";
+        BteqScript combinedScript = new BteqScript();
+        for (MultipartFile file : files) {
+            String content = new String(file.getBytes(), StandardCharsets.UTF_8);
+            BteqScript script = bteqScriptParser.parse(content);
+            script.getCommands().forEach(combinedScript::addCommand);
+        }
+        Graph graph = graphConverter.convert(combinedScript);
+        logger.info("Generated graph with {} nodes and {} edges", graph.getNodes().size(), graph.getEdges().size());
+        return graph;
     }
 
     @GetMapping("/hello")

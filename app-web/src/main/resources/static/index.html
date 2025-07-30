@@ -39,7 +39,12 @@
             method: 'POST',
             body: formData,
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             const nodes = new vis.DataSet(data.nodes);
             const edges = new vis.DataSet(data.edges);
@@ -50,9 +55,23 @@
             };
             const options = {};
             const network = new vis.Network(container, networkData, options);
+
+            network.on("click", function (params) {
+                params.event = "[original event]";
+                const nodeId = params.nodes[0];
+                if (nodeId) {
+                    const node = nodes.get(nodeId);
+                    let properties = '';
+                    for (const [key, value] of Object.entries(node.properties)) {
+                        properties += `${key}: ${JSON.stringify(value)}\n`;
+                    }
+                    alert(`Node Properties:\n${properties}`);
+                }
+            });
         })
         .catch(error => {
             console.error('Error:', error);
+            alert('An error occurred while processing the file.');
         });
     });
 </script>
