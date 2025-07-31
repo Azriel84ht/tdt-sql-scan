@@ -57,8 +57,8 @@ public class BteqUploadController {
             BteqScript script = bteqScriptParser.parse(content);
             script.getCommands().forEach(combinedScript::addCommand);
         }
-        Graph graph = bteqScriptGraphConverter.convert(combinedScript);
-        logger.info("Generated graph with {} nodes and {} edges", graph.getNodes().size(), graph.getEdges().size());
+        Graph graph = dataFlowGraphConverter.convert(combinedScript);
+        logger.info("Generated data flow graph with {} nodes and {} edges", graph.getNodes().size(), graph.getEdges().size());
         return graph;
     }
 
