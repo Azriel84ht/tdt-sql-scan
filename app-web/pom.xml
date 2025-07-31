@@ -55,16 +55,6 @@
             <artifactId>parser-select</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>com.tdtsqlscan</groupId>
-            <artifactId>parser-dml</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.tdtsqlscan</groupId>
-            <artifactId>parser-select</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-        </dependency>
     </dependencies>
 
     <build>
