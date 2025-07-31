@@ -1,4 +1,4 @@
-package com.tdtsqlscan.graph;
+package com.tdtsqlscan.web;
 
 import com.tdtsqlscan.etl.BteqCommand;
 import com.tdtsqlscan.etl.BteqScript;
