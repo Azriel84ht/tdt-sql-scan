@@ -9,6 +9,7 @@ import com.tdtsqlscan.dml.UpdateParser;
 import com.tdtsqlscan.etl.BteqScript;
 import com.tdtsqlscan.etl.BteqScriptParser;
 import com.tdtsqlscan.graph.BteqScriptGraphConverter;
+import com.tdtsqlscan.graph.DataFlowGraphConverter;
 import com.tdtsqlscan.graph.Graph;
 import com.tdtsqlscan.select.SelectParser;
 import org.slf4j.Logger;
@@ -30,7 +31,7 @@ public class BteqUploadController {
     private static final Logger logger = LoggerFactory.getLogger(BteqUploadController.class);
 
     private final BteqScriptParser bteqScriptParser;
-    private final BteqScriptGraphConverter graphConverter;
+    private final DataFlowGraphConverter dataFlowGraphConverter;
 
     public BteqUploadController() {
         logger.info("Initializing BteqUploadController");
@@ -42,7 +43,7 @@ public class BteqUploadController {
         sqlParsers.add(new UpdateParser());
         sqlParsers.add(new DeleteParser());
         this.bteqScriptParser = new BteqScriptParser(sqlParsers);
-        this.graphConverter = new BteqScriptGraphConverter();
+        this.dataFlowGraphConverter = new DataFlowGraphConverter();
         logger.info("BteqUploadController initialized");
     }
 
@@ -55,8 +56,8 @@ public class BteqUploadController {
             BteqScript script = bteqScriptParser.parse(content);
             script.getCommands().forEach(combinedScript::addCommand);
         }
-        Graph graph = graphConverter.convert(combinedScript);
-        logger.info("Generated graph with {} nodes and {} edges", graph.getNodes().size(), graph.getEdges().size());
+        Graph graph = dataFlowGraphConverter.convert(combinedScript);
+        logger.info("Generated data flow graph with {} nodes and {} edges", graph.getNodes().size(), graph.getEdges().size());
         return graph;
     }
 

@@ -13,6 +13,7 @@ public enum BteqCommandType {
     GOTO,
     LABEL,
     RUN,
+    DECLARE,
     OTHER,
     SQL
 }

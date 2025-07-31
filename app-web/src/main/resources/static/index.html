@@ -3,6 +3,7 @@
 <head>
     <title>BTEQ Flow Visualizer</title>
     <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="dark-mode.css" id="dark-mode-stylesheet" disabled>
     <style type="text/css">
         #mynetwork {
             width: 100%;
@@ -55,6 +56,14 @@
 
 <h1>BTEQ Flow Visualizer</h1>
 
+<div style="position: absolute; top: 10px; right: 10px;">
+    <label class="switch">
+        <input type="checkbox" id="dark-mode-toggle">
+        <span class="slider round"></span>
+    </label>
+    <label for="dark-mode-toggle">Dark Mode</label>
+</div>
+
 <form id="upload-form">
     <input type="file" id="file-input" name="files" multiple/>
     <button type="submit">Upload and Visualize</button>
@@ -82,7 +91,13 @@
     const modalText = document.getElementById("modal-text");
     const span = document.getElementsByClassName("close")[0];
     const contextMenu = document.getElementById('context-menu');
+    const darkModeToggle = document.getElementById('dark-mode-toggle');
+    const darkModeStylesheet = document.getElementById('dark-mode-stylesheet');
     let activeNode = null;
+
+    darkModeToggle.addEventListener('change', () => {
+        darkModeStylesheet.disabled = !darkModeToggle.checked;
+    });
 
     span.onclick = function() {
         modal.style.display = "none";
@@ -113,27 +128,31 @@
         switch (nodeType) {
             case 'CREATE_TABLE':
                 color = '#FFC107'; // Amber
-                shape = 'box';
+                shape = 'database';
                 break;
             case 'INSERT':
                 color = '#4CAF50'; // Green
-                shape = 'ellipse';
+                shape = 'dot';
                 break;
             case 'UPDATE':
                 color = '#2196F3'; // Blue
-                shape = 'ellipse';
+                shape = 'dot';
                 break;
             case 'DELETE':
                 color = '#F44336'; // Red
-                shape = 'ellipse';
+                shape = 'dot';
                 break;
             case 'SELECT':
                 color = '#9C27B0'; // Purple
-                shape = 'diamond';
+                shape = 'square';
                 break;
             case 'CONFIGURATION':
                 color = '#78909C'; // Blue Grey
                 shape = 'hexagon';
+                break;
+            case 'TABLE':
+                color = '#FF9800'; // Orange
+                shape = 'database';
                 break;
             default:
                 color = '#E0E0E0'; // Grey
