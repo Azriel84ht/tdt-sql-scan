@@ -46,6 +46,8 @@ public class DataFlowGraphConverter {
                     Node node = new Node(nodeId, label);
                     node.addProperty("commandType", commandType);
                     node.addProperty("fullText", sqlCommand.getRawText());
+                    int labelWidth = label.length() * 8;
+                    node.addProperty("width", labelWidth);
                     tableNodeGroups.get(tableName).add(node);
                 }
             }
@@ -56,16 +58,16 @@ public class DataFlowGraphConverter {
             x = 0;
             Node previousNode = null;
             for (Node node : entry.getValue()) {
-                node.addProperty("x", x);
+                node.addProperty("x", x + (int)node.getProperties().get("width") / 2);
                 node.addProperty("y", y);
                 graph.addNode(node);
                 if (previousNode != null) {
                     graph.addEdge(new Edge(previousNode.getId(), node.getId(), ""));
                 }
                 previousNode = node;
-                x += 200;
+                x += (int)node.getProperties().get("width") + 100; // 100 is the margin
             }
-            y += 150;
+            y += 200; // Increased vertical spacing
         }
 
 
