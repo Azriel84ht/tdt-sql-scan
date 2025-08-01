@@ -208,15 +208,6 @@
                 edges: edges,
             };
             const options = {
-                layout: {
-                    hierarchical: {
-                        direction: "UD",
-                        sortMethod: "directed",
-                        levelSeparation: 150,
-                        nodeSpacing: 200,
-                        treeSpacing: 200
-                    }
-                },
                 nodes: {
                     font: {
                         size: 14,
@@ -235,9 +226,12 @@
                     },
                     smooth: {
                         type: 'cubicBezier',
-                        forceDirection: 'vertical',
+                        forceDirection: 'horizontal',
                         roundness: 0.4
                     }
+                },
+                physics: {
+                    enabled: false
                 }
             };
             const network = new vis.Network(container, networkData, options);
