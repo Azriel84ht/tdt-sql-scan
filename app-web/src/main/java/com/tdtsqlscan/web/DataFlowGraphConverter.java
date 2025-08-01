@@ -18,58 +18,36 @@ public class DataFlowGraphConverter {
 
     public Graph convert(BteqScript script) {
         Graph graph = new Graph();
-        Map<String, List<Node>> tableNodeGroups = new HashMap<>();
-        int x = 0;
+        Map<String, Node> tableNodes = new HashMap<>();
 
-        for (BteqCommand command : script.getCommands()) {
+        script.getCommands().forEach(command -> {
             if (command instanceof BteqSqlCommand) {
                 BteqSqlCommand sqlCommand = (BteqSqlCommand) command;
-                String tableName = null;
-                String commandType = null;
-                String label = null;
-
                 if (sqlCommand.getQuery() instanceof CreateTableQuery) {
                     CreateTableQuery createTableQuery = (CreateTableQuery) sqlCommand.getQuery();
-                    tableName = createTableQuery.getTableName();
-                    commandType = "CREATE_TABLE";
-                    label = "CREATE TABLE\n" + tableName;
+                    String tableName = createTableQuery.getTableName();
+                    if (!tableNodes.containsKey(tableName)) {
+                        Node node = new Node(tableName, "CREATE TABLE\n" + tableName);
+                        node.addProperty("commandType", "CREATE_TABLE");
+                        node.addProperty("fullText", sqlCommand.getRawText());
+                        tableNodes.put(tableName, node);
+                        graph.addNode(node);
+                    }
                 } else if (sqlCommand.getQuery() instanceof InsertQuery) {
                     InsertQuery insertQuery = (InsertQuery) sqlCommand.getQuery();
-                    tableName = insertQuery.getTableName();
-                    commandType = "INSERT";
-                    label = "INSERT\n" + tableName;
-                }
-
-                if (tableName != null) {
-                    tableNodeGroups.putIfAbsent(tableName, new ArrayList<>());
-                    String nodeId = commandType + "-" + tableName + "-" + tableNodeGroups.get(tableName).size();
-                    Node node = new Node(nodeId, label);
-                    node.addProperty("commandType", commandType);
-                    node.addProperty("fullText", sqlCommand.getRawText());
-                    int labelWidth = label.length() * 8;
-                    node.addProperty("width", labelWidth);
-                    tableNodeGroups.get(tableName).add(node);
+                    String tableName = insertQuery.getTableName();
+                    Node tableNode = tableNodes.get(tableName);
+                    if (tableNode != null) {
+                        String insertId = "insert-" + tableName + "-" + graph.getNodes().size();
+                        Node insertNode = new Node(insertId, "INSERT\n" + tableName);
+                        insertNode.addProperty("commandType", "INSERT");
+                        insertNode.addProperty("fullText", sqlCommand.getRawText());
+                        graph.addNode(insertNode);
+                        graph.addEdge(new Edge(tableNode.getId(), insertId, ""));
+                    }
                 }
             }
-        }
-
-        int y = 0;
-        for (Map.Entry<String, List<Node>> entry : tableNodeGroups.entrySet()) {
-            x = 0;
-            Node previousNode = null;
-            for (Node node : entry.getValue()) {
-                node.addProperty("x", x + (int)node.getProperties().get("width") / 2);
-                node.addProperty("y", y);
-                graph.addNode(node);
-                if (previousNode != null) {
-                    graph.addEdge(new Edge(previousNode.getId(), node.getId(), ""));
-                }
-                previousNode = node;
-                x += (int)node.getProperties().get("width") + 100; // 100 is the margin
-            }
-            y += 200; // Increased vertical spacing
-        }
-
+        });
 
         return graph;
     }

@@ -208,6 +208,16 @@
                 edges: edges,
             };
             const options = {
+                layout: {
+                    hierarchical: {
+                        direction: "LR",
+                        sortMethod: "directed",
+                        levelSeparation: 500,
+                        nodeSpacing: 300,
+                        treeSpacing: 300,
+                        adaptiveAvgNodes: true
+                    }
+                },
                 nodes: {
                     font: {
                         size: 14,
