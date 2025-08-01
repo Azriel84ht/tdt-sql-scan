@@ -20,29 +20,37 @@ public class InsertParser implements QueryParser {
     @Override
     public InsertQuery parse(String sql) throws SQLParseException {
         String s = sql.trim();
-        if (s.endsWith(";")) s = s.substring(0, s.length()-1);
+        if (s.endsWith(";")) s = s.substring(0, s.length() - 1);
 
-        // Tabla y lista de columnas
         int intoPos = s.toUpperCase().indexOf("INTO") + 4;
-        int parenColsOpen = s.indexOf('(', intoPos);
-        String tableName = s.substring(intoPos, parenColsOpen).trim();
+        String afterInto = s.substring(intoPos).trim();
+        String tableName = SQLParserUtils.getFirstWord(afterInto);
 
-        String colsSegment = s.substring(parenColsOpen + 1, s.indexOf(')', parenColsOpen));
-        List<String> columns = splitTopLevel(colsSegment, ",");
-
-        // Valores
-        int valuesPos = s.toUpperCase().indexOf("VALUES") + 6;
-        String valsPart = s.substring(valuesPos).trim();
-        // agrupamos grupos "(...)" separados por top-level "),"
-        List<String> rawGroups = splitTopLevel(valsPart, "),");
+        String sourceTableName = null;
+        List<String> columns = new ArrayList<>();
         List<List<String>> values = new ArrayList<>();
-        for (String grp : rawGroups) {
-            String g = grp.trim();
-            if (g.startsWith("(")) g = g.substring(1);
-            if (g.endsWith(")"))   g = g.substring(0, g.length()-1);
-            values.add(splitTopLevel(g, ","));
+
+        if (afterInto.toUpperCase().contains("SELECT")) {
+            int fromPos = afterInto.toUpperCase().indexOf("FROM") + 4;
+            sourceTableName = SQLParserUtils.getFirstWord(afterInto.substring(fromPos).trim());
+        } else {
+            int parenColsOpen = s.indexOf('(', intoPos);
+            String colsSegment = s.substring(parenColsOpen + 1, s.indexOf(')', parenColsOpen));
+            columns = splitTopLevel(colsSegment, ",");
+
+            // Valores
+            int valuesPos = s.toUpperCase().indexOf("VALUES") + 6;
+            String valsPart = s.substring(valuesPos).trim();
+            // agrupamos grupos "(...)" separados por top-level "),"
+            List<String> rawGroups = splitTopLevel(valsPart, "),");
+            for (String grp : rawGroups) {
+                String g = grp.trim();
+                if (g.startsWith("(")) g = g.substring(1);
+                if (g.endsWith(")")) g = g.substring(0, g.length() - 1);
+                values.add(splitTopLevel(g, ","));
+            }
         }
 
-        return new InsertQuery(sql, tableName, columns, values);
+        return new InsertQuery(sql, tableName, sourceTableName, columns, values);
     }
 }

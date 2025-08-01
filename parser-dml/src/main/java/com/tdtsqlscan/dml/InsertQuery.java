@@ -9,12 +9,14 @@ import java.util.List;
 public class InsertQuery extends SQLQuery {
 
     private final String tableName;
+    private final String sourceTableName;
     private final List<String> columns;
     private final List<List<String>> values;
 
-    public InsertQuery(String sql, String tableName, List<String> columns, List<List<String>> values) {
+    public InsertQuery(String sql, String tableName, String sourceTableName, List<String> columns, List<List<String>> values) {
         super(sql);
         this.tableName = tableName;
+        this.sourceTableName = sourceTableName;
         this.columns = columns;
         this.values = values;
     }
@@ -36,4 +38,7 @@ public class InsertQuery extends SQLQuery {
         return values;
     }
 
+    public String getSourceTableName() {
+        return sourceTableName;
+    }
 }

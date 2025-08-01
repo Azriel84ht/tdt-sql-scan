@@ -64,9 +64,10 @@ public class DataFlowGraphConverter {
                 graph.addNode(node);
 
                 if (node.getProperties().get("commandType").equals("INSERT")) {
-                    InsertQuery insertQuery = (InsertQuery) ((BteqSqlCommand) script.getCommands().stream()
+                    BteqSqlCommand sqlCommand = (BteqSqlCommand) script.getCommands().stream()
                             .filter(c -> c instanceof BteqSqlCommand && ((BteqSqlCommand) c).getRawText().equals(node.getProperties().get("fullText")))
-                            .findFirst().get()).getQuery();
+                            .findFirst().get();
+                    InsertQuery insertQuery = (InsertQuery) sqlCommand.getQuery();
                     if (insertQuery.getSourceTableName() != null && lastTableNode.containsKey(insertQuery.getSourceTableName())) {
                         graph.addEdge(new Edge(lastTableNode.get(insertQuery.getSourceTableName()).getId(), node.getId(), ""));
                     }
