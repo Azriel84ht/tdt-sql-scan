@@ -55,4 +55,12 @@ public class SQLParserUtils {
         }
         return -1;
     }
+
+    public static String getFirstWord(String s) {
+        String[] words = s.trim().split("\\s+");
+        if (words.length > 0) {
+            return words[0];
+        }
+        return "";
+    }
 }

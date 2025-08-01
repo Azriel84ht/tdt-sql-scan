@@ -11,7 +11,7 @@ public class SelectParserOrderByTest {
     public void parse_orderBy_multiple() {
         String sql = "SELECT a FROM T1 ORDER BY x ASC, y DESC, z;";
         SelectParser p = new SelectParser();
-        SelectQuery q = p.parse(sql);
+        SelectQuery q = (SelectQuery) p.parse(sql);
 
         List<SQLOrderItem> ob = q.getOrderBy();
         assertEquals(3, ob.size());

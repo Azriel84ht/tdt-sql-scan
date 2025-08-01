@@ -13,7 +13,7 @@ public class SelectParserBasicTest {
     public void parse_simpleSelect() {
         String sql = "SELECT a, b, c FROM T1, T2;";
         SelectParser p = new SelectParser();
-        SelectQuery q = p.parse(sql);
+        SelectQuery q = (SelectQuery) p.parse(sql);
 
         // columnas
         assertEquals(3, q.getColumns().size());

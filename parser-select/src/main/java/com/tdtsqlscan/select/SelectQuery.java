@@ -30,8 +30,8 @@ public class SelectQuery extends SQLQuery {
     }
 
     @Override
-    public String getType() {
-        return "SELECT";
+    public Type getType() {
+        return Type.SELECT;
     }
 
     public void addColumn(String col) {

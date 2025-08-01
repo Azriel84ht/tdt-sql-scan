@@ -15,7 +15,7 @@ public class SelectParserJoinTest {
                    + "WHERE c.active = 'Y';";
 
         SelectParser parser = new SelectParser();
-        SelectQuery q    = parser.parse(sql);
+        SelectQuery q    = (SelectQuery) parser.parse(sql);
 
         // Columnas
         assertEquals(2, q.getColumns().size());

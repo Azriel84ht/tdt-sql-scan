@@ -12,7 +12,8 @@ public class UpdateQuery extends SQLQuery {
     private List<SQLAssignment> assignments;
     private SQLCondition condition;
 
-    public UpdateQuery(String tableName, List<SQLAssignment> assignments, SQLCondition condition) {
+    public UpdateQuery(String sql, String tableName, List<SQLAssignment> assignments, SQLCondition condition) {
+        super(sql);
         this.tableName = tableName;
         this.assignments = assignments;
         this.condition = condition;
@@ -31,7 +32,7 @@ public class UpdateQuery extends SQLQuery {
     }
 
     @Override
-    public String getType() {
-        return "UPDATE";
+    public Type getType() {
+        return Type.UPDATE;
     }
 }

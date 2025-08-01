@@ -13,24 +13,27 @@ public class CreateTableParser implements QueryParser {
 
     @Override
     public boolean supports(String sql) {
-        return SQLParserUtils.regionMatchesIgnoreCase(sql.trim(), 0, "CREATE TABLE");
+        String upperSql = sql.trim().toUpperCase();
+        return upperSql.startsWith("CREATE TABLE") || upperSql.startsWith("CREATE VOLATILE TABLE");
     }
 
     @Override
     public CreateTableQuery parse(String sql) throws SQLParseException {
-        // Extraer nombre de la tabla
-        String afterCreate = SQLParserUtils.extractBetween(sql, "CREATE TABLE", "(");
-        String tableName = afterCreate.trim();
+        String upperSql = sql.trim().toUpperCase();
+        String tableName;
+        if (upperSql.startsWith("CREATE VOLATILE TABLE")) {
+            tableName = SQLParserUtils.extractBetweenKeywords(sql, "CREATE VOLATILE TABLE", "(").trim();
+        } else {
+            tableName = SQLParserUtils.extractBetweenKeywords(sql, "CREATE TABLE", "(").trim();
+        }
 
-        // Extraer definición de columnas
-        String colsInside = SQLParserUtils.extractBetween(sql, "(", ")");
+        String colsInside = SQLParserUtils.extractBetweenKeywords(sql, "(", ")");
         List<String> colDefs = SQLParserUtils.splitTopLevel(colsInside, ",");
         List<ColumnDefinition> columns = new ArrayList<>();
         for (String col : colDefs) {
             columns.add(ColumnDefinition.from(col.trim()));
         }
 
-        // Construir la consulta con el constructor (sql, tableName, columns)
         return new CreateTableQuery(sql, tableName, columns);
     }
 }

@@ -10,7 +10,7 @@ public class SelectParserGroupByTest {
     public void parse_groupByAndHaving_single() {
         String sql = "SELECT a, SUM(b) FROM T1 GROUP BY a HAVING SUM(b) > 10;";
         SelectParser p = new SelectParser();
-        SelectQuery q = p.parse(sql);
+        SelectQuery q = (SelectQuery) p.parse(sql);
 
         // Ahora esperamos 2 columnas: a y SUM(b)
         assertEquals(2, q.getColumns().size());
@@ -31,7 +31,7 @@ public class SelectParserGroupByTest {
     public void parse_groupBy_multipleNoHaving() {
         String sql = "SELECT x, y FROM T2 GROUP BY x, y;";
         SelectParser p = new SelectParser();
-        SelectQuery q = p.parse(sql);
+        SelectQuery q = (SelectQuery) p.parse(sql);
 
         assertEquals(2, q.getColumns().size());
         assertEquals(2, q.getGroupBy().size());
