@@ -210,10 +210,11 @@
             const options = {
                 layout: {
                     hierarchical: {
-                        direction: "LR",
+                        direction: "UD",
                         sortMethod: "directed",
-                        levelSeparation: 300,
-                        nodeSpacing: 150
+                        levelSeparation: 150,
+                        nodeSpacing: 200,
+                        treeSpacing: 200
                     }
                 },
                 nodes: {
@@ -234,7 +235,7 @@
                     },
                     smooth: {
                         type: 'cubicBezier',
-                        forceDirection: 'horizontal',
+                        forceDirection: 'vertical',
                         roundness: 0.4
                     }
                 }

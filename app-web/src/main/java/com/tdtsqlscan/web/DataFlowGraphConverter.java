@@ -33,14 +33,14 @@ public class DataFlowGraphConverter {
                 } else if (sqlCommand.getQuery() instanceof InsertQuery) {
                     InsertQuery insertQuery = (InsertQuery) sqlCommand.getQuery();
                     String tableName = insertQuery.getTableName();
-                    String insertId = "insert-" + tableName + "-" + graph.getNodes().size();
-                    Node insertNode = new Node(insertId, "INSERT\n" + tableName);
-                    insertNode.addProperty("commandType", "INSERT");
-                    insertNode.addProperty("fullText", sqlCommand.getRawText());
-                    graph.addNode(insertNode);
-
-                    if (tableNodes.containsKey(tableName)) {
-                        graph.addEdge(new Edge(tableNodes.get(tableName).getId(), insertId, ""));
+                    Node tableNode = tableNodes.get(tableName);
+                    if (tableNode != null) {
+                        String insertId = "insert-" + tableName + "-" + graph.getNodes().size();
+                        Node insertNode = new Node(insertId, "INSERT\n" + tableName);
+                        insertNode.addProperty("commandType", "INSERT");
+                        insertNode.addProperty("fullText", sqlCommand.getRawText());
+                        graph.addNode(insertNode);
+                        graph.addEdge(new Edge(tableNode.getId(), insertId, ""));
                     }
                 }
             }
