@@ -2,9 +2,7 @@ package com.tdtsqlscan.web;
 
 import com.tdtsqlscan.ddl.CreateTableQuery;
 import com.tdtsqlscan.dml.InsertQuery;
-import com.tdtsqlscan.etl.BteqCommand;
-import com.tdtsqlscan.etl.BteqScript;
-import com.tdtsqlscan.etl.BteqSqlCommand;
+import com.tdtsqlscan.etl.*;
 import com.tdtsqlscan.graph.Edge;
 import com.tdtsqlscan.graph.Graph;
 import com.tdtsqlscan.graph.Node;
@@ -17,50 +15,108 @@ public class DataFlowGraphConverter {
     public Graph convert(BteqScript script) {
         Graph graph = new Graph();
         Map<String, Node> tableNodes = new HashMap<>();
+        Node lastCommandNode = null;
 
-        for (BteqCommand command : script.getCommands()) {
+        for (int i = 0; i < script.getCommands().size(); i++) {
+            BteqCommand command = script.getCommands().get(i);
+            String commandNodeId = "cmd-" + i;
+            Node commandNode = createCommandNode(command, commandNodeId);
+            graph.addNode(commandNode);
+
+            // Add edge for sequential logic flow
+            if (lastCommandNode != null) {
+                Edge logicEdge = new Edge(lastCommandNode.getId(), commandNode.getId(), "");
+                logicEdge.addProperty("dashes", true);
+                logicEdge.addProperty("arrows", "to");
+                graph.addEdge(logicEdge);
+            }
+            lastCommandNode = commandNode;
+
+            // Handle data flow
             if (command instanceof BteqSqlCommand) {
-                BteqSqlCommand sqlCommand = (BteqSqlCommand) command;
-
-                if (sqlCommand.getQuery() instanceof CreateTableQuery) {
-                    CreateTableQuery createTableQuery = (CreateTableQuery) sqlCommand.getQuery();
-                    String tableName = createTableQuery.getTableName();
-                    if (tableName != null && !tableNodes.containsKey(tableName)) {
-                        Node node = new Node(tableName, tableName);
-                        node.addProperty("type", "TABLE");
-                        tableNodes.put(tableName, node);
-                        graph.addNode(node);
-                    }
-                } else if (sqlCommand.getQuery() instanceof InsertQuery) {
-                    InsertQuery insertQuery = (InsertQuery) sqlCommand.getQuery();
-                    String targetTable = insertQuery.getTableName();
-                    String sourceTable = insertQuery.getSourceTableName();
-
-                    if (targetTable != null) {
-                        if (!tableNodes.containsKey(targetTable)) {
-                            Node node = new Node(targetTable, targetTable);
-                            node.addProperty("type", "TABLE");
-                            tableNodes.put(targetTable, node);
-                            graph.addNode(node);
-                        }
-                    }
-
-                    if (sourceTable != null) {
-                        if (!tableNodes.containsKey(sourceTable)) {
-                            Node node = new Node(sourceTable, sourceTable);
-                            node.addProperty("type", "TABLE");
-                            tableNodes.put(sourceTable, node);
-                            graph.addNode(node);
-                        }
-                    }
-
-                    if (sourceTable != null && targetTable != null) {
-                        graph.addEdge(new Edge(sourceTable, targetTable, ""));
-                    }
+                Object query = ((BteqSqlCommand) command).getQuery();
+                if (query instanceof CreateTableQuery) {
+                    handleCreateTable(graph, tableNodes, commandNode, (CreateTableQuery) query);
+                } else if (query instanceof InsertQuery) {
+                    handleInsert(graph, tableNodes, commandNode, (InsertQuery) query);
                 }
             }
         }
 
         return graph;
+    }
+
+    private Node createCommandNode(BteqCommand command, String id) {
+        String label;
+        String shape = "box";
+
+        if (command instanceof BteqConfigurationCommand) {
+            label = "CONFIG";
+            shape = "ellipse";
+        } else if (command instanceof BteqControlCommand) {
+            label = "." + ((BteqControlCommand) command).getType().toString();
+            shape = "ellipse";
+        } else if (command instanceof BteqSqlCommand) {
+            Object query = ((BteqSqlCommand) command).getQuery();
+            if (query instanceof CreateTableQuery) {
+                label = "CREATE TABLE";
+            } else if (query instanceof InsertQuery) {
+                label = "INSERT";
+            } else {
+                label = "SQL";
+            }
+        } else {
+            label = "UNKNOWN";
+        }
+
+        Node node = new Node(id, label);
+        node.addProperty("shape", shape);
+        node.addProperty("fullText", command.getRawText());
+        return node;
+    }
+
+    private void handleCreateTable(Graph graph, Map<String, Node> tableNodes, Node commandNode, CreateTableQuery query) {
+        String tableName = query.getTableName();
+        if (tableName == null) return;
+
+        Node tableNode = tableNodes.computeIfAbsent(tableName, k -> {
+            Node newNode = new Node(k, k);
+            newNode.addProperty("shape", "database");
+            graph.addNode(newNode);
+            return newNode;
+        });
+
+        Edge edge = new Edge(commandNode.getId(), tableNode.getId(), "creates");
+        edge.addProperty("arrows", "to");
+        graph.addEdge(edge);
+    }
+
+    private void handleInsert(Graph graph, Map<String, Node> tableNodes, Node commandNode, InsertQuery query) {
+        String targetTable = query.getTableName();
+        if (targetTable == null) return;
+
+        Node targetNode = tableNodes.computeIfAbsent(targetTable, k -> {
+            Node newNode = new Node(k, k);
+            newNode.addProperty("shape", "database");
+            graph.addNode(newNode);
+            return newNode;
+        });
+
+        Edge toEdge = new Edge(commandNode.getId(), targetNode.getId(), "inserts into");
+        toEdge.addProperty("arrows", "to");
+        graph.addEdge(toEdge);
+
+        String sourceTable = query.getSourceTableName();
+        if (sourceTable != null) {
+            Node sourceNode = tableNodes.computeIfAbsent(sourceTable, k -> {
+                Node newNode = new Node(k, k);
+                newNode.addProperty("shape", "database");
+                graph.addNode(newNode);
+                return newNode;
+            });
+            Edge fromEdge = new Edge(sourceNode.getId(), commandNode.getId(), "reads from");
+            fromEdge.addProperty("arrows", "to");
+            graph.addEdge(fromEdge);
+        }
     }
 }
