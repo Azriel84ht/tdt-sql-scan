@@ -1,5 +1,6 @@
 package com.tdtsqlscan.web;
 
+import com.tdtsqlscan.etl.BteqCommand;
 import com.tdtsqlscan.etl.BteqScript;
 import com.tdtsqlscan.etl.BteqSqlCommand;
 import com.tdtsqlscan.ddl.CreateTableQuery;
@@ -8,7 +9,9 @@ import com.tdtsqlscan.graph.Edge;
 import com.tdtsqlscan.graph.Graph;
 import com.tdtsqlscan.graph.Node;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class DataFlowGraphConverter {
