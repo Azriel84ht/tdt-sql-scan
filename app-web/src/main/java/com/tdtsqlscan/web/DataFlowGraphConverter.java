@@ -25,17 +25,21 @@ public class DataFlowGraphConverter {
                     if (!tableNodes.containsKey(tableName)) {
                         Node node = new Node(tableName, "CREATE TABLE\n" + tableName);
                         node.addProperty("commandType", "CREATE_TABLE");
+                        node.addProperty("fullText", sqlCommand.getRawText());
                         tableNodes.put(tableName, node);
                         graph.addNode(node);
                     }
                 } else if (sqlCommand.getQuery() instanceof InsertQuery) {
                     InsertQuery insertQuery = (InsertQuery) sqlCommand.getQuery();
                     String tableName = insertQuery.getTableName();
-                    if (!tableNodes.containsKey(tableName)) {
-                        Node node = new Node(tableName, "INSERT\n" + tableName);
-                        node.addProperty("commandType", "INSERT");
-                        tableNodes.put(tableName, node);
-                        graph.addNode(node);
+                    String insertId = "insert-" + tableName + "-" + graph.getNodes().size();
+                    Node insertNode = new Node(insertId, "INSERT\n" + tableName);
+                    insertNode.addProperty("commandType", "INSERT");
+                    insertNode.addProperty("fullText", sqlCommand.getRawText());
+                    graph.addNode(insertNode);
+
+                    if (tableNodes.containsKey(tableName)) {
+                        graph.addEdge(new Edge(tableNodes.get(tableName).getId(), insertId, ""));
                     }
                 }
             }
