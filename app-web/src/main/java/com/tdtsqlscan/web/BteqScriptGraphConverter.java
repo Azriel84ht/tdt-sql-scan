@@ -2,6 +2,9 @@ package com.tdtsqlscan.web;
 
 import com.tdtsqlscan.etl.BteqCommand;
 import com.tdtsqlscan.etl.BteqScript;
+import com.tdtsqlscan.graph.Edge;
+import com.tdtsqlscan.graph.Graph;
+import com.tdtsqlscan.graph.Node;
 
 public class BteqScriptGraphConverter {
 

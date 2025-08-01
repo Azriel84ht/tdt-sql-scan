@@ -4,6 +4,8 @@ import com.tdtsqlscan.etl.BteqScript;
 import com.tdtsqlscan.etl.BteqSqlCommand;
 import com.tdtsqlscan.ddl.CreateTableQuery;
 import com.tdtsqlscan.dml.InsertQuery;
+import com.tdtsqlscan.graph.Graph;
+import com.tdtsqlscan.graph.Node;
 
 import java.util.HashMap;
 import java.util.Map;
