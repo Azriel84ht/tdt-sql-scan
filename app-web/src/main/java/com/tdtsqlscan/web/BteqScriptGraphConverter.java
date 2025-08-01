@@ -20,7 +20,7 @@ public class BteqScriptGraphConverter {
 
             if (command instanceof com.tdtsqlscan.etl.BteqConfigurationCommand) {
                 commandType = "CONFIGURATION";
-                nodeLabel = "Configuration";
+                nodeLabel = "Config";
             } else if (command instanceof com.tdtsqlscan.etl.BteqControlCommand) {
                 com.tdtsqlscan.etl.BteqControlCommand controlCommand = (com.tdtsqlscan.etl.BteqControlCommand) command;
                 commandType = controlCommand.getType().toString();
@@ -30,13 +30,18 @@ public class BteqScriptGraphConverter {
                 if (sqlCommand.getQuery() != null) {
                     commandType = sqlCommand.getQuery().getType().toString();
                     nodeLabel = commandType.replace("_", " ");
+                    if (sqlCommand.getQuery() instanceof com.tdtsqlscan.ddl.CreateTableQuery) {
+                        nodeLabel = "CREATE TABLE\n" + ((com.tdtsqlscan.ddl.CreateTableQuery) sqlCommand.getQuery()).getTableName();
+                    } else if (sqlCommand.getQuery() instanceof com.tdtsqlscan.dml.InsertQuery) {
+                        nodeLabel = "INSERT\n" + ((com.tdtsqlscan.dml.InsertQuery) sqlCommand.getQuery()).getTableName();
+                    }
                 } else {
                     commandType = "SQL";
                     nodeLabel = "SQL";
                 }
             } else {
                 commandType = "UNKNOWN";
-                nodeLabel = "UNKNOWN";
+                nodeLabel = "Unknown";
             }
 
             Node currentNode = new Node(nodeId, nodeLabel);

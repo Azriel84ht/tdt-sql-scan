@@ -127,38 +127,38 @@
         let color, shape;
         switch (nodeType) {
             case 'CREATE_TABLE':
-                color = '#FFC107'; // Amber
+                color = '#2ECC71'; // Emerald
                 shape = 'database';
                 break;
             case 'INSERT':
-                color = '#4CAF50'; // Green
+                color = '#3498DB'; // Peter River
                 shape = 'dot';
                 break;
             case 'UPDATE':
-                color = '#2196F3'; // Blue
+                color = '#F1C40F'; // Sun Flower
                 shape = 'dot';
                 break;
             case 'DELETE':
-                color = '#F44336'; // Red
+                color = '#E74C3C'; // Alizarin
                 shape = 'dot';
                 break;
             case 'SELECT':
-                color = '#9C27B0'; // Purple
+                color = '#9B59B6'; // Amethyst
                 shape = 'square';
                 break;
             case 'CONFIGURATION':
-                color = '#78909C'; // Blue Grey
+                color = '#7F8C8D'; // Asbestos
                 shape = 'hexagon';
                 break;
             case 'TABLE':
-                color = '#FF9800'; // Orange
+                color = '#1ABC9C'; // Turquoise
                 shape = 'database';
                 break;
             default:
-                color = '#E0E0E0'; // Grey
+                color = '#BDC3C7'; // Silver
                 shape = 'ellipse';
         }
-        return { color: { background: color }, shape: shape };
+        return { color: { background: color, border: color }, shape: shape };
     }
 
     form.addEventListener('submit', (event) => {
@@ -199,6 +199,23 @@
                     hierarchical: {
                         direction: "UD",
                         sortMethod: "directed"
+                    }
+                },
+                nodes: {
+                    font: {
+                        size: 14,
+                        face: 'arial'
+                    },
+                    shapeProperties: {
+                        interpolation: false
+                    }
+                },
+                edges: {
+                    arrows: {
+                        to: {
+                            enabled: true,
+                            scaleFactor: 0.5
+                        }
                     }
                 }
             };

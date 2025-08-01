@@ -23,8 +23,8 @@ public class DataFlowGraphConverter {
                     CreateTableQuery createTableQuery = (CreateTableQuery) sqlCommand.getQuery();
                     String tableName = createTableQuery.getTableName();
                     if (!tableNodes.containsKey(tableName)) {
-                        Node node = new Node(tableName, tableName);
-                        node.addProperty("commandType", "TABLE");
+                        Node node = new Node(tableName, "CREATE TABLE\n" + tableName);
+                        node.addProperty("commandType", "CREATE_TABLE");
                         tableNodes.put(tableName, node);
                         graph.addNode(node);
                     }
@@ -32,8 +32,8 @@ public class DataFlowGraphConverter {
                     InsertQuery insertQuery = (InsertQuery) sqlCommand.getQuery();
                     String tableName = insertQuery.getTableName();
                     if (!tableNodes.containsKey(tableName)) {
-                        Node node = new Node(tableName, tableName);
-                        node.addProperty("commandType", "TABLE");
+                        Node node = new Node(tableName, "INSERT\n" + tableName);
+                        node.addProperty("commandType", "INSERT");
                         tableNodes.put(tableName, node);
                         graph.addNode(node);
                     }
