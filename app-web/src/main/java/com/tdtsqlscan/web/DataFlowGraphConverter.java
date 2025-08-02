@@ -81,6 +81,7 @@ public class DataFlowGraphConverter {
     private Node processCommand(BteqCommand command, int index, Node lastCommandNode) {
         String commandNodeId = "cmd-" + index;
         int yPos;
+        int currentX = xOffset;
         Set<String> relatedTables = getRelatedTables(command);
 
         if (command instanceof BteqControlCommand || command instanceof BteqConfigurationCommand) {
@@ -91,7 +92,16 @@ public class DataFlowGraphConverter {
         }
 
         Node commandNode = createCommandNode(command, commandNodeId);
-        commandNode.addProperty("x", xOffset);
+
+        if (command instanceof BteqSqlCommand) {
+            // For SQL commands, center them between potential source/target tables
+            commandNode.addProperty("x", currentX + X_OFFSET_STEP / 2);
+            handleDataFlow(commandNode, (BteqSqlCommand) command, yPos, currentX);
+        } else {
+            // For non-SQL commands, place them at the start of the block
+            commandNode.addProperty("x", currentX);
+        }
+
         commandNode.addProperty("y", yPos);
         graph.addNode(commandNode);
 
@@ -100,10 +110,6 @@ public class DataFlowGraphConverter {
             logicEdge.addProperty("dashes", true);
             logicEdge.addProperty("arrows", "to");
             graph.addEdge(logicEdge);
-        }
-
-        if (command instanceof BteqSqlCommand) {
-            handleDataFlow(commandNode, (BteqSqlCommand) command, yPos);
         }
 
         xOffset += X_OFFSET_STEP;
@@ -155,13 +161,14 @@ public class DataFlowGraphConverter {
         return node;
     }
 
-    private void handleDataFlow(Node commandNode, BteqSqlCommand sqlCommand, int yPos) {
+    private void handleDataFlow(Node commandNode, BteqSqlCommand sqlCommand, int yPos, int currentX) {
         Object query = sqlCommand.getQuery();
         if (query instanceof CreateTableQuery) {
             String tableName = ((CreateTableQuery) query).getTableName();
             if (tableName == null) return;
 
-            Node tableNode = getOrCreateTableNode(tableName, yPos, xOffset + TABLE_X_OFFSET);
+            Node tableNode = getOrCreateTableNode(tableName, yPos);
+            tableNode.addProperty("x", currentX + X_OFFSET_STEP); // Place table to the right
             Edge edge = new Edge(commandNode.getId(), tableNode.getId(), "creates");
             edge.addProperty("arrows", "to");
             graph.addEdge(edge);
@@ -171,31 +178,37 @@ public class DataFlowGraphConverter {
             String targetTable = insertQuery.getTableName();
             String sourceTable = insertQuery.getSourceTableName();
 
-            if (targetTable != null) {
-                Node targetNode = getOrCreateTableNode(targetTable, yPos, xOffset + TABLE_X_OFFSET);
-                Edge toEdge = new Edge(commandNode.getId(), targetNode.getId(), "inserts into");
-                toEdge.addProperty("arrows", "to");
-                graph.addEdge(toEdge);
-            }
-
             if (sourceTable != null) {
-                Node sourceNode = getOrCreateTableNode(sourceTable, yPos, xOffset - TABLE_X_OFFSET);
+                Node sourceNode = getOrCreateTableNode(sourceTable, yPos);
+                sourceNode.addProperty("x", currentX); // Source table at the beginning of the block
                 Edge fromEdge = new Edge(sourceNode.getId(), commandNode.getId(), "reads from");
                 fromEdge.addProperty("arrows", "to");
                 graph.addEdge(fromEdge);
             }
+
+            if (targetTable != null) {
+                Node targetNode = getOrCreateTableNode(targetTable, yPos);
+                // Target table to the right of the command
+                targetNode.addProperty("x", currentX + X_OFFSET_STEP);
+                Edge toEdge = new Edge(commandNode.getId(), targetNode.getId(), "inserts into");
+                toEdge.addProperty("arrows", "to");
+                graph.addEdge(toEdge);
+            }
         }
     }
 
-    private Node getOrCreateTableNode(String tableName, int yPos, int xPos) {
+    private Node getOrCreateTableNode(String tableName, int yPos) {
         Node tableNode = tableNodes.get(tableName);
         if (tableNode == null) {
             tableNode = new Node(tableName, tableName);
             tableNode.addProperty("shape", "database");
-            tableNode.addProperty("x", xPos);
             tableNode.addProperty("y", yPos);
             tableNodes.put(tableName, tableNode);
             graph.addNode(tableNode);
+        } else {
+            // If table node already exists, update its y-position to the current lane
+            // This can happen if a table is used in multiple flows. We prioritize the latest flow.
+            tableNode.addProperty("y", yPos);
         }
         return tableNode;
     }
