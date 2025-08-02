@@ -196,7 +196,8 @@
             const nodes = new vis.DataSet(
                 data.nodes.map(node => {
                     const style = getNodeStyle(node.properties.commandType);
-                    return { ...node, ...style };
+                    // Manually map x and y from the properties object to the top level
+                    return { ...node, ...style, x: node.properties.x, y: node.properties.y };
                 })
             );
             const edges = new vis.DataSet(data.edges.map(edge => {
