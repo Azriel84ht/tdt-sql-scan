@@ -2,6 +2,7 @@ package com.tdtsqlscan.web;
 
 import com.tdtsqlscan.ddl.CreateTableQuery;
 import com.tdtsqlscan.dml.InsertQuery;
+import com.tdtsqlscan.dml.UpdateQuery;
 import com.tdtsqlscan.etl.*;
 import com.tdtsqlscan.graph.Edge;
 import com.tdtsqlscan.graph.Graph;
@@ -126,6 +127,11 @@ public class DataFlowGraphConverter {
                 if (((InsertQuery) query).getSourceTableName() != null) {
                     tables.add(((InsertQuery) query).getSourceTableName());
                 }
+            } else if (query instanceof UpdateQuery) {
+                tables.add(((UpdateQuery) query).getTargetTable());
+                if (((UpdateQuery) query).getSourceTables() != null) {
+                    tables.addAll(((UpdateQuery) query).getSourceTables());
+                }
             }
         }
         return tables;
@@ -147,6 +153,8 @@ public class DataFlowGraphConverter {
                 label = "CREATE TABLE";
             } else if (query instanceof InsertQuery) {
                 label = "INSERT";
+            } else if (query instanceof UpdateQuery) {
+                label = "UPDATE";
             } else {
                 label = "SQL";
             }
@@ -190,6 +198,31 @@ public class DataFlowGraphConverter {
                 // Target table to the right of the command
                 targetNode.addProperty("x", currentX + X_OFFSET_STEP);
                 Edge toEdge = new Edge(commandNode.getId(), targetNode.getId(), "inserts into");
+                toEdge.addProperty("arrows", "to");
+                graph.addEdge(toEdge);
+            }
+        } else if (query instanceof UpdateQuery) {
+            UpdateQuery updateQuery = (UpdateQuery) query;
+            String targetTable = updateQuery.getTargetTable();
+            List<String> sourceTables = updateQuery.getSourceTables();
+
+            if (sourceTables != null) {
+                for (String sourceTable : sourceTables) {
+                    Node sourceNode = getOrCreateTableNode(sourceTable, yPos);
+                    sourceNode.addProperty("x", currentX); // Source tables at the beginning
+                    Edge fromEdge = new Edge(sourceNode.getId(), commandNode.getId(), "reads from");
+                    fromEdge.addProperty("arrows", "to");
+                    graph.addEdge(fromEdge);
+                }
+            }
+
+            if (targetTable != null) {
+                Node targetNode = getOrCreateTableNode(targetTable, yPos);
+                // Target table is both source and destination, so place it near the command
+                if (sourceTables == null || !sourceTables.contains(targetTable)) {
+                     targetNode.addProperty("x", currentX + X_OFFSET_STEP);
+                }
+                Edge toEdge = new Edge(commandNode.getId(), targetNode.getId(), "updates");
                 toEdge.addProperty("arrows", "to");
                 graph.addEdge(toEdge);
             }

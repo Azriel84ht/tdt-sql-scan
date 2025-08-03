@@ -9,6 +9,9 @@ import com.tdtsqlscan.core.SQLQuery;
 
 import java.util.List;
 
+import java.util.ArrayList;
+import java.util.Collections;
+
 public class UpdateParser implements QueryParser {
 
     @Override
@@ -18,14 +21,19 @@ public class UpdateParser implements QueryParser {
 
     @Override
     public SQLQuery parse(String sql) throws SQLParseException {
-        String lower = sql.toLowerCase();
-        String table = SQLParserUtils.extractAfterKeyword(lower, "update", "set");
-        String assignmentsStr = SQLParserUtils.extractAfterKeyword(lower, "set", "where");
-        String conditionStr = SQLParserUtils.extractAfterKeyword(lower, "where", null);
+        String upperSql = sql.toUpperCase();
+        String targetTable = SQLParserUtils.extractTableName(upperSql, "UPDATE");
 
-        // List<SQLAssignment> assignments = SQLParserUtils.parseAssignments(assignmentsStr);
-        // SQLCondition condition = SQLParserUtils.parseCondition(conditionStr);
+        List<String> sourceTables = null;
+        if (upperSql.contains(" FROM ")) {
+            String fromClause = SQLParserUtils.extractAfterKeyword(upperSql, "FROM", "WHERE");
+            if (fromClause != null && !fromClause.isEmpty()) {
+                // This is a simplistic implementation. A real one would need to handle joins, aliases etc.
+                String sourceTable = SQLParserUtils.getFirstWord(fromClause.trim());
+                sourceTables = Collections.singletonList(sourceTable);
+            }
+        }
 
-        return new UpdateQuery(sql, table, null, null);
+        return new UpdateQuery(sql, targetTable, sourceTables);
     }
 }
