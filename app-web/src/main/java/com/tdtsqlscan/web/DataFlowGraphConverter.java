@@ -131,7 +131,7 @@ public class DataFlowGraphConverter {
 
         if (command instanceof BteqControlCommand) {
             yPos = BTEQ_LANE_Y;
-            if (((BteqControlCommand) command).getType() == BteqControlCommand.Type.LABEL) {
+            if (((BteqControlCommand) command).getType() == BteqCommandType.LABEL) {
                 addLabelMarkerNode(currentX);
             }
         } else if (command instanceof BteqConfigurationCommand) {
