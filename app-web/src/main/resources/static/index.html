@@ -157,25 +157,17 @@
         .then(data => {
             const nodes = new vis.DataSet(
                 data.nodes.map(node => {
-                    // Manually map properties from the backend to the format vis.js expects
-                    const visNode = {
+                    const isAnchor = node.properties.isAnchor || false;
+                    return {
                         id: node.id,
                         label: node.label,
                         shape: node.properties.shape,
                         x: node.properties.x,
                         y: node.properties.y,
-                        fullText: node.properties.fullText
+                        fullText: node.properties.fullText,
+                        hidden: isAnchor, // Make anchor nodes invisible
+                        physics: !isAnchor // Anchors shouldn't be affected by physics if enabled
                     };
-                    if (node.properties.width) {
-                        visNode.width = node.properties.width;
-                    }
-                    if (node.properties.height) {
-                        visNode.height = node.properties.height;
-                    }
-                    if (node.properties.color) {
-                        visNode.color = node.properties.color;
-                    }
-                    return visNode;
                 })
             );
             const edges = new vis.DataSet(data.edges.map(edge => {
@@ -219,36 +211,39 @@
             network.on('beforeDrawing', function(ctx) {
                 const canvasWidth = container.clientWidth;
                 const canvasHeight = container.clientHeight;
-                const view = network.getViewPosition();
-                const scale = network.getScale();
+                const nodePositions = network.getPositions();
 
                 // Draw Horizontal Lane Lines
-                if (data.horizontalLaneYs) {
-                    ctx.strokeStyle = '#e0e0e0';
-                    ctx.lineWidth = 1;
-                    ctx.setLineDash([5, 5]);
-                    data.horizontalLaneYs.forEach(laneY => {
-                        const yCanvas = (laneY - view.y) * scale + canvasHeight / 2;
-                        ctx.beginPath();
-                        ctx.moveTo(0, yCanvas);
-                        ctx.lineTo(canvasWidth, yCanvas);
-                        ctx.stroke();
-                    });
-                    ctx.setLineDash([]);
-                }
+                ctx.strokeStyle = '#e0e0e0';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([5, 5]);
+                nodes.forEach(node => {
+                    if (node.id.startsWith('h_anchor_')) {
+                        const nodePos = nodePositions[node.id];
+                        if (nodePos) {
+                            ctx.beginPath();
+                            ctx.moveTo(0, nodePos.y);
+                            ctx.lineTo(canvasWidth, nodePos.y);
+                            ctx.stroke();
+                        }
+                    }
+                });
+                ctx.setLineDash([]);
 
                 // Draw Vertical Label Markers
-                if (data.verticalLabelXs) {
-                    ctx.strokeStyle = '#ffc0cb'; // Light pink
-                    ctx.lineWidth = 2;
-                    data.verticalLabelXs.forEach(labelX => {
-                        const xCanvas = (labelX - view.x) * scale + canvasWidth / 2;
-                        ctx.beginPath();
-                        ctx.moveTo(xCanvas, 0);
-                        ctx.lineTo(xCanvas, canvasHeight);
-                        ctx.stroke();
-                    });
-                }
+                ctx.strokeStyle = '#ffc0cb';
+                ctx.lineWidth = 2;
+                nodes.forEach(node => {
+                    if (node.id.startsWith('v_anchor_')) {
+                        const nodePos = nodePositions[node.id];
+                        if (nodePos) {
+                            ctx.beginPath();
+                            ctx.moveTo(nodePos.x, 0);
+                            ctx.lineTo(nodePos.x, canvasHeight);
+                            ctx.stroke();
+                        }
+                    }
+                });
             });
 
             network.on("oncontext", function (params) {

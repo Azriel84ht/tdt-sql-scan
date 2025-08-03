@@ -88,11 +88,7 @@ public class DataFlowGraphConverter {
             }
         }
 
-        // After processing all commands, populate the guide line coordinates
-        graph.getHorizontalLaneYs().add(BTEQ_LANE_Y + 60);
-        for (int lane : laneManager.usedLanes) {
-            graph.getHorizontalLaneYs().add(DATA_LANE_START_Y + (lane * LANE_HEIGHT));
-        }
+        addLaneAnchorNodes();
 
         return graph;
     }
@@ -106,7 +102,7 @@ public class DataFlowGraphConverter {
         if (command instanceof BteqControlCommand) {
             yPos = BTEQ_LANE_Y;
             if (((BteqControlCommand) command).getType() == BteqCommandType.LABEL) {
-                graph.getVerticalLabelXs().add(currentX);
+                addVerticalLabelAnchor(currentX);
             }
         } else if (command instanceof BteqConfigurationCommand) {
             yPos = BTEQ_LANE_Y;
@@ -138,6 +134,30 @@ public class DataFlowGraphConverter {
 
         xOffset += X_OFFSET_STEP;
         return commandNode;
+    }
+
+    private void addLaneAnchorNodes() {
+        if (xOffset == 0) return;
+
+        Set<Integer> allLanes = new HashSet<>(laneManager.usedLanes);
+        allLanes.add(-1); // Special lane for BTEQ commands
+
+        for (int lane : allLanes) {
+            int yPos = (lane == -1) ? BTEQ_LANE_Y : DATA_LANE_START_Y + (lane * LANE_HEIGHT);
+            Node anchor = new Node("h_anchor_" + lane, "");
+            anchor.addProperty("x", 0);
+            anchor.addProperty("y", yPos);
+            anchor.addProperty("isAnchor", true);
+            graph.addNode(anchor);
+        }
+    }
+
+    private void addVerticalLabelAnchor(int xPos) {
+        Node anchor = new Node("v_anchor_" + xPos, "");
+        anchor.addProperty("x", xPos);
+        anchor.addProperty("y", BTEQ_LANE_Y); // Align with the BTEQ lane
+        anchor.addProperty("isAnchor", true);
+        graph.addNode(anchor);
     }
 
     private boolean isGroupableInsert(BteqCommand command) {

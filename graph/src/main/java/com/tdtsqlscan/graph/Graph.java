@@ -6,14 +6,9 @@ import java.util.ArrayList;
 public class Graph {
     private final List<Node> nodes;
     private final List<Edge> edges;
-    private final List<Integer> horizontalLaneYs;
-    private final List<Integer> verticalLabelXs;
-
     public Graph() {
         this.nodes = new ArrayList<>();
         this.edges = new ArrayList<>();
-        this.horizontalLaneYs = new ArrayList<>();
-        this.verticalLabelXs = new ArrayList<>();
     }
 
     public void addNode(Node node) {
@@ -30,13 +25,5 @@ public class Graph {
 
     public List<Edge> getEdges() {
         return edges;
-    }
-
-    public List<Integer> getHorizontalLaneYs() {
-        return horizontalLaneYs;
-    }
-
-    public List<Integer> getVerticalLabelXs() {
-        return verticalLabelXs;
     }
 }
