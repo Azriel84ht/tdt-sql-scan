@@ -27,6 +27,8 @@ public class DataFlowGraphConverter {
         private final Map<String, Integer> tableToLane = new HashMap<>();
         private int nextLane = 0;
 
+        private final Set<Integer> usedLanes = new HashSet<>();
+
         int getLaneForTables(Set<String> tableNames) {
             if (tableNames.isEmpty()) {
                 return assignNewLane(null);
@@ -44,6 +46,7 @@ public class DataFlowGraphConverter {
             } else {
                 int lane = Collections.min(existingLanes);
                 assignLane(tableNames, lane);
+                usedLanes.add(lane);
                 return lane;
             }
         }
@@ -85,7 +88,39 @@ public class DataFlowGraphConverter {
             }
         }
 
+        addLaneGuideNodes();
+
         return graph;
+    }
+
+    private void addLaneGuideNodes() {
+        if (xOffset == 0) return; // Don't draw for empty graph
+
+        // Add BTEQ lane guide
+        Node bteqLaneNode = new Node("lane-bteq", "");
+        bteqLaneNode.addProperty("shape", "box");
+        bteqLaneNode.addProperty("x", xOffset / 2);
+        bteqLaneNode.addProperty("y", BTEQ_LANE_Y + 60);
+        bteqLaneNode.addProperty("width", xOffset);
+        bteqLaneNode.addProperty("height", 1);
+        bteqLaneNode.addProperty("color", "#e0e0e0");
+        bteqLaneNode.addProperty("fixed", true);
+        bteqLaneNode.addProperty("physics", false);
+        graph.addNode(bteqLaneNode);
+
+        for (int lane : laneManager.usedLanes) {
+            int yPos = DATA_LANE_START_Y + (lane * LANE_HEIGHT);
+            Node laneNode = new Node("lane-" + lane, "");
+            laneNode.addProperty("shape", "box");
+            laneNode.addProperty("x", xOffset / 2);
+            laneNode.addProperty("y", yPos);
+            laneNode.addProperty("width", xOffset);
+            laneNode.addProperty("height", 1);
+            laneNode.addProperty("color", "#e0e0e0");
+            laneNode.addProperty("fixed", true);
+            laneNode.addProperty("physics", false);
+            graph.addNode(laneNode);
+        }
     }
 
     private Node processCommand(BteqCommand command, int index, Node lastCommandNode) {
@@ -94,9 +129,14 @@ public class DataFlowGraphConverter {
         int currentX = xOffset;
         Set<String> relatedTables = getRelatedTables(command);
 
-        if (command instanceof BteqControlCommand || command instanceof BteqConfigurationCommand) {
+        if (command instanceof BteqControlCommand) {
             yPos = BTEQ_LANE_Y;
-        } else {
+            if (((BteqControlCommand) command).getType() == BteqControlCommand.Type.LABEL) {
+                addLabelMarkerNode(currentX);
+            }
+        } else if (command instanceof BteqConfigurationCommand) {
+            yPos = BTEQ_LANE_Y;
+        }else {
             int lane = laneManager.getLaneForTables(relatedTables);
             yPos = DATA_LANE_START_Y + (lane * LANE_HEIGHT);
         }
@@ -124,6 +164,19 @@ public class DataFlowGraphConverter {
 
         xOffset += X_OFFSET_STEP;
         return commandNode;
+    }
+
+    private void addLabelMarkerNode(int xPos) {
+        Node markerNode = new Node("marker-" + xPos, "");
+        markerNode.addProperty("shape", "box");
+        markerNode.addProperty("x", xPos);
+        markerNode.addProperty("y", DATA_LANE_START_Y + (laneManager.nextLane * LANE_HEIGHT) / 2); // Center vertically
+        markerNode.addProperty("width", 2);
+        markerNode.addProperty("height", (laneManager.nextLane + 1) * LANE_HEIGHT);
+        markerNode.addProperty("color", "#ffdddd");
+        markerNode.addProperty("fixed", true);
+        markerNode.addProperty("physics", false);
+        graph.addNode(markerNode);
     }
 
     private boolean isGroupableInsert(BteqCommand command) {

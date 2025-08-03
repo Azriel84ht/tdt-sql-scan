@@ -158,14 +158,24 @@
             const nodes = new vis.DataSet(
                 data.nodes.map(node => {
                     // Manually map properties from the backend to the format vis.js expects
-                    return {
+                    const visNode = {
                         id: node.id,
                         label: node.label,
                         shape: node.properties.shape,
                         x: node.properties.x,
                         y: node.properties.y,
-                        fullText: node.properties.fullText // Keep original data for modal
+                        fullText: node.properties.fullText
                     };
+                    if (node.properties.width) {
+                        visNode.width = node.properties.width;
+                    }
+                    if (node.properties.height) {
+                        visNode.height = node.properties.height;
+                    }
+                    if (node.properties.color) {
+                        visNode.color = node.properties.color;
+                    }
+                    return visNode;
                 })
             );
             const edges = new vis.DataSet(data.edges.map(edge => {
@@ -205,37 +215,6 @@
                 }
             };
             const network = new vis.Network(container, networkData, options);
-
-            network.on('beforeDrawing', function(ctx) {
-                const lanes = new Set();
-                nodes.forEach(node => {
-                    if (node.y !== undefined) {
-                        // The BTEQ lane is at y=0, the first data lane is at y=150.
-                        // We draw the line mid-way between lanes.
-                        const isBteqLane = node.y === 0;
-                        const laneCenter = isBteqLane ? node.y + 75 : node.y;
-                        lanes.add(laneCenter);
-                    }
-                });
-
-                const canvasWidth = container.clientWidth;
-                ctx.strokeStyle = '#e0e0e0';
-                ctx.lineWidth = 1;
-                ctx.setLineDash([5, 5]);
-
-                const view = network.getViewPosition();
-                const scale = network.getScale();
-
-                lanes.forEach(laneY => {
-                    const yCanvas = (laneY - view.y) * scale + container.clientHeight / 2;
-                    ctx.beginPath();
-                    ctx.moveTo(0, yCanvas);
-                    ctx.lineTo(canvasWidth, yCanvas);
-                    ctx.stroke();
-                });
-
-                ctx.setLineDash([]);
-            });
 
             network.on("oncontext", function (params) {
                 params.event.preventDefault();
