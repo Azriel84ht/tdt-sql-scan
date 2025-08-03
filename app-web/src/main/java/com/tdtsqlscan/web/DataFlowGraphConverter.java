@@ -70,9 +70,19 @@ public class DataFlowGraphConverter {
         this.xOffset = 0;
         Node lastCommandNode = null;
 
-        for (int i = 0; i < script.getCommands().size(); i++) {
+        int i = 0;
+        while (i < script.getCommands().size()) {
             BteqCommand command = script.getCommands().get(i);
-            lastCommandNode = processCommand(command, i, lastCommandNode);
+
+            // Check if the command is a candidate for grouping
+            if (isGroupableInsert(command)) {
+                List<BteqCommand> group = findInsertGroup(script.getCommands(), i);
+                lastCommandNode = processInsertGroup(group, i, lastCommandNode);
+                i += group.size(); // Skip past the commands that were just grouped
+            } else {
+                lastCommandNode = processCommand(command, i, lastCommandNode);
+                i++;
+            }
         }
 
         return graph;
@@ -114,6 +124,84 @@ public class DataFlowGraphConverter {
 
         xOffset += X_OFFSET_STEP;
         return commandNode;
+    }
+
+    private boolean isGroupableInsert(BteqCommand command) {
+        if (!(command instanceof BteqSqlCommand)) {
+            return false;
+        }
+        Object query = ((BteqSqlCommand) command).getQuery();
+        if (!(query instanceof InsertQuery)) {
+            return false;
+        }
+        // Groupable inserts are those without a source table (i.e., INSERT ... VALUES)
+        return ((InsertQuery) query).getSourceTableName() == null;
+    }
+
+    private Node processInsertGroup(List<BteqCommand> group, int startIndex, Node lastCommandNode) {
+        BteqCommand firstCommand = group.get(0);
+        String targetTable = ((InsertQuery) ((BteqSqlCommand) firstCommand).getQuery()).getTableName();
+        String commandNodeId = "cmd-group-" + startIndex;
+
+        // Build the consolidated node
+        StringBuilder fullText = new StringBuilder();
+        for (BteqCommand cmd : group) {
+            fullText.append(cmd.getRawText()).append("\n\n");
+        }
+        String label = String.format("Batch INSERT (%d)", group.size());
+        Node commandNode = new Node(commandNodeId, label);
+        commandNode.addProperty("shape", "box");
+        commandNode.addProperty("fullText", fullText.toString().trim());
+
+        // Position and connect the node
+        Set<String> relatedTables = Collections.singleton(targetTable);
+        int lane = laneManager.getLaneForTables(relatedTables);
+        int yPos = DATA_LANE_START_Y + (lane * LANE_HEIGHT);
+        int currentX = xOffset;
+
+        commandNode.addProperty("x", currentX + X_OFFSET_STEP / 2);
+        commandNode.addProperty("y", yPos);
+        graph.addNode(commandNode);
+
+        // Connect to the target table
+        Node targetNode = getOrCreateTableNode(targetTable, yPos);
+        targetNode.addProperty("x", currentX + X_OFFSET_STEP);
+        Edge toEdge = new Edge(commandNode.getId(), targetNode.getId(), "inserts into");
+        toEdge.addProperty("arrows", "to");
+        graph.addEdge(toEdge);
+
+        // Connect the logic flow
+        if (lastCommandNode != null) {
+            Edge logicEdge = new Edge(lastCommandNode.getId(), commandNode.getId(), "");
+            logicEdge.addProperty("dashes", true);
+            logicEdge.addProperty("arrows", "to");
+            graph.addEdge(logicEdge);
+        }
+
+        xOffset += X_OFFSET_STEP;
+        return commandNode;
+    }
+
+    private List<BteqCommand> findInsertGroup(List<BteqCommand> commands, int startIndex) {
+        List<BteqCommand> group = new ArrayList<>();
+        BteqCommand firstCommand = commands.get(startIndex);
+        String targetTable = ((InsertQuery) ((BteqSqlCommand) firstCommand).getQuery()).getTableName();
+        group.add(firstCommand);
+
+        for (int i = startIndex + 1; i < commands.size(); i++) {
+            BteqCommand nextCommand = commands.get(i);
+            if (isGroupableInsert(nextCommand)) {
+                String nextTargetTable = ((InsertQuery) ((BteqSqlCommand) nextCommand).getQuery()).getTableName();
+                if (targetTable.equals(nextTargetTable)) {
+                    group.add(nextCommand);
+                } else {
+                    break; // Different table, end of group
+                }
+            } else {
+                break; // Not a groupable insert, end of group
+            }
+        }
+        return group;
     }
 
     private Set<String> getRelatedTables(BteqCommand command) {
