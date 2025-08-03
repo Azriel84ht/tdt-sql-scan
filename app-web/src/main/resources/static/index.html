@@ -210,27 +210,31 @@
                 const lanes = new Set();
                 nodes.forEach(node => {
                     if (node.y !== undefined) {
-                        lanes.add(node.y);
+                        // The BTEQ lane is at y=0, the first data lane is at y=150.
+                        // We draw the line mid-way between lanes.
+                        const isBteqLane = node.y === 0;
+                        const laneCenter = isBteqLane ? node.y + 75 : node.y;
+                        lanes.add(laneCenter);
                     }
                 });
 
-                const view = network.getViewPosition();
-                const scale = network.getScale();
                 const canvasWidth = container.clientWidth;
-
-                ctx.strokeStyle = '#cccccc';
+                ctx.strokeStyle = '#e0e0e0';
                 ctx.lineWidth = 1;
                 ctx.setLineDash([5, 5]);
 
+                const view = network.getViewPosition();
+                const scale = network.getScale();
+
                 lanes.forEach(laneY => {
-                    const y = network.DOMtoCanvas({x: 0, y: laneY}).y;
+                    const yCanvas = (laneY - view.y) * scale + container.clientHeight / 2;
                     ctx.beginPath();
-                    ctx.moveTo(0, y);
-                    ctx.lineTo(canvasWidth, y);
+                    ctx.moveTo(0, yCanvas);
+                    ctx.lineTo(canvasWidth, yCanvas);
                     ctx.stroke();
                 });
 
-                ctx.setLineDash([]); // Reset line dash
+                ctx.setLineDash([]);
             });
 
             network.on("oncontext", function (params) {

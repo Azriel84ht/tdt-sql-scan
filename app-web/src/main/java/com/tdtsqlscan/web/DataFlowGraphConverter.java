@@ -217,9 +217,6 @@ public class DataFlowGraphConverter {
                 }
             } else if (query instanceof UpdateQuery) {
                 tables.add(((UpdateQuery) query).getTargetTable());
-                if (((UpdateQuery) query).getSourceTables() != null) {
-                    tables.addAll(((UpdateQuery) query).getSourceTables());
-                }
             }
         }
         return tables;
@@ -292,24 +289,10 @@ public class DataFlowGraphConverter {
         } else if (query instanceof UpdateQuery) {
             UpdateQuery updateQuery = (UpdateQuery) query;
             String targetTable = updateQuery.getTargetTable();
-            List<String> sourceTables = updateQuery.getSourceTables();
-
-            if (sourceTables != null) {
-                for (String sourceTable : sourceTables) {
-                    Node sourceNode = getOrCreateTableNode(sourceTable, yPos);
-                    sourceNode.addProperty("x", currentX); // Source tables at the beginning
-                    Edge fromEdge = new Edge(sourceNode.getId(), commandNode.getId(), "reads from");
-                    fromEdge.addProperty("arrows", "to");
-                    graph.addEdge(fromEdge);
-                }
-            }
 
             if (targetTable != null) {
                 Node targetNode = getOrCreateTableNode(targetTable, yPos);
-                // Target table is both source and destination, so place it near the command
-                if (sourceTables == null || !sourceTables.contains(targetTable)) {
-                     targetNode.addProperty("x", currentX + X_OFFSET_STEP);
-                }
+                targetNode.addProperty("x", currentX + X_OFFSET_STEP);
                 Edge toEdge = new Edge(commandNode.getId(), targetNode.getId(), "updates");
                 toEdge.addProperty("arrows", "to");
                 graph.addEdge(toEdge);
