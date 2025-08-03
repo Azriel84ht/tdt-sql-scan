@@ -206,6 +206,33 @@
             };
             const network = new vis.Network(container, networkData, options);
 
+            network.on('beforeDrawing', function(ctx) {
+                const lanes = new Set();
+                nodes.forEach(node => {
+                    if (node.y !== undefined) {
+                        lanes.add(node.y);
+                    }
+                });
+
+                const view = network.getViewPosition();
+                const scale = network.getScale();
+                const canvasWidth = container.clientWidth;
+
+                ctx.strokeStyle = '#cccccc';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([5, 5]);
+
+                lanes.forEach(laneY => {
+                    const y = network.DOMtoCanvas({x: 0, y: laneY}).y;
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(canvasWidth, y);
+                    ctx.stroke();
+                });
+
+                ctx.setLineDash([]); // Reset line dash
+            });
+
             network.on("oncontext", function (params) {
                 params.event.preventDefault();
                 const nodeId = network.getNodeAt(params.pointer.DOM);

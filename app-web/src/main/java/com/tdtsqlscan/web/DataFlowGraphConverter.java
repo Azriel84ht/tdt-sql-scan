@@ -13,10 +13,9 @@ import java.util.*;
 public class DataFlowGraphConverter {
 
     private static final int BTEQ_LANE_Y = 0;
-    private static final int DATA_LANE_START_Y = 200;
-    private static final int LANE_HEIGHT = 200;
-    private static final int X_OFFSET_STEP = 250;
-    private static final int TABLE_X_OFFSET = 120;
+    private static final int DATA_LANE_START_Y = 150;
+    private static final int LANE_HEIGHT = 120;
+    private static final int X_OFFSET_STEP = 180;
 
     private Graph graph;
     private Map<String, Node> tableNodes;
