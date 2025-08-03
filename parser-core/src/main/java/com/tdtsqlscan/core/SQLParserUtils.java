@@ -63,4 +63,12 @@ public class SQLParserUtils {
         }
         return "";
     }
+
+    public static String extractTableName(String sql, String keyword) {
+        String afterKeyword = extractAfterKeyword(sql, keyword, null);
+        if (afterKeyword != null) {
+            return getFirstWord(afterKeyword);
+        }
+        return null;
+    }
 }
