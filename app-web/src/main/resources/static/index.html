@@ -216,6 +216,41 @@
             };
             const network = new vis.Network(container, networkData, options);
 
+            network.on('beforeDrawing', function(ctx) {
+                const canvasWidth = container.clientWidth;
+                const canvasHeight = container.clientHeight;
+                const view = network.getViewPosition();
+                const scale = network.getScale();
+
+                // Draw Horizontal Lane Lines
+                if (data.horizontalLaneYs) {
+                    ctx.strokeStyle = '#e0e0e0';
+                    ctx.lineWidth = 1;
+                    ctx.setLineDash([5, 5]);
+                    data.horizontalLaneYs.forEach(laneY => {
+                        const yCanvas = (laneY - view.y) * scale + canvasHeight / 2;
+                        ctx.beginPath();
+                        ctx.moveTo(0, yCanvas);
+                        ctx.lineTo(canvasWidth, yCanvas);
+                        ctx.stroke();
+                    });
+                    ctx.setLineDash([]);
+                }
+
+                // Draw Vertical Label Markers
+                if (data.verticalLabelXs) {
+                    ctx.strokeStyle = '#ffc0cb'; // Light pink
+                    ctx.lineWidth = 2;
+                    data.verticalLabelXs.forEach(labelX => {
+                        const xCanvas = (labelX - view.x) * scale + canvasWidth / 2;
+                        ctx.beginPath();
+                        ctx.moveTo(xCanvas, 0);
+                        ctx.lineTo(xCanvas, canvasHeight);
+                        ctx.stroke();
+                    });
+                }
+            });
+
             network.on("oncontext", function (params) {
                 params.event.preventDefault();
                 const nodeId = network.getNodeAt(params.pointer.DOM);
