@@ -124,6 +124,9 @@ public class DataFlowGraphConverter {
     private String getTargetTable(BteqCommand command) {
         if (command instanceof BteqSqlCommand) {
             Object query = ((BteqSqlCommand) command).getQuery();
+            if (query instanceof com.tdtsqlscan.select.SelectQuery) {
+                return null;
+            }
             if (query instanceof CreateTableQuery) return ((CreateTableQuery) query).getTableName();
             if (query instanceof InsertQuery) return ((InsertQuery) query).getTableName();
             if (query instanceof UpdateQuery) return ((UpdateQuery) query).getTargetTable();
@@ -259,6 +262,7 @@ public class DataFlowGraphConverter {
         Node node = new Node(id, label);
         node.addProperty("shape", shape);
         node.addProperty("fullText", command.getRawText());
+        node.addProperty("fixed", true);
         return node;
     }
 
@@ -279,13 +283,6 @@ public class DataFlowGraphConverter {
             String targetTable = insertQuery.getTableName();
             String sourceTable = insertQuery.getSourceTableName();
 
-            if (sourceTable != null) {
-                Node sourceNode = getOrCreateTableNode(sourceTable, yPos);
-                sourceNode.addProperty("x", currentX); // Source table at the beginning of the block
-                Edge fromEdge = new Edge(sourceNode.getId(), commandNode.getId(), "reads from");
-                fromEdge.addProperty("arrows", "to");
-                graph.addEdge(fromEdge);
-            }
 
             if (targetTable != null) {
                 Node targetNode = getOrCreateTableNode(targetTable, yPos);
@@ -326,6 +323,7 @@ public class DataFlowGraphConverter {
             tableNode = new Node(tableName, tableName);
             tableNode.addProperty("shape", "database");
             tableNode.addProperty("y", yPos);
+            tableNode.addProperty("fixed", true);
             tableNodes.put(tableName, tableNode);
             graph.addNode(tableNode);
         }
