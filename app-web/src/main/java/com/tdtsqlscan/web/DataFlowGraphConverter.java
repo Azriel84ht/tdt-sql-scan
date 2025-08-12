@@ -2,6 +2,7 @@ package com.tdtsqlscan.web;
 
 import com.tdtsqlscan.ddl.CreateTableQuery;
 import com.tdtsqlscan.ddl.DropTableQuery;
+import com.tdtsqlscan.dml.DeleteQuery;
 import com.tdtsqlscan.dml.InsertQuery;
 import com.tdtsqlscan.dml.UpdateQuery;
 import com.tdtsqlscan.etl.*;
