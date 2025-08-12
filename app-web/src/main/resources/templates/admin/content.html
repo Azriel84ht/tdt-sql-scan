@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Admin - Manage Homepage</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: #f8f9fa; }
+        .admin-wrapper { display: flex; }
+        .sidebar { width: 250px; background-color: #343a40; color: white; min-height: 100vh; }
+        .sidebar h2 { text-align: center; padding: 20px 0; margin: 0; background-color: #454d55; }
+        .sidebar ul { list-style-type: none; padding: 0; margin: 0; }
+        .sidebar ul li a { display: block; color: #adb5bd; padding: 15px 20px; text-decoration: none; }
+        .sidebar ul li a:hover, .sidebar ul li a.active { background-color: #495057; color: white; }
+        .main-content { flex-grow: 1; padding: 40px; }
+        .main-content h1 { border-bottom: 2px solid #dee2e6; padding-bottom: 10px; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; margin-bottom: .5rem; font-weight: bold; }
+        .form-group input[type=text], .form-group textarea { width: 100%; padding: .5rem; border: 1px solid #ced4da; border-radius: .25rem; box-sizing: border-box; }
+        .form-group textarea { min-height: 150px; }
+        .btn-primary { background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem; }
+        .btn-primary:hover { background-color: #0056b3; }
+        .alert-success { color: #155724; background-color: #d4edda; border-color: #c3e6cb; padding: 1rem; margin-bottom: 1rem; border-radius: .25rem; }
+    </style>
+</head>
+<body>
+    <div class="admin-wrapper">
+        <nav class="sidebar">
+            <h2>Admin Panel</h2>
+            <ul>
+                <li><a th:href="@{/admin}">Dashboard</a></li>
+                <li><a th:href="@{/admin/content}" class="active">Manage Homepage</a></li>
+                <li><a th:href="@{/admin/users}">User Management</a></li>
+                <li><a th:href="@{/admin/suggestions}">View Suggestions</a></li>
+                <li><a th:href="@{/app}">Back to App</a></li>
+            </ul>
+        </nav>
+        <main class="main-content">
+            <h1>Manage Homepage Content</h1>
+
+            <div th:if="${message}" class="alert-success" th:text="${message}"></div>
+
+            <form th:action="@{/admin/content}" th:object="${content}" method="post">
+                <input type="hidden" th:field="*{id}" />
+                <div class="form-group">
+                    <label for="heroTitle">Hero Title</label>
+                    <input type="text" id="heroTitle" th:field="*{heroTitle}" />
+                </div>
+                <div class="form-group">
+                    <label for="heroSubtitle">Hero Subtitle</label>
+                    <textarea id="heroSubtitle" th:field="*{heroSubtitle}"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="newsSection">News Section (HTML allowed)</label>
+                    <textarea id="newsSection" th:field="*{newsSection}"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="popupMessage">Popup Message</label>
+                    <input type="text" id="popupMessage" th:field="*{popupMessage}" />
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" th:field="*{showPopup}" />
+                        Show Popup on Homepage
+                    </label>
+                </div>
+                <button type="submit" class="btn-primary">Save Content</button>
+            </form>
+        </main>
+    </div>
+</body>
+</html>
