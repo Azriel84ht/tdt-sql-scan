@@ -339,10 +339,6 @@ public class DataFlowGraphConverter {
             tableNode.addProperty("y", yPos);
             tableNodes.put(tableName, tableNode);
             graph.addNode(tableNode);
-        } else {
-            // If table node already exists, update its y-position to the current lane
-            // This can happen if a table is used in multiple flows. We prioritize the latest flow.
-            tableNode.addProperty("y", yPos);
         }
         return tableNode;
     }
