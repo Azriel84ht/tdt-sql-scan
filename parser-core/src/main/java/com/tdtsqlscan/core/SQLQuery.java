@@ -21,6 +21,7 @@ public abstract class SQLQuery {
         DELETE,
         CREATE_TABLE,
         CREATE_INDEX,
+        DROP_TABLE,
         DROP,
         ALTER,
         // otros tipos que necesites...
