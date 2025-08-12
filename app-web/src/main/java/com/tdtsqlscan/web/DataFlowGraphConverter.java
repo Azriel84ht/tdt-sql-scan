@@ -322,7 +322,8 @@ public class DataFlowGraphConverter {
             tableNode.addProperty("y", yPos);
             tableNode.addProperty("fixed", true);
             tableNodes.put(tableName, tableNode);
-            graph.addNode(tableNode);
+            // By not adding the table node to the graph, we prevent it from being drawn.
+            // graph.addNode(tableNode);
         }
         return tableNode;
     }
