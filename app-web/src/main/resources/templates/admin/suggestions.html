@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Admin - View Suggestions</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: #f8f9fa; }
+        .admin-wrapper { display: flex; }
+        .sidebar { width: 250px; background-color: #343a40; color: white; min-height: 100vh; }
+        .sidebar h2 { text-align: center; padding: 20px 0; margin: 0; background-color: #454d55; }
+        .sidebar ul { list-style-type: none; padding: 0; margin: 0; }
+        .sidebar ul li a { display: block; color: #adb5bd; padding: 15px 20px; text-decoration: none; }
+        .sidebar ul li a:hover, .sidebar ul li a.active { background-color: #495057; color: white; }
+        .main-content { flex-grow: 1; padding: 40px; }
+        .main-content h1 { border-bottom: 2px solid #dee2e6; padding-bottom: 10px; }
+        .suggestion-card { background-color: #fff; border: 1px solid #dee2e6; border-radius: 5px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .suggestion-meta { font-size: 0.9rem; color: #6c757d; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .suggestion-text { white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <div class="admin-wrapper">
+        <nav class="sidebar">
+            <h2>Admin Panel</h2>
+            <ul>
+                <li><a th:href="@{/admin}">Dashboard</a></li>
+                <li><a th:href="@{/admin/content}">Manage Homepage</a></li>
+                <li><a th:href="@{/admin/users}">User Management</a></li>
+                <li><a th:href="@{/admin/suggestions}" class="active">View Suggestions</a></li>
+                <li><a th:href="@{/app}">Back to App</a></li>
+            </ul>
+        </nav>
+        <main class="main-content">
+            <h1>User Suggestions</h1>
+
+            <div th:if="${suggestions.isEmpty()}">
+                <p>No suggestions have been submitted yet.</p>
+            </div>
+
+            <div class="suggestion-card" th:each="suggestion : ${suggestions}">
+                <div class="suggestion-meta">
+                    <strong>User:</strong> <span th:text="${suggestion.user.username}"></span> |
+                    <strong>Date:</strong> <span th:text="${#dates.format(suggestion.submissionDate, 'yyyy-MM-dd HH:mm')}"></span>
+                </div>
+                <p class="suggestion-text" th:text="${suggestion.text}"></p>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
