@@ -124,55 +124,17 @@
     }
 
     document.getElementById('view-text').onclick = () => {
-        if (activeNode) {
-            modalText.textContent = activeNode.properties.fullText;
+        if (activeNode && activeNode.fullText) {
+            modalText.textContent = activeNode.fullText;
             modal.style.display = "block";
         }
     };
 
     document.getElementById('copy-code').onclick = () => {
-        if (activeNode) {
-            navigator.clipboard.writeText(activeNode.properties.fullText);
+        if (activeNode && activeNode.fullText) {
+            navigator.clipboard.writeText(activeNode.fullText);
         }
     };
-
-    function getNodeStyle(nodeType) {
-        let color, shape;
-        switch (nodeType) {
-            case 'CREATE_TABLE':
-                color = '#2ECC71'; // Emerald
-                shape = 'database';
-                break;
-            case 'INSERT':
-                color = '#3498DB'; // Peter River
-                shape = 'dot';
-                break;
-            case 'UPDATE':
-                color = '#F1C40F'; // Sun Flower
-                shape = 'dot';
-                break;
-            case 'DELETE':
-                color = '#E74C3C'; // Alizarin
-                shape = 'dot';
-                break;
-            case 'SELECT':
-                color = '#9B59B6'; // Amethyst
-                shape = 'square';
-                break;
-            case 'CONFIGURATION':
-                color = '#7F8C8D'; // Asbestos
-                shape = 'hexagon';
-                break;
-            case 'TABLE':
-                color = '#1ABC9C'; // Turquoise
-                shape = 'database';
-                break;
-            default:
-                color = '#BDC3C7'; // Silver
-                shape = 'ellipse';
-        }
-        return { color: { background: color, border: color }, shape: shape };
-    }
 
     form.addEventListener('submit', (event) => {
         event.preventDefault();
@@ -195,8 +157,15 @@
         .then(data => {
             const nodes = new vis.DataSet(
                 data.nodes.map(node => {
-                    const style = getNodeStyle(node.properties.commandType);
-                    return { ...node, ...style };
+                    // Manually map properties from the backend to the format vis.js expects
+                    return {
+                        id: node.id,
+                        label: node.label,
+                        shape: node.properties.shape,
+                        x: node.properties.x,
+                        y: node.properties.y,
+                        fullText: node.properties.fullText
+                    };
                 })
             );
             const edges = new vis.DataSet(data.edges.map(edge => {
@@ -209,6 +178,7 @@
             };
             const options = {
                 nodes: {
+                    size: 25,
                     font: {
                         size: 14,
                         face: 'arial'
@@ -235,6 +205,43 @@
                 }
             };
             const network = new vis.Network(container, networkData, options);
+
+            network.on('beforeDrawing', function(ctx) {
+                const canvasWidth = container.clientWidth;
+                const canvasHeight = container.clientHeight;
+
+                // Get the coordinates of the visible area in the graph's world space
+                const viewCanvas = {
+                    topLeft: network.DOMtoCanvas({ x: 0, y: 0 }),
+                    bottomRight: network.DOMtoCanvas({ x: canvasWidth, y: canvasHeight })
+                };
+
+                // Draw Horizontal Lane Lines
+                if (data.horizontalLaneYs) {
+                    ctx.strokeStyle = '#e0e0e0';
+                    ctx.lineWidth = 1;
+                    ctx.setLineDash([5, 5]);
+                    data.horizontalLaneYs.forEach(laneY => {
+                        ctx.beginPath();
+                        ctx.moveTo(viewCanvas.topLeft.x, laneY);
+                        ctx.lineTo(viewCanvas.bottomRight.x, laneY);
+                        ctx.stroke();
+                    });
+                    ctx.setLineDash([]);
+                }
+
+                // Draw Vertical Label Markers
+                if (data.verticalLabelXs) {
+                    ctx.strokeStyle = '#ffc0cb';
+                    ctx.lineWidth = 2;
+                    data.verticalLabelXs.forEach(labelX => {
+                        ctx.beginPath();
+                        ctx.moveTo(labelX, viewCanvas.topLeft.y);
+                        ctx.lineTo(labelX, viewCanvas.bottomRight.y);
+                        ctx.stroke();
+                    });
+                }
+            });
 
             network.on("oncontext", function (params) {
                 params.event.preventDefault();

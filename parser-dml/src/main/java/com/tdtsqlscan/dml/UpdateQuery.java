@@ -1,38 +1,29 @@
 package com.tdtsqlscan.dml;
 
-import com.tdtsqlscan.core.SQLAssignment;
-import com.tdtsqlscan.core.SQLCondition;
 import com.tdtsqlscan.core.SQLQuery;
-
 import java.util.List;
 
 public class UpdateQuery extends SQLQuery {
 
-    private String tableName;
-    private List<SQLAssignment> assignments;
-    private SQLCondition condition;
+    private final String targetTable;
+    private final List<String> sourceTables;
 
-    public UpdateQuery(String sql, String tableName, List<SQLAssignment> assignments, SQLCondition condition) {
+    public UpdateQuery(String sql, String targetTable, List<String> sourceTables) {
         super(sql);
-        this.tableName = tableName;
-        this.assignments = assignments;
-        this.condition = condition;
-    }
-
-    public String getTableName() {
-        return tableName;
-    }
-
-    public List<SQLAssignment> getAssignments() {
-        return assignments;
-    }
-
-    public SQLCondition getCondition() {
-        return condition;
+        this.targetTable = targetTable;
+        this.sourceTables = sourceTables;
     }
 
     @Override
     public Type getType() {
         return Type.UPDATE;
+    }
+
+    public String getTargetTable() {
+        return targetTable;
+    }
+
+    public List<String> getSourceTables() {
+        return sourceTables;
     }
 }

@@ -3,6 +3,7 @@ package com.tdtsqlscan.web;
 import com.tdtsqlscan.core.QueryParser;
 import com.tdtsqlscan.ddl.CreateIndexParser;
 import com.tdtsqlscan.ddl.CreateTableParser;
+import com.tdtsqlscan.ddl.DropTableParser;
 import com.tdtsqlscan.dml.DeleteParser;
 import com.tdtsqlscan.dml.InsertParser;
 import com.tdtsqlscan.dml.UpdateParser;
@@ -38,6 +39,7 @@ public class BteqUploadController {
         List<QueryParser> sqlParsers = new ArrayList<>();
         sqlParsers.add(new SelectParser());
         sqlParsers.add(new CreateTableParser());
+        sqlParsers.add(new DropTableParser());
         sqlParsers.add(new CreateIndexParser());
         sqlParsers.add(new InsertParser());
         sqlParsers.add(new UpdateParser());
