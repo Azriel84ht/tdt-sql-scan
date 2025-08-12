@@ -1,6 +1,7 @@
 package com.tdtsqlscan.web;
 
 import com.tdtsqlscan.ddl.CreateTableQuery;
+import com.tdtsqlscan.ddl.DropTableQuery;
 import com.tdtsqlscan.dml.InsertQuery;
 import com.tdtsqlscan.dml.UpdateQuery;
 import com.tdtsqlscan.etl.*;
@@ -53,6 +54,7 @@ public class DataFlowGraphConverter {
 
         private int assignNewLane(Set<String> tableNames) {
             int lane = nextLane++;
+            usedLanes.add(lane); // Always track the new lane
             if (tableNames != null) {
                 assignLane(tableNames, lane);
             }
@@ -231,6 +233,8 @@ public class DataFlowGraphConverter {
                 }
             } else if (query instanceof UpdateQuery) {
                 tables.add(((UpdateQuery) query).getTargetTable());
+            } else if (query instanceof DropTableQuery) {
+                tables.add(((DropTableQuery) query).getTableName());
             }
         }
         return tables;
@@ -254,6 +258,8 @@ public class DataFlowGraphConverter {
                 label = "INSERT";
             } else if (query instanceof UpdateQuery) {
                 label = "UPDATE";
+            } else if (query instanceof DropTableQuery) {
+                label = "DROP TABLE";
             } else {
                 label = "SQL";
             }
@@ -310,6 +316,17 @@ public class DataFlowGraphConverter {
                 Edge toEdge = new Edge(commandNode.getId(), targetNode.getId(), "updates");
                 toEdge.addProperty("arrows", "to");
                 graph.addEdge(toEdge);
+            }
+        } else if (query instanceof DropTableQuery) {
+            DropTableQuery dropTableQuery = (DropTableQuery) query;
+            String tableName = dropTableQuery.getTableName();
+
+            if (tableName != null) {
+                Node tableNode = getOrCreateTableNode(tableName, yPos);
+                tableNode.addProperty("x", currentX);
+                Edge edge = new Edge(commandNode.getId(), tableNode.getId(), "drops");
+                edge.addProperty("arrows", "to");
+                graph.addEdge(edge);
             }
         }
     }
