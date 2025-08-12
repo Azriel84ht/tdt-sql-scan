@@ -22,7 +22,12 @@ public class UpdateParser implements QueryParser {
     @Override
     public SQLQuery parse(String sql) throws SQLParseException {
         String upperSql = sql.toUpperCase();
-        String targetTable = SQLParserUtils.extractTableName(upperSql, "UPDATE");
+        // Use extractBetweenKeywords for more robustness, as the table is between UPDATE and SET.
+        String targetTable = SQLParserUtils.extractBetweenKeywords(upperSql, "UPDATE", "SET");
+        if (targetTable != null) {
+            // The result might include an alias, get the first word.
+            targetTable = SQLParserUtils.getFirstWord(targetTable);
+        }
 
         List<String> sourceTables = null;
         if (upperSql.contains(" FROM ")) {
