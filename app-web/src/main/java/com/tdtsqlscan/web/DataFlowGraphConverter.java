@@ -84,7 +84,8 @@ public class DataFlowGraphConverter {
         int yPos;
         int currentX = xOffset;
 
-        if (command instanceof BteqControlCommand || command instanceof BteqConfigurationCommand) {
+        if (command instanceof BteqControlCommand || command instanceof BteqConfigurationCommand ||
+            (command instanceof BteqSqlCommand && ((BteqSqlCommand) command).getQuery() instanceof com.tdtsqlscan.select.SelectQuery)) {
             yPos = BTEQ_LANE_Y;
             if (command instanceof BteqControlCommand && ((BteqControlCommand) command).getType() == BteqCommandType.LABEL) {
                 graph.getVerticalLabelXs().add(currentX);
@@ -281,19 +282,9 @@ public class DataFlowGraphConverter {
             graph.addEdge(edge);
 
         } else if (query instanceof InsertQuery) {
-            InsertQuery insertQuery = (InsertQuery) query;
-            String targetTable = insertQuery.getTableName();
-            String sourceTable = insertQuery.getSourceTableName();
-
-
-            if (targetTable != null) {
-                Node targetNode = getOrCreateTableNode(targetTable, yPos);
-                // Target table to the right of the command
-                targetNode.addProperty("x", currentX + X_OFFSET_STEP);
-                Edge toEdge = new Edge(commandNode.getId(), targetNode.getId(), "inserts into");
-                toEdge.addProperty("arrows", "to");
-                graph.addEdge(toEdge);
-            }
+            // The user requested that no extra nodes be drawn for INSERT statements.
+            // The source table node was already removed.
+            // Now we also remove the target table node.
         } else if (query instanceof UpdateQuery) {
             UpdateQuery updateQuery = (UpdateQuery) query;
             String targetTable = updateQuery.getTargetTable();
