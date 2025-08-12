@@ -160,8 +160,7 @@ public class DataFlowGraphConverter {
         commandNode.addProperty("fullText", fullText.toString().trim());
 
         // Position and connect the node
-        Set<String> relatedTables = Collections.singleton(targetTable);
-        int lane = laneManager.getLaneForTables(relatedTables);
+        int lane = laneManager.getLaneForTable(targetTable);
         int yPos = DATA_LANE_START_Y + (lane * LANE_HEIGHT);
         int currentX = xOffset;
 
