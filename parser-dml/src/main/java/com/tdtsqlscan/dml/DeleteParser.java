@@ -15,10 +15,13 @@ public class DeleteParser implements QueryParser {
 
     @Override
     public SQLQuery parse(String sql) throws SQLParseException {
-        String lower = sql.toLowerCase();
-        String table = SQLParserUtils.extractAfterKeyword(lower, "from", "where");
-        String conditionStr = SQLParserUtils.extractAfterKeyword(lower, "where", null);
+        String upper = sql.toUpperCase();
+        String table = SQLParserUtils.extractTableName(upper, "DELETE FROM");
+        if (table != null) {
+            table = table.trim();
+        }
 
+        String conditionStr = SQLParserUtils.extractAfterKeyword(upper, "WHERE", null);
         // SQLCondition condition = SQLParserUtils.parseCondition(conditionStr);
 
         return new DeleteQuery(sql, table, null);

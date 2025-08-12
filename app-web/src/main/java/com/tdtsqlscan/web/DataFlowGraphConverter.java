@@ -129,6 +129,7 @@ public class DataFlowGraphConverter {
             if (query instanceof InsertQuery) return ((InsertQuery) query).getTableName();
             if (query instanceof UpdateQuery) return ((UpdateQuery) query).getTargetTable();
             if (query instanceof DropTableQuery) return ((DropTableQuery) query).getTableName();
+            if (query instanceof DeleteQuery) return ((DeleteQuery) query).getTable();
         }
         return null;
     }
@@ -249,6 +250,8 @@ public class DataFlowGraphConverter {
                 label = "UPDATE";
             } else if (query instanceof DropTableQuery) {
                 label = "DROP TABLE";
+            } else if (query instanceof DeleteQuery) {
+                label = "DELETE";
             } else {
                 label = "SQL";
             }
