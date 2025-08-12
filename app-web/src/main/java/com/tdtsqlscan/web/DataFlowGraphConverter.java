@@ -125,9 +125,6 @@ public class DataFlowGraphConverter {
     private String getTargetTable(BteqCommand command) {
         if (command instanceof BteqSqlCommand) {
             Object query = ((BteqSqlCommand) command).getQuery();
-            if (query instanceof com.tdtsqlscan.select.SelectQuery) {
-                return null;
-            }
             if (query instanceof CreateTableQuery) return ((CreateTableQuery) query).getTableName();
             if (query instanceof InsertQuery) return ((InsertQuery) query).getTableName();
             if (query instanceof UpdateQuery) return ((UpdateQuery) query).getTargetTable();
@@ -173,8 +170,8 @@ public class DataFlowGraphConverter {
         commandNode.addProperty("y", yPos);
         graph.addNode(commandNode);
 
-        // The user requested that no extra nodes be drawn for INSERT statements.
-        // This removes the target table node for grouped INSERTs.
+        // Keep this call to register the table for lane management, but don't create an edge
+        getOrCreateTableNode(targetTable, yPos);
 
         // Connect the logic flow
         if (lastCommandNode != null) {
@@ -279,9 +276,19 @@ public class DataFlowGraphConverter {
             graph.addEdge(edge);
 
         } else if (query instanceof InsertQuery) {
-            // The user requested that no extra nodes be drawn for INSERT statements.
-            // The source table node was already removed.
-            // Now we also remove the target table node.
+            InsertQuery insertQuery = (InsertQuery) query;
+            String targetTable = insertQuery.getTableName();
+            String sourceTable = insertQuery.getSourceTableName();
+
+            if (sourceTable != null) {
+                // Keep this call to register the table for lane management, but don't create an edge
+                getOrCreateTableNode(sourceTable, yPos);
+            }
+
+            if (targetTable != null) {
+                // Keep this call to register the table for lane management, but don't create an edge
+                getOrCreateTableNode(targetTable, yPos);
+            }
         } else if (query instanceof UpdateQuery) {
             UpdateQuery updateQuery = (UpdateQuery) query;
             String targetTable = updateQuery.getTargetTable();
