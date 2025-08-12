@@ -14,6 +14,7 @@ public enum BteqCommandType {
     LABEL,
     RUN,
     DECLARE,
+    EXIT,
     OTHER,
     SQL
 }

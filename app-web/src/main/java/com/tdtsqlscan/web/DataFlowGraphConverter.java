@@ -237,8 +237,12 @@ public class DataFlowGraphConverter {
             label = "CONFIG";
             shape = "ellipse";
         } else if (command instanceof BteqControlCommand) {
-            label = "." + ((BteqControlCommand) command).getType().toString();
+            BteqControlCommand controlCommand = (BteqControlCommand) command;
+            label = "." + controlCommand.getType().toString();
             shape = "ellipse";
+            if (controlCommand.getType() == BteqCommandType.EXIT) {
+                shape = "star"; // Using a star for EXIT
+            }
         } else if (command instanceof BteqSqlCommand) {
             Object query = ((BteqSqlCommand) command).getQuery();
             if (query instanceof CreateTableQuery) {
