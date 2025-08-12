@@ -162,6 +162,7 @@ public class DataFlowGraphConverter {
         Node commandNode = new Node(commandNodeId, label);
         commandNode.addProperty("shape", "box");
         commandNode.addProperty("fullText", fullText.toString().trim());
+        commandNode.addProperty("fixed", true);
 
         // Position and connect the node
         int lane = laneManager.getLaneForTable(targetTable);
