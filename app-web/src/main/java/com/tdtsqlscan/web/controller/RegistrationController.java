@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @Controller
 public class RegistrationController {
@@ -33,7 +34,7 @@ public class RegistrationController {
     public String registerUserAccount(@ModelAttribute("user") UserDto userDto, WebRequest request, Model model) {
         try {
             User registered = userService.registerNewUserAccount(userDto);
-            String appUrl = request.getContextPath();
+            final String appUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
             eventPublisher.publishEvent(new OnRegistrationCompleteEvent(registered, appUrl));
             model.addAttribute("message", "A verification email has been sent to " + userDto.getEmail());
         } catch (Exception ex) {
