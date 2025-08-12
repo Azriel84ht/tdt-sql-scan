@@ -24,7 +24,7 @@ public class InsertParser implements QueryParser {
 
         int intoPos = s.toUpperCase().indexOf("INTO") + 4;
         String afterInto = s.substring(intoPos).trim();
-        String tableName = SQLParserUtils.getFirstWord(afterInto);
+        String tableName = SQLParserUtils.getFirstWord(afterInto).toUpperCase();
 
         String sourceTableName = null;
         List<String> columns = new ArrayList<>();
@@ -33,6 +33,9 @@ public class InsertParser implements QueryParser {
         if (afterInto.toUpperCase().contains("SELECT")) {
             int fromPos = afterInto.toUpperCase().indexOf("FROM") + 4;
             sourceTableName = SQLParserUtils.getFirstWord(afterInto.substring(fromPos).trim());
+            if (sourceTableName != null) {
+                sourceTableName = sourceTableName.toUpperCase();
+            }
         } else {
             int parenColsOpen = s.indexOf('(', intoPos);
             String colsSegment = s.substring(parenColsOpen + 1, s.indexOf(')', parenColsOpen));

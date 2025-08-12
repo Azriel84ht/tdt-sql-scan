@@ -2,6 +2,7 @@ package com.tdtsqlscan.web;
 
 import com.tdtsqlscan.ddl.CreateTableQuery;
 import com.tdtsqlscan.ddl.DropTableQuery;
+import com.tdtsqlscan.dml.DeleteQuery;
 import com.tdtsqlscan.dml.InsertQuery;
 import com.tdtsqlscan.dml.UpdateQuery;
 import com.tdtsqlscan.etl.*;
@@ -84,7 +85,8 @@ public class DataFlowGraphConverter {
         int yPos;
         int currentX = xOffset;
 
-        if (command instanceof BteqControlCommand || command instanceof BteqConfigurationCommand) {
+        if (command instanceof BteqControlCommand || command instanceof BteqConfigurationCommand ||
+            (command instanceof BteqSqlCommand && ((BteqSqlCommand) command).getQuery() instanceof com.tdtsqlscan.select.SelectQuery)) {
             yPos = BTEQ_LANE_Y;
             if (command instanceof BteqControlCommand && ((BteqControlCommand) command).getType() == BteqCommandType.LABEL) {
                 graph.getVerticalLabelXs().add(currentX);
@@ -128,6 +130,7 @@ public class DataFlowGraphConverter {
             if (query instanceof InsertQuery) return ((InsertQuery) query).getTableName();
             if (query instanceof UpdateQuery) return ((UpdateQuery) query).getTargetTable();
             if (query instanceof DropTableQuery) return ((DropTableQuery) query).getTableName();
+            if (query instanceof DeleteQuery) return ((DeleteQuery) query).getTable();
         }
         return null;
     }
@@ -158,6 +161,7 @@ public class DataFlowGraphConverter {
         Node commandNode = new Node(commandNodeId, label);
         commandNode.addProperty("shape", "box");
         commandNode.addProperty("fullText", fullText.toString().trim());
+        commandNode.addProperty("fixed", true);
 
         // Position and connect the node
         int lane = laneManager.getLaneForTable(targetTable);
@@ -168,12 +172,8 @@ public class DataFlowGraphConverter {
         commandNode.addProperty("y", yPos);
         graph.addNode(commandNode);
 
-        // Connect to the target table
-        Node targetNode = getOrCreateTableNode(targetTable, yPos);
-        targetNode.addProperty("x", currentX + X_OFFSET_STEP);
-        Edge toEdge = new Edge(commandNode.getId(), targetNode.getId(), "inserts into");
-        toEdge.addProperty("arrows", "to");
-        graph.addEdge(toEdge);
+        // Keep this call to register the table for lane management, but don't create an edge
+        getOrCreateTableNode(targetTable, yPos);
 
         // Connect the logic flow
         if (lastCommandNode != null) {
@@ -237,18 +237,26 @@ public class DataFlowGraphConverter {
             label = "CONFIG";
             shape = "ellipse";
         } else if (command instanceof BteqControlCommand) {
-            label = "." + ((BteqControlCommand) command).getType().toString();
+            BteqControlCommand controlCommand = (BteqControlCommand) command;
+            label = "." + controlCommand.getType().toString();
             shape = "ellipse";
+            if (controlCommand.getType() == BteqCommandType.EXIT) {
+                shape = "star"; // Using a star for EXIT
+            }
         } else if (command instanceof BteqSqlCommand) {
             Object query = ((BteqSqlCommand) command).getQuery();
             if (query instanceof CreateTableQuery) {
                 label = "CREATE TABLE";
             } else if (query instanceof InsertQuery) {
                 label = "INSERT";
+            } else if (query instanceof com.tdtsqlscan.select.SelectQuery) {
+                label = "SELECT";
             } else if (query instanceof UpdateQuery) {
                 label = "UPDATE";
             } else if (query instanceof DropTableQuery) {
                 label = "DROP TABLE";
+            } else if (query instanceof DeleteQuery) {
+                label = "DELETE";
             } else {
                 label = "SQL";
             }
@@ -259,6 +267,7 @@ public class DataFlowGraphConverter {
         Node node = new Node(id, label);
         node.addProperty("shape", shape);
         node.addProperty("fullText", command.getRawText());
+        node.addProperty("fixed", true);
         return node;
     }
 
@@ -280,20 +289,13 @@ public class DataFlowGraphConverter {
             String sourceTable = insertQuery.getSourceTableName();
 
             if (sourceTable != null) {
-                Node sourceNode = getOrCreateTableNode(sourceTable, yPos);
-                sourceNode.addProperty("x", currentX); // Source table at the beginning of the block
-                Edge fromEdge = new Edge(sourceNode.getId(), commandNode.getId(), "reads from");
-                fromEdge.addProperty("arrows", "to");
-                graph.addEdge(fromEdge);
+                // Keep this call to register the table for lane management, but don't create an edge
+                getOrCreateTableNode(sourceTable, yPos);
             }
 
             if (targetTable != null) {
-                Node targetNode = getOrCreateTableNode(targetTable, yPos);
-                // Target table to the right of the command
-                targetNode.addProperty("x", currentX + X_OFFSET_STEP);
-                Edge toEdge = new Edge(commandNode.getId(), targetNode.getId(), "inserts into");
-                toEdge.addProperty("arrows", "to");
-                graph.addEdge(toEdge);
+                // Keep this call to register the table for lane management, but don't create an edge
+                getOrCreateTableNode(targetTable, yPos);
             }
         } else if (query instanceof UpdateQuery) {
             UpdateQuery updateQuery = (UpdateQuery) query;
@@ -326,8 +328,10 @@ public class DataFlowGraphConverter {
             tableNode = new Node(tableName, tableName);
             tableNode.addProperty("shape", "database");
             tableNode.addProperty("y", yPos);
+            tableNode.addProperty("fixed", true);
             tableNodes.put(tableName, tableNode);
-            graph.addNode(tableNode);
+            // By not adding the table node to the graph, we prevent it from being drawn.
+            // graph.addNode(tableNode);
         }
         return tableNode;
     }

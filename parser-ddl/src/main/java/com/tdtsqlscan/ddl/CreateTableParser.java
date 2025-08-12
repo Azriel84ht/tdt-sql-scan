@@ -22,9 +22,9 @@ public class CreateTableParser implements QueryParser {
         String upperSql = sql.trim().toUpperCase();
         String tableName;
         if (upperSql.startsWith("CREATE VOLATILE TABLE")) {
-            tableName = SQLParserUtils.extractBetweenKeywords(sql, "CREATE VOLATILE TABLE", "(").trim();
+            tableName = SQLParserUtils.extractBetweenKeywords(upperSql, "CREATE VOLATILE TABLE", "(").trim();
         } else {
-            tableName = SQLParserUtils.extractBetweenKeywords(sql, "CREATE TABLE", "(").trim();
+            tableName = SQLParserUtils.extractBetweenKeywords(upperSql, "CREATE TABLE", "(").trim();
         }
 
         String colsInside = SQLParserUtils.extractBetweenKeywords(sql, "(", ")");
