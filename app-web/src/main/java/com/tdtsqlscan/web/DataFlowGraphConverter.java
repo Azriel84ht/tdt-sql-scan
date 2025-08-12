@@ -248,6 +248,8 @@ public class DataFlowGraphConverter {
                 label = "CREATE TABLE";
             } else if (query instanceof InsertQuery) {
                 label = "INSERT";
+            } else if (query instanceof com.tdtsqlscan.select.SelectQuery) {
+                label = "SELECT";
             } else if (query instanceof UpdateQuery) {
                 label = "UPDATE";
             } else if (query instanceof DropTableQuery) {

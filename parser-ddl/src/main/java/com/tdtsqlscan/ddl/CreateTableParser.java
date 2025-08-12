@@ -26,7 +26,6 @@ public class CreateTableParser implements QueryParser {
         } else {
             tableName = SQLParserUtils.extractBetweenKeywords(sql, "CREATE TABLE", "(").trim();
         }
-        tableName = tableName.toUpperCase();
 
         String colsInside = SQLParserUtils.extractBetweenKeywords(sql, "(", ")");
         List<String> colDefs = SQLParserUtils.splitTopLevel(colsInside, ",");
