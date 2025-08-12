@@ -27,44 +27,24 @@ public class DataFlowGraphConverter {
     private static class LaneManager {
         private final Map<String, Integer> tableToLane = new HashMap<>();
         private int nextLane = 0;
+        final Set<Integer> usedLanes = new HashSet<>();
 
-        private final Set<Integer> usedLanes = new HashSet<>();
-
-        int getLaneForTables(Set<String> tableNames) {
-            if (tableNames.isEmpty()) {
-                return assignNewLane(null);
-            }
-
-            Set<Integer> existingLanes = new HashSet<>();
-            for (String table : tableNames) {
-                if (tableToLane.containsKey(table)) {
-                    existingLanes.add(tableToLane.get(table));
-                }
-            }
-
-            if (existingLanes.isEmpty()) {
-                return assignNewLane(tableNames);
-            } else {
-                int lane = Collections.min(existingLanes);
-                assignLane(tableNames, lane);
+        int getLaneForTable(String tableName) {
+            if (tableName == null) {
+                // For commands without a table, create a new lane but don't track the table
+                int lane = nextLane++;
                 usedLanes.add(lane);
                 return lane;
             }
-        }
 
-        private int assignNewLane(Set<String> tableNames) {
+            if (tableToLane.containsKey(tableName)) {
+                return tableToLane.get(tableName);
+            }
+
             int lane = nextLane++;
-            usedLanes.add(lane); // Always track the new lane
-            if (tableNames != null) {
-                assignLane(tableNames, lane);
-            }
+            tableToLane.put(tableName, lane);
+            usedLanes.add(lane);
             return lane;
-        }
-
-        private void assignLane(Set<String> tableNames, int lane) {
-            for (String table : tableNames) {
-                tableToLane.put(table, lane);
-            }
         }
     }
 
@@ -103,17 +83,16 @@ public class DataFlowGraphConverter {
         String commandNodeId = "cmd-" + index;
         int yPos;
         int currentX = xOffset;
-        Set<String> relatedTables = getRelatedTables(command);
 
-        if (command instanceof BteqControlCommand) {
+        if (command instanceof BteqControlCommand || command instanceof BteqConfigurationCommand) {
             yPos = BTEQ_LANE_Y;
-            if (((BteqControlCommand) command).getType() == BteqCommandType.LABEL) {
+            if (command instanceof BteqControlCommand && ((BteqControlCommand) command).getType() == BteqCommandType.LABEL) {
                 graph.getVerticalLabelXs().add(currentX);
             }
-        } else if (command instanceof BteqConfigurationCommand) {
-            yPos = BTEQ_LANE_Y;
-        }else {
-            int lane = laneManager.getLaneForTables(relatedTables);
+        } else {
+            // For SQL commands, the lane is determined by the TARGET table.
+            String targetTable = getTargetTable(command);
+            int lane = laneManager.getLaneForTable(targetTable);
             yPos = DATA_LANE_START_Y + (lane * LANE_HEIGHT);
         }
 
@@ -140,6 +119,17 @@ public class DataFlowGraphConverter {
 
         xOffset += X_OFFSET_STEP;
         return commandNode;
+    }
+
+    private String getTargetTable(BteqCommand command) {
+        if (command instanceof BteqSqlCommand) {
+            Object query = ((BteqSqlCommand) command).getQuery();
+            if (query instanceof CreateTableQuery) return ((CreateTableQuery) query).getTableName();
+            if (query instanceof InsertQuery) return ((InsertQuery) query).getTableName();
+            if (query instanceof UpdateQuery) return ((UpdateQuery) query).getTargetTable();
+            if (query instanceof DropTableQuery) return ((DropTableQuery) query).getTableName();
+        }
+        return null;
     }
 
     private boolean isGroupableInsert(BteqCommand command) {
