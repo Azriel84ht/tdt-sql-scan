@@ -173,12 +173,8 @@ public class DataFlowGraphConverter {
         commandNode.addProperty("y", yPos);
         graph.addNode(commandNode);
 
-        // Connect to the target table
-        Node targetNode = getOrCreateTableNode(targetTable, yPos);
-        targetNode.addProperty("x", currentX + X_OFFSET_STEP);
-        Edge toEdge = new Edge(commandNode.getId(), targetNode.getId(), "inserts into");
-        toEdge.addProperty("arrows", "to");
-        graph.addEdge(toEdge);
+        // The user requested that no extra nodes be drawn for INSERT statements.
+        // This removes the target table node for grouped INSERTs.
 
         // Connect the logic flow
         if (lastCommandNode != null) {
