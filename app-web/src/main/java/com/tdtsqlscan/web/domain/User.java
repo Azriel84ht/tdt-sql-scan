@@ -36,9 +36,12 @@ public class User {
 
     private Date lastLoginDate;
 
+    private boolean mustChangePassword;
+
     public User() {
         this.enabled = false; // Disabled by default until email verification
         this.registrationDate = new Date();
+        this.mustChangePassword = false;
     }
 
     // Getters and Setters
@@ -57,6 +60,15 @@ public class User {
     public void setLastLoginDate(Date lastLoginDate) {
         this.lastLoginDate = lastLoginDate;
     }
+
+    public boolean isMustChangePassword() {
+        return mustChangePassword;
+    }
+
+    public void setMustChangePassword(boolean mustChangePassword) {
+        this.mustChangePassword = mustChangePassword;
+    }
+
     public Long getId() {
         return id;
     }

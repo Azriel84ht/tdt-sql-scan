@@ -3,6 +3,8 @@ package com.tdtsqlscan.web.service;
 import com.tdtsqlscan.web.domain.User;
 import com.tdtsqlscan.web.domain.VerificationToken;
 import com.tdtsqlscan.web.dto.UserDto;
+import com.tdtsqlscan.web.domain.PasswordResetToken;
+import com.tdtsqlscan.web.repository.PasswordResetTokenRepository;
 import com.tdtsqlscan.web.repository.UserRepository;
 import com.tdtsqlscan.web.repository.VerificationTokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -23,6 +26,9 @@ public class UserService {
 
     @Autowired
     private VerificationTokenRepository tokenRepository;
+
+    @Autowired
+    private PasswordResetTokenRepository passwordResetTokenRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -79,5 +85,51 @@ public class UserService {
 
     public List<User> findAllUsers() {
         return userRepository.findAll();
+    }
+
+    public User findUserByUsername(String username) {
+        return userRepository.findByUsername(username).orElse(null);
+    }
+
+    public User findUserByEmail(String email) {
+        return userRepository.findByEmail(email).orElse(null);
+    }
+
+    public void createPasswordResetTokenForUser(User user, String token) {
+        PasswordResetToken myToken = new PasswordResetToken(user);
+        myToken.setToken(token);
+        passwordResetTokenRepository.save(myToken);
+    }
+
+    public String validatePasswordResetToken(String token) {
+        final PasswordResetToken passToken = passwordResetTokenRepository.findByToken(token).orElse(null);
+
+        if (passToken == null) {
+            return "invalidToken";
+        }
+
+        if (passToken.getExpiryDate().before(new Date())) {
+            return "expired";
+        }
+
+        return null; // Token is valid
+    }
+
+    public User getUserByPasswordResetToken(String token) {
+        return passwordResetTokenRepository.findByToken(token)
+                .map(PasswordResetToken::getUser)
+                .orElse(null);
+    }
+
+    public void changeUserPassword(User user, String password) {
+        user.setPassword(passwordEncoder.encode(password));
+        user.setMustChangePassword(false); // Assuming a direct change clears the flag.
+        userRepository.save(user);
+    }
+
+    public void forcePasswordChange(User user, String password) {
+        user.setPassword(passwordEncoder.encode(password));
+        user.setMustChangePassword(true);
+        userRepository.save(user);
     }
 }

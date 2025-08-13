@@ -1,6 +1,7 @@
 package com.tdtsqlscan.web.config;
 
 import com.tdtsqlscan.web.service.UserDetailsServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -13,6 +14,9 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    @Autowired
+    private CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
 
     private final UserDetailsServiceImpl userDetailsService;
 
@@ -45,7 +49,7 @@ public class SecurityConfig {
             )
             .formLogin(form -> form
                 .loginPage("/login")
-                .defaultSuccessUrl("/app", true)
+                .successHandler(customAuthenticationSuccessHandler)
                 .permitAll()
             )
             .logout(logout -> logout
