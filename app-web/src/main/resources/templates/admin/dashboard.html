@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Admin Dashboard</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: #f8f9fa; }
+        .admin-wrapper { display: flex; }
+        .sidebar { width: 250px; background-color: #343a40; color: white; min-height: 100vh; }
+        .sidebar h2 { text-align: center; padding: 20px 0; margin: 0; background-color: #454d55; }
+        .sidebar ul { list-style-type: none; padding: 0; margin: 0; }
+        .sidebar ul li a { display: block; color: #adb5bd; padding: 15px 20px; text-decoration: none; }
+        .sidebar ul li a:hover, .sidebar ul li a.active { background-color: #495057; color: white; }
+        .main-content { flex-grow: 1; padding: 40px; }
+        .main-content h1 { border-bottom: 2px solid #dee2e6; padding-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="admin-wrapper">
+        <nav class="sidebar">
+            <h2>Admin Panel</h2>
+            <ul>
+                <li><a th:href="@{/admin}" class="active">Dashboard</a></li>
+                <li><a th:href="@{/admin/content}">Manage Homepage</a></li>
+                <li><a th:href="@{/admin/users}">User Management</a></li>
+                <li><a th:href="@{/admin/suggestions}">View Suggestions</a></li>
+                <li><a th:href="@{/app}">Back to App</a></li>
+            </ul>
+        </nav>
+        <main class="main-content">
+            <h1>Dashboard</h1>
+            <p>Welcome to the administration panel. Please select an option from the sidebar to get started.</p>
+        </main>
+    </div>
+</body>
+</html>
