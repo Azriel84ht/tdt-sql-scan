@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Blog | Data Flow Visualizer</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #fdfdfd; color: #333; }
+        .navbar { background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .navbar .logo { font-size: 1.5rem; font-weight: bold; color: #4a4a4a; text-decoration: none; }
+        .navbar .nav-links a { color: #5a5a5a; text-decoration: none; margin-left: 20px; font-weight: 500; }
+        .navbar .nav-links a:hover { color: #007bff; }
+        .container { max-width: 960px; margin: 40px auto; padding: 0 20px; }
+        .page-header { border-bottom: 2px solid #dee2e6; padding-bottom: 10px; margin-bottom: 40px; }
+        .post-item { margin-bottom: 40px; }
+        .post-item h2 a { text-decoration: none; color: #333; }
+        .post-item h2 a:hover { color: #007bff; }
+        .post-meta { color: #6c757d; font-size: 0.9rem; margin-bottom: 10px; }
+        footer { text-align: center; padding: 20px; margin-top: 40px; background-color: #f4f4f4; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a th:href="@{/}" class="logo">Data Flow Visualizer</a>
+        <div class="nav-links">
+            <a th:href="@{/blog}">Blog</a>
+            <a th:href="@{/login}">Login</a>
+            <a th:href="@{/register}">Register</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header class="page-header">
+            <h1>Blog</h1>
+        </header>
+
+        <div th:each="post : ${posts}" class="post-item">
+            <h2><a th:href="@{/blog/{slug}(slug=${post.slug})}" th:text="${post.title}">Post Title</a></h2>
+            <div class="post-meta">
+                <span>By <span th:text="${post.author}">Author</span></span> |
+                <span>Published on <span th:text="${#temporals.format(post.createdAt, 'MMMM dd, yyyy')}">Date</span></span>
+            </div>
+            <!-- Could add a summary here if the Post entity had a summary field -->
+        </div>
+
+        <div th:if="${posts.isEmpty()}">
+            <p>No blog posts have been published yet. Check back soon!</p>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Data Flow Visualizer. All rights reserved.</p>
+    </footer>
+</body>
+</html>
