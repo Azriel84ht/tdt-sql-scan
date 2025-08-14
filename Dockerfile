@@ -8,9 +8,9 @@ WORKDIR /app
 # Copiamos todo el código fuente del proyecto primero
 COPY . .
 
-# Ahora que todos los módulos están presentes, descargamos dependencias y compilamos
-# Unimos dependency:go-offline y package para optimizar
-RUN ./mvnw clean package -DskipTests
+# Ahora que todos los módulos están presentes, compilamos el proyecto.
+# Usamos el "formato exec" para evitar errores de interpretación del shell.
+RUN ["./mvnw", "clean", "package", "-DskipTests"]
 
 
 # --- Fase de Ejecución (Run Stage) ---
