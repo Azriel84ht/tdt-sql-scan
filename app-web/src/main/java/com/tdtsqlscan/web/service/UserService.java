@@ -2,8 +2,10 @@ package com.tdtsqlscan.web.service;
 
 import com.tdtsqlscan.web.domain.User;
 import com.tdtsqlscan.web.domain.VerificationToken;
+import com.tdtsqlscan.web.dto.RegistrationResult;
 import com.tdtsqlscan.web.dto.UserDto;
 import com.tdtsqlscan.web.domain.PasswordResetToken;
+import java.util.Optional;
 import com.tdtsqlscan.web.repository.PasswordResetTokenRepository;
 import com.tdtsqlscan.web.repository.UserRepository;
 import com.tdtsqlscan.web.repository.VerificationTokenRepository;
@@ -33,24 +35,41 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public User registerNewUserAccount(UserDto userDto) throws Exception {
+    public RegistrationResult registerNewUserAccount(UserDto userDto) throws Exception {
+        // Priority 1: Check if email exists
+        final Optional<User> userByEmail = userRepository.findByEmail(userDto.getEmail());
+        if (userByEmail.isPresent()) {
+            User existingUser = userByEmail.get();
+            if (existingUser.isEnabled()) {
+                // User exists and is verified, throw error.
+                throw new Exception("There is an account with that email address: " + userDto.getEmail());
+            } else {
+                // User exists but is not verified. Resend verification email.
+                // Ignore all other data from the new registration attempt.
+                return new RegistrationResult(existingUser, true);
+            }
+        }
+
+        // Priority 2: Check if username is taken, only if email is new
         if (userRepository.findByUsername(userDto.getUsername()).isPresent()) {
             throw new Exception("There is an account with that username: " + userDto.getUsername());
         }
-        if (userRepository.findByEmail(userDto.getEmail()).isPresent()) {
-            throw new Exception("There is an account with that email address: " + userDto.getEmail());
-        }
 
+        // If both email and username are new, create the new user.
         User user = new User();
         user.setUsername(userDto.getUsername());
         user.setEmail(userDto.getEmail());
         user.setPassword(passwordEncoder.encode(userDto.getPassword()));
         user.setRoles("USER");
         user.setEnabled(false);
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        return new RegistrationResult(savedUser, false);
     }
 
     public void createVerificationTokenForUser(final User user, final String token) {
+        // A user should only have one active verification token. Delete any existing ones.
+        tokenRepository.findByUser(user).ifPresent(tokenRepository::delete);
+
         final VerificationToken myToken = new VerificationToken(user);
         myToken.setToken(token);
         tokenRepository.save(myToken);

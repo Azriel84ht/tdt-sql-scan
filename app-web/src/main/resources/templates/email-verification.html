@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${appName} + ' - Verificación de Email'"></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+            <td style="padding: 20px 0 30px 0;">
+                <table align="center" border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse: collapse; border: 1px solid #cccccc; background-color: #ffffff;">
+                    <!-- Header -->
+                    <tr>
+                        <td align="center" style="padding: 40px 0 30px 0; color: #2c3e50; font-size: 28px; font-weight: bold; border-bottom: 1px solid #cccccc;">
+                            <span th:text="${appName}">Data Flow Visualizer</span>
+                        </td>
+                    </tr>
+                    <!-- Body -->
+                    <tr>
+                        <td style="padding: 40px 30px 40px 30px;">
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td style="color: #333333; font-size: 20px; font-weight: bold;">
+                                        ¡Bienvenido, <span th:text="${userName}">Usuario</span>!
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 20px 0 30px 0; color: #555555; font-size: 16px; line-height: 1.5;">
+                                        Gracias por registrarte en <strong th:text="${appName}">nuestra aplicación</strong>. Solo queda un paso más para activar tu cuenta.
+                                        <br/><br/>
+                                        Por favor, haz clic en el botón de abajo para verificar tu dirección de correo electrónico.
+                                    </td>
+                                </tr>
+                                <!-- CTA Button -->
+                                <tr>
+                                    <td align="center">
+                                        <table border="0" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td align="center" style="border-radius: 5px;" bgcolor="#3498db">
+                                                    <a th:href="${confirmationUrl}" target="_blank" style="font-size: 16px; color: #ffffff; text-decoration: none; padding: 15px 25px; border-radius: 5px; display: inline-block; font-weight: bold;">
+                                                        Verificar mi Email
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                 <tr>
+                                    <td style="padding: 30px 0 0 0; color: #888888; font-size: 14px;">
+                                        Si no puedes hacer clic en el botón, copia y pega la siguiente URL en tu navegador:
+                                        <br/>
+                                        <a th:href="${confirmationUrl}" th:text="${confirmationUrl}" style="color: #3498db; text-decoration: underline;"></a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <!-- Footer -->
+                    <tr>
+                        <td align="center" style="padding: 20px 30px; color: #ffffff; background-color: #2c3e50; font-size: 14px;">
+                            &copy; <span th:text="${#dates.year(#dates.createNow())}">2025</span>, <span th:text="${appName}">Data Flow Visualizer</span>. Todos los derechos reservados.
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
