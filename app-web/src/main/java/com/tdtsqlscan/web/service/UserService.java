@@ -36,24 +36,26 @@ public class UserService {
     private PasswordEncoder passwordEncoder;
 
     public RegistrationResult registerNewUserAccount(UserDto userDto) throws Exception {
-        if (userRepository.findByUsername(userDto.getUsername()).isPresent()) {
-            throw new Exception("There is an account with that username: " + userDto.getUsername());
-        }
-
-        // Check if email exists
-        final Optional<User> userOptional = userRepository.findByEmail(userDto.getEmail());
-        if (userOptional.isPresent()) {
-            User existingUser = userOptional.get();
+        // Priority 1: Check if email exists
+        final Optional<User> userByEmail = userRepository.findByEmail(userDto.getEmail());
+        if (userByEmail.isPresent()) {
+            User existingUser = userByEmail.get();
             if (existingUser.isEnabled()) {
-                // User exists and is verified, throw error
+                // User exists and is verified, throw error.
                 throw new Exception("There is an account with that email address: " + userDto.getEmail());
             } else {
-                // User exists but is not verified, signal to resend email
+                // User exists but is not verified. Resend verification email.
+                // Ignore all other data from the new registration attempt.
                 return new RegistrationResult(existingUser, true);
             }
         }
 
-        // Create a new user if no account with that email exists
+        // Priority 2: Check if username is taken, only if email is new
+        if (userRepository.findByUsername(userDto.getUsername()).isPresent()) {
+            throw new Exception("There is an account with that username: " + userDto.getUsername());
+        }
+
+        // If both email and username are new, create the new user.
         User user = new User();
         user.setUsername(userDto.getUsername());
         user.setEmail(userDto.getEmail());
