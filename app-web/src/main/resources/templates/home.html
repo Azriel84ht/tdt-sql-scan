@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Welcome to SQL Flow Visualizer</title>
+    <title>SQL Flow Visualizer | BTEQ & Teradata Data Flow Analysis Tool</title>
+    <meta name="description" content="Visualize complex Teradata BTEQ scripts instantly. Our tool transforms convoluted SQL into clear, interactive data flow diagrams to untangle your ETL processes.">
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #fdfdfd; color: #333; }
         .navbar { background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
@@ -34,7 +35,7 @@
     </nav>
 
     <header class="hero">
-        <h1 th:text="${content.heroTitle}">Understand Your Data Lineage</h1>
+        <h1>Understand Your Teradata BTEQ Data Lineage</h1>
         <p th:text="${content.heroSubtitle}">Our tool helps you visualize complex SQL scripts and data flows, turning convoluted code into clear, interactive diagrams. Untangle your ETL processes and gain clarity on your data's journey.</p>
         <a th:href="@{/register}" class="cta-button">Get Started for Free</a>
     </header>
