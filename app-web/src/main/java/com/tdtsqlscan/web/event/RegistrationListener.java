@@ -3,11 +3,16 @@ package com.tdtsqlscan.web.event;
 import com.tdtsqlscan.web.domain.User;
 import com.tdtsqlscan.web.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import java.util.UUID;
 
 @Component
@@ -19,33 +24,52 @@ public class RegistrationListener implements ApplicationListener<OnRegistrationC
     @Autowired
     private JavaMailSender mailSender;
 
+    @Autowired
+    private TemplateEngine templateEngine;
+
+    @Value("${app.name}")
+    private String appName;
+
+    @Value("${app.email.registration.subject}")
+    private String registrationSubject;
+
     @Override
     public void onApplicationEvent(final OnRegistrationCompleteEvent event) {
-        this.confirmRegistration(event);
+        try {
+            this.confirmRegistration(event);
+        } catch (MessagingException e) {
+            // In a real application, handle this exception properly (e.g., log it, queue the email for retry)
+            e.printStackTrace();
+        }
     }
 
-    private void confirmRegistration(final OnRegistrationCompleteEvent event) {
+    private void confirmRegistration(final OnRegistrationCompleteEvent event) throws MessagingException {
         final User user = event.getUser();
         final String token = UUID.randomUUID().toString();
         service.createVerificationTokenForUser(user, token);
 
-        final SimpleMailMessage email = constructEmailMessage(event, user, token);
-        // In a real application, you would use the mailSender.
-        // For now, we just print to the console.
-        System.out.println("Sending email: " + email.toString());
-        // mailSender.send(email);
+        final MimeMessage email = constructMimeMessage(event, user, token);
+        mailSender.send(email);
     }
 
-    private SimpleMailMessage constructEmailMessage(final OnRegistrationCompleteEvent event, final User user, final String token) {
-        final String recipientAddress = user.getEmail();
-        final String subject = "Registration Confirmation";
-        // The appUrl from the event is now the full base URL.
+    private MimeMessage constructMimeMessage(final OnRegistrationCompleteEvent event, final User user, final String token) throws MessagingException {
+        // Prepare the evaluation context
+        final Context ctx = new Context();
+        ctx.setVariable("userName", user.getFirstName());
+        ctx.setVariable("appName", this.appName);
         final String confirmationUrl = event.getAppUrl() + "/verify?token=" + token;
-        final String message = "Please click the link below to verify your email address and activate your account:";
-        final SimpleMailMessage email = new SimpleMailMessage();
-        email.setTo(recipientAddress);
-        email.setSubject(subject);
-        email.setText(message + "\r\n" + confirmationUrl);
-        return email;
+        ctx.setVariable("confirmationUrl", confirmationUrl);
+
+        // Create the HTML body using Thymeleaf
+        final String htmlContent = this.templateEngine.process("email-verification.html", ctx);
+
+        // Prepare message using a Spring MimeMessageHelper
+        final MimeMessage mimeMessage = this.mailSender.createMimeMessage();
+        final MimeMessageHelper message = new MimeMessageHelper(mimeMessage, "UTF-8");
+        message.setSubject(this.registrationSubject);
+        message.setTo(user.getEmail());
+        message.setText(htmlContent, true); // true = is HTML
+
+        return mimeMessage;
     }
 }
