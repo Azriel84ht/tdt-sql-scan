@@ -9,8 +9,8 @@ WORKDIR /app
 COPY . .
 
 # Ahora que todos los módulos están presentes, compilamos el proyecto.
-# Usamos el "formato exec" para evitar errores de interpretación del shell.
-RUN ["./mvnw", "clean", "package", "-DskipTests"]
+# Usamos el comando 'mvn' de la imagen base para mayor robustez.
+RUN ["mvn", "clean", "package", "-DskipTests"]
 
 
 # --- Fase de Ejecución (Run Stage) ---
