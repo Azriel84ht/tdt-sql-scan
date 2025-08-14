@@ -33,24 +33,39 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public User registerNewUserAccount(UserDto userDto) throws Exception {
+    public RegistrationResult registerNewUserAccount(UserDto userDto) throws Exception {
         if (userRepository.findByUsername(userDto.getUsername()).isPresent()) {
             throw new Exception("There is an account with that username: " + userDto.getUsername());
         }
-        if (userRepository.findByEmail(userDto.getEmail()).isPresent()) {
-            throw new Exception("There is an account with that email address: " + userDto.getEmail());
+
+        // Check if email exists
+        final Optional<User> userOptional = userRepository.findByEmail(userDto.getEmail());
+        if (userOptional.isPresent()) {
+            User existingUser = userOptional.get();
+            if (existingUser.isEnabled()) {
+                // User exists and is verified, throw error
+                throw new Exception("There is an account with that email address: " + userDto.getEmail());
+            } else {
+                // User exists but is not verified, signal to resend email
+                return new RegistrationResult(existingUser, true);
+            }
         }
 
+        // Create a new user if no account with that email exists
         User user = new User();
         user.setUsername(userDto.getUsername());
         user.setEmail(userDto.getEmail());
         user.setPassword(passwordEncoder.encode(userDto.getPassword()));
         user.setRoles("USER");
         user.setEnabled(false);
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        return new RegistrationResult(savedUser, false);
     }
 
     public void createVerificationTokenForUser(final User user, final String token) {
+        // A user should only have one active verification token. Delete any existing ones.
+        tokenRepository.findByUser(user).ifPresent(tokenRepository::delete);
+
         final VerificationToken myToken = new VerificationToken(user);
         myToken.setToken(token);
         tokenRepository.save(myToken);
