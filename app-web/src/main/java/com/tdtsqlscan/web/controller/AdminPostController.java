@@ -3,6 +3,7 @@ package com.tdtsqlscan.web.controller;
 import com.tdtsqlscan.web.domain.Post;
 import com.tdtsqlscan.web.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -22,6 +23,9 @@ public class AdminPostController {
 
     private final PostService postService;
 
+    @Value("${tinymce.api.key}")
+    private String tinymceApiKey;
+
     @Autowired
     public AdminPostController(PostService postService) {
         this.postService = postService;
@@ -36,6 +40,7 @@ public class AdminPostController {
     @GetMapping("/new")
     public String showCreateForm(Model model) {
         model.addAttribute("post", new Post());
+        model.addAttribute("tinymceApiKey", tinymceApiKey);
         return "admin/posts/form"; // Thymeleaf template path
     }
 
@@ -54,6 +59,7 @@ public class AdminPostController {
         return postService.findById(id)
                 .map(post -> {
                     model.addAttribute("post", post);
+                    model.addAttribute("tinymceApiKey", tinymceApiKey);
                     return "admin/posts/form"; // Thymeleaf template path
                 })
                 .orElseGet(() -> {

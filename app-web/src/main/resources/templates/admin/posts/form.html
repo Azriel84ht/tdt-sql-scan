@@ -20,7 +20,7 @@
         .btn-secondary { background-color: #6c757d; }
     </style>
     <!-- TinyMCE Script -->
-    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <script th:src="@{'https://cdn.tiny.cloud/1/' + ${tinymceApiKey} + '/tinymce/6/tinymce.min.js'}" referrerpolicy="origin"></script>
     <script>
         tinymce.init({
             selector: 'textarea#content-editor',
