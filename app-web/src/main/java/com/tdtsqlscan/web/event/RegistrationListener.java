@@ -55,7 +55,7 @@ public class RegistrationListener implements ApplicationListener<OnRegistrationC
     private MimeMessage constructMimeMessage(final OnRegistrationCompleteEvent event, final User user, final String token) throws MessagingException {
         // Prepare the evaluation context
         final Context ctx = new Context();
-        ctx.setVariable("userName", user.getFirstName());
+        ctx.setVariable("userName", user.getUsername());
         ctx.setVariable("appName", this.appName);
         final String confirmationUrl = event.getAppUrl() + "/verify?token=" + token;
         ctx.setVariable("confirmationUrl", confirmationUrl);
