@@ -2,8 +2,10 @@ package com.tdtsqlscan.web.service;
 
 import com.tdtsqlscan.web.domain.User;
 import com.tdtsqlscan.web.domain.VerificationToken;
+import com.tdtsqlscan.web.dto.RegistrationResult;
 import com.tdtsqlscan.web.dto.UserDto;
 import com.tdtsqlscan.web.domain.PasswordResetToken;
+import java.util.Optional;
 import com.tdtsqlscan.web.repository.PasswordResetTokenRepository;
 import com.tdtsqlscan.web.repository.UserRepository;
 import com.tdtsqlscan.web.repository.VerificationTokenRepository;
