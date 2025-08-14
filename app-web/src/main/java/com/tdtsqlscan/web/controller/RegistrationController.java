@@ -1,6 +1,7 @@
 package com.tdtsqlscan.web.controller;
 
 import com.tdtsqlscan.web.domain.User;
+import com.tdtsqlscan.web.dto.RegistrationResult;
 import com.tdtsqlscan.web.dto.UserDto;
 import com.tdtsqlscan.web.event.OnRegistrationCompleteEvent;
 import com.tdtsqlscan.web.service.UserService;
