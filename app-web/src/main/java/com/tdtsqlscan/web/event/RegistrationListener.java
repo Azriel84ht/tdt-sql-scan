@@ -33,6 +33,9 @@ public class RegistrationListener implements ApplicationListener<OnRegistrationC
     @Value("${app.email.registration.subject}")
     private String registrationSubject;
 
+    @Value("${spring.mail.from}")
+    private String fromAddress;
+
     @Override
     public void onApplicationEvent(final OnRegistrationCompleteEvent event) {
         try {
@@ -66,6 +69,7 @@ public class RegistrationListener implements ApplicationListener<OnRegistrationC
         // Prepare message using a Spring MimeMessageHelper
         final MimeMessage mimeMessage = this.mailSender.createMimeMessage();
         final MimeMessageHelper message = new MimeMessageHelper(mimeMessage, "UTF-8");
+        message.setFrom(this.fromAddress);
         message.setSubject(this.registrationSubject);
         message.setTo(user.getEmail());
         message.setText(htmlContent, true); // true = is HTML
