@@ -57,10 +57,11 @@
                   <div class="flex flex-col gap-2 text-center">
                     <h1
                       class="text-white text-4xl font-black leading-tight tracking-[-0.033em] @[480px]:text-5xl @[480px]:font-black @[480px]:leading-tight @[480px]:tracking-[-0.033em]"
+                      th:text="${content.heroTitle}"
                     >
                       Untangle Your Teradata BTEQ Scripts
                     </h1>
-                    <h2 class="text-white text-sm font-normal leading-normal @[480px]:text-base @[480px]:font-normal @[480px]:leading-normal">
+                    <h2 class="text-white text-sm font-normal leading-normal @[480px]:text-base @[480px]:font-normal @[480px]:leading-normal" th:utext="${content.heroSubtitle}">
                       Transform complex Teradata BTEQ scripts into interactive data flow diagrams with Data Flow Visualizer. Visualize your data's journey, understand dependencies,
                       and optimize your processes effortlessly.
                     </h2>
@@ -73,20 +74,7 @@
                 </div>
               </div>
             </div>
-            <h2 class="text-[#111618] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">Latest News</h2>
-            <div class="p-4">
-              <div class="flex items-stretch justify-between gap-4 rounded-xl">
-                <div class="flex flex-col gap-1 flex-[2_2_0px]">
-                  <p class="text-[#111618] text-base font-bold leading-tight">New Features in Data Flow Visualizer</p>
-                  <p class="text-[#618089] text-sm font-normal leading-normal">
-                    Explore the latest updates and enhancements in Data Flow Visualizer, including improved script parsing, enhanced diagram interactivity, and new export options.
-                  </p>
-                </div>
-                <div
-                  class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-xl flex-1"
-                  style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuD7hTmXeSgjWGyxjRvYymdQNhUKLs3UUQpQNAZq4kXMmCm_wz2RQQeUcvdAund6I3h2f_RYym9NGUbQVpr46UemHc6-G0gmqPONBbYyztNe7WOktaHQGlQdpox1-qTMP2s7dX8ee3FZUjhqnoX_8WNnHpe20E-jTD5jl-Tz3laM4-ToORyhlFwnvDXTHVH2mGHCQkVPGNXgGLoGNLPkfTHKT8qhYqsf5Ux1mss2MLAXj-sjZPHnrwgZ2OI9JDBReNzso5i-XHr2KrkV");'
-                ></div>
-              </div>
+            <div th:utext="${content.newsSection}">
             </div>
             <div class="w-full" style="height: 40px;"></div>
           </div>
