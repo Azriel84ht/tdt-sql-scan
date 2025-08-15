@@ -23,12 +23,14 @@
         #context-menu a { color: black; padding: 12px 16px; text-decoration: none; display: block; }
         #context-menu a:hover { background-color: #f1f1f1; }
         .main-content { padding: 20px; }
-        .upload-form { margin-bottom: 20px; }
-        .drop-zone { border: 2px dashed #ccc; border-radius: 10px; padding: 20px; text-align: center; cursor: pointer; margin-bottom: 20px; }
+        #upload-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; }
+        .drop-zone { border: 2px dashed #ccc; border-radius: 10px; padding: 40px 20px; text-align: center; cursor: pointer; margin-bottom: 20px; width: 60%; max-width: 500px; height: 150px; display: flex; align-items: center; justify-content: center;}
         .drop-zone.dragover { border-color: #007bff; }
-        #file-list-container { margin-top: 20px; }
-        #file-list li { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        #file-list li input { width: 50px; margin-left: 10px; }
+        #file-list-container { margin-top: 20px; width: 60%; max-width: 500px; }
+        #file-list { list-style: none; padding: 0; }
+        #file-list li { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 10px; background-color: #f9f9f9; border-radius: 5px; }
+        #file-list li span { flex-grow: 1; }
+        #file-list li input { width: 60px; margin-left: 10px; text-align: center; }
         /* Style the tab */
         .tab {
             overflow: hidden;
@@ -89,19 +91,21 @@
         </label>
     </div>
 
-    <div id="drop-zone" class="drop-zone">
-        <p>Drag and drop your BTEQ files here, or click to select files.</p>
-        <input type="file" id="file-input" multiple style="display: none;" />
-    </div>
-    <div id="file-list-container" style="display: none;">
-        <h3>Selected Files:</h3>
-        <form id="file-order-form">
-            <ul id="file-list"></ul>
-            <button type="submit">Upload and Visualize</button>
-        </form>
+    <div id="upload-container">
+        <div id="drop-zone" class="drop-zone">
+            <p>Drag and drop your BTEQ files here, or click to select files.</p>
+            <input type="file" id="file-input" multiple style="display: none;" />
+        </div>
+        <div id="file-list-container" style="display: none;">
+            <h3>Selected Files:</h3>
+            <form id="file-order-form">
+                <ul id="file-list"></ul>
+                <button type="submit">Upload and Visualize</button>
+            </form>
+        </div>
     </div>
 
-    <div class="tab">
+    <div class="tab" style="display: none;">
         <button class="tablinks" onclick="openTab(event, 'chain-flow')" id="defaultOpen">Flujo de cadena</button>
         <button class="tablinks" onclick="openTab(event, 'bteq-flow')">Flujo de bteq</button>
     </div>
@@ -131,9 +135,11 @@
     /*<![CDATA[*/
     const dropZone = document.getElementById('drop-zone');
     const fileInput = document.getElementById('file-input');
+    const uploadContainer = document.getElementById('upload-container');
     const fileListContainer = document.getElementById('file-list-container');
     const fileList = document.getElementById('file-list');
     const fileOrderForm = document.getElementById('file-order-form');
+    const tabContainer = document.querySelector('.tab');
     const container = document.getElementById('mynetwork');
     const modal = document.getElementById("myModal");
     const modalText = document.getElementById("modal-text");
@@ -231,6 +237,9 @@
 
     fileOrderForm.addEventListener('submit', (event) => {
         event.preventDefault();
+
+        uploadContainer.style.display = 'none';
+        tabContainer.style.display = 'block';
 
         const formData = new FormData();
         const fileOrder = [];
