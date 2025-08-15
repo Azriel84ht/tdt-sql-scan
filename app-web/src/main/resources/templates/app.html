@@ -65,6 +65,12 @@
         #chain-flow-network, #mynetwork {
             height: 800px;
         }
+        #flow-container { display: flex; flex-direction: row; }
+        #flow-main { width: 75%; }
+        #metadata-sidebar { width: 25%; padding-left: 20px; }
+        #metadata-table { width: 100%; border-collapse: collapse; }
+        #metadata-table th, #metadata-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        #metadata-table th { background-color: #f2f2f2; }
     </style>
 </head>
 <body>
@@ -105,17 +111,27 @@
         </div>
     </div>
 
-    <div class="tab" style="display: none;">
-        <button class="tablinks" onclick="openTab(event, 'chain-flow')" id="defaultOpen">Flujo de cadena</button>
-        <button class="tablinks" onclick="openTab(event, 'bteq-flow')">Flujo de bteq</button>
-    </div>
+    <div id="flow-container" style="display: none;">
+        <div id="flow-main">
+            <div class="tab">
+                <button class="tablinks" onclick="openTab(event, 'chain-flow')" id="defaultOpen">Flujo de cadena</button>
+                <button class="tablinks" onclick="openTab(event, 'bteq-flow')">Flujo de bteq</button>
+            </div>
 
-    <div id="chain-flow" class="tabcontent">
-        <div id="chain-flow-network" style="width: 100%; border: 1px solid lightgray;"></div>
-    </div>
+            <div id="chain-flow" class="tabcontent">
+                <div id="chain-flow-network" style="width: 100%; border: 1px solid lightgray;"></div>
+            </div>
 
-    <div id="bteq-flow" class="tabcontent">
-        <div id="mynetwork"></div>
+            <div id="bteq-flow" class="tabcontent">
+                <div id="mynetwork"></div>
+            </div>
+        </div>
+        <div id="metadata-sidebar">
+            <h2>Metadata</h2>
+            <table id="metadata-table">
+                <!-- Metadata will be inserted here -->
+            </table>
+        </div>
     </div>
 </div>
 
@@ -139,6 +155,7 @@
     const fileListContainer = document.getElementById('file-list-container');
     const fileList = document.getElementById('file-list');
     const fileOrderForm = document.getElementById('file-order-form');
+    const flowContainer = document.getElementById('flow-container');
     const tabContainer = document.querySelector('.tab');
     const container = document.getElementById('mynetwork');
     const modal = document.getElementById("myModal");
@@ -239,6 +256,7 @@
         event.preventDefault();
 
         uploadContainer.style.display = 'none';
+        flowContainer.style.display = 'flex';
         tabContainer.style.display = 'block';
 
         const formData = new FormData();
@@ -291,15 +309,21 @@
         }
         const nodes = new vis.DataSet(
             data.nodes.map(node => {
-                return {
+                let nodeData = {
                     id: node.id,
                     label: node.label,
                     shape: node.properties.shape,
-                    x: node.properties.x,
-                    y: node.properties.y,
+                    image: node.properties.image,
+                    size: node.properties.size,
+                    x: parseInt(node.properties.x),
+                    y: parseInt(node.properties.y),
                     fullText: node.properties.fullText,
-                    fixed: node.properties.fixed
+                    fixed: true,
+                    fileName: node.properties.fileName,
+                    fileSize: node.properties.fileSize,
+                    fileEncoding: node.properties.fileEncoding
                 };
+                return nodeData;
             })
         );
         const edges = new vis.DataSet(data.edges.map(edge => {
@@ -382,6 +406,34 @@
                 contextMenu.style.left = params.event.pageX + 'px';
                 contextMenu.style.top = params.event.pageY + 'px';
                 contextMenu.style.display = 'block';
+            }
+        });
+
+        network.on("click", function (params) {
+            const nodeId = network.getNodeAt(params.pointer.DOM);
+            if (nodeId) {
+                const clickedNode = nodes.get(nodeId);
+                if (clickedNode && clickedNode.fileName) { // Check if it's a file node
+                    const table = document.getElementById('metadata-table');
+                    table.innerHTML = `
+                        <tr>
+                            <th>Attribute</th>
+                            <th>Value</th>
+                        </tr>
+                        <tr>
+                            <td>File Name</td>
+                            <td>${clickedNode.fileName}</td>
+                        </tr>
+                        <tr>
+                            <td>File Size</td>
+                            <td>${clickedNode.fileSize} bytes</td>
+                        </tr>
+                        <tr>
+                            <td>Encoding</td>
+                            <td>${clickedNode.fileEncoding}</td>
+                        </tr>
+                    `;
+                }
             }
         });
     }

@@ -1,76 +1,99 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <title>Data Flow Visualizer | BTEQ & Teradata Data Flow Analysis Tool</title>
-    <meta name="description" content="Visualize complex Teradata BTEQ scripts instantly. Our tool transforms convoluted SQL into clear, interactive data flow diagrams to untangle your ETL processes.">
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #fdfdfd; color: #333; }
-        .navbar { background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
-        .navbar .logo { font-size: 1.5rem; font-weight: bold; color: #4a4a4a; }
-        .navbar .nav-links a { color: #5a5a5a; text-decoration: none; margin-left: 20px; font-weight: 500; }
-        .navbar .nav-links a:hover { color: #007bff; }
-        .hero { text-align: center; padding: 80px 20px; background-color: #007bff; color: white; }
-        .hero h1 { font-size: 3rem; margin-bottom: 20px; }
-        .hero p { font-size: 1.2rem; max-width: 600px; margin: 0 auto 30px auto; }
-        .hero .cta-button { background-color: #fff; color: #007bff; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; }
-        .features { padding: 60px 20px; display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; }
-        .feature { max-width: 300px; text-align: center; }
-        .feature h3 { font-size: 1.5rem; margin-bottom: 10px; }
-        .news { padding: 40px 20px; text-align: center; }
-        .news h2 { font-size: 2rem; margin-bottom: 20px; }
-        .popup-modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); }
-        .popup-content { background-color: #fff; margin: 20% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 500px; text-align: center; border-radius: 5px; }
-        .popup-close { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
-        .popup-close:hover, .popup-close:focus { color: black; }
-        footer { text-align: center; padding: 20px; margin-top: 40px; background-color: #f4f4f4; }
-    </style>
-</head>
-<body>
-    <nav class="navbar">
-        <div class="logo">Data Flow Visualizer</div>
-        <div class="nav-links">
-            <a th:href="@{/blog}">Blog</a>
-            <a th:href="@{/login}">Login</a>
-            <a th:href="@{/register}">Register</a>
-        </div>
-    </nav>
+<html>
+  <head>
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
+    <link
+      rel="stylesheet"
+      as="style"
+      onload="this.rel='stylesheet'"
+      href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900"
+    />
 
-    <header class="hero">
-        <h1>Understand Your Teradata BTEQ Data Lineage</h1>
-        <p th:text="${content.heroSubtitle}">Our tool helps you visualize complex SQL scripts and data flows, turning convoluted code into clear, interactive diagrams. Untangle your ETL processes and gain clarity on your data's journey.</p>
-        <a th:href="@{/register}" class="cta-button">Get Started for Free</a>
-    </header>
+    <title>Stitch Design</title>
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
 
-    <section class="news" th:if="${content.newsSection != null and !content.newsSection.isEmpty()}">
-        <h2>Latest News</h2>
-        <div th:utext="${content.newsSection}">
-            <!-- News content rendered as HTML -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  </head>
+  <body>
+    <div class="relative flex size-full min-h-screen flex-col bg-white group/design-root overflow-x-hidden" style='font-family: Inter, "Noto Sans", sans-serif;'>
+      <div class="layout-container flex h-full grow flex-col">
+        <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#f0f3f4] px-10 py-3">
+          <div class="flex items-center gap-4 text-[#111618]">
+            <div class="size-4">
+              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M24 45.8096C19.6865 45.8096 15.4698 44.5305 11.8832 42.134C8.29667 39.7376 5.50128 36.3314 3.85056 32.3462C2.19985 28.361 1.76794 23.9758 2.60947 19.7452C3.451 15.5145 5.52816 11.6284 8.57829 8.5783C11.6284 5.52817 15.5145 3.45101 19.7452 2.60948C23.9758 1.76795 28.361 2.19986 32.3462 3.85057C36.3314 5.50129 39.7376 8.29668 42.134 11.8833C44.5305 15.4698 45.8096 19.6865 45.8096 24L24 24L24 45.8096Z"
+                  fill="currentColor"
+                ></path>
+              </svg>
+            </div>
+            <h2 class="text-[#111618] text-lg font-bold leading-tight tracking-[-0.015em]">SQL Flow Visualizer</h2>
+          </div>
+          <div class="flex gap-2">
+            <a th:href="@{/register}"
+              class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#21bded] text-[#111618] text-sm font-bold leading-normal tracking-[0.015em]"
+            >
+              <span class="truncate">Register</span>
+            </a>
+            <a th:href="@{/login}"
+              class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#f0f3f4] text-[#111618] text-sm font-bold leading-normal tracking-[0.015em]"
+            >
+              <span class="truncate">Login</span>
+            </a>
+          </div>
+        </header>
+        <div class="px-40 flex flex-1 justify-center py-5">
+          <div class="layout-content-container flex flex-col max-w-[960px] flex-1">
+            <div class="@container">
+              <div class="@[480px]:p-4">
+                <div
+                  class="flex min-h-[480px] flex-col gap-6 bg-cover bg-center bg-no-repeat @[480px]:gap-8 @[480px]:rounded-xl items-center justify-center p-4"
+                  style='background-image: linear-gradient(rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.4) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuCBsLHpZQs8z3D3eFU9rxkNt2NoNAylTSFAU-T-Y1VWCJkD7SdF3rmBYFKSYfMgdz3QvIaL7k18x_GqPp-FurBZ8yogFc4x41ZyVVmf4fTvCbNiPbEtinBvjMakTTxoVTdz1upQYT0kKLcHn1sf2eC0tc6gaUV6dpb5JnC9FA4mNkQC474s5-CR0jwOX3LAY9YU5jjDRJS6ohMnxeyhbtE3fkeEKxrhFQB0K1-Yzu_5xYR2wTMt4h62zUZM8fKvfln8X0MYWiSeDMG2");'
+                >
+                  <div class="flex flex-col gap-2 text-center">
+                    <h1
+                      class="text-white text-4xl font-black leading-tight tracking-[-0.033em] @[480px]:text-5xl @[480px]:font-black @[480px]:leading-tight @[480px]:tracking-[-0.033em]"
+                    >
+                      Untangle Your Teradata BTEQ Scripts
+                    </h1>
+                    <h2 class="text-white text-sm font-normal leading-normal @[480px]:text-base @[480px]:font-normal @[480px]:leading-normal">
+                      Transform complex Teradata BTEQ scripts into interactive data flow diagrams with SQL Flow Visualizer. Visualize your data's journey, understand dependencies,
+                      and optimize your processes effortlessly.
+                    </h2>
+                  </div>
+                  <a th:href="@{/register}"
+                    class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 @[480px]:h-12 @[480px]:px-5 bg-[#21bded] text-[#111618] text-sm font-bold leading-normal tracking-[0.015em] @[480px]:text-base @[480px]:font-bold @[480px]:leading-normal @[480px]:tracking-[0.015em]"
+                  >
+                    <span class="truncate">Get Started for Free</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+            <h2 class="text-[#111618] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">Latest News</h2>
+            <div class="p-4">
+              <div class="flex items-stretch justify-between gap-4 rounded-xl">
+                <div class="flex flex-col gap-1 flex-[2_2_0px]">
+                  <p class="text-[#111618] text-base font-bold leading-tight">New Features in SQL Flow Visualizer</p>
+                  <p class="text-[#618089] text-sm font-normal leading-normal">
+                    Explore the latest updates and enhancements in SQL Flow Visualizer, including improved script parsing, enhanced diagram interactivity, and new export options.
+                  </p>
+                </div>
+                <div
+                  class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-xl flex-1"
+                  style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuD7hTmXeSgjWGyxjRvYymdQNhUKLs3UUQpQNAZq4kXMmCm_wz2RQQeUcvdAund6I3h2f_RYym9NGUbQVpr46UemHc6-G0gmqPONBbYyztNe7WOktaHQGlQdpox1-qTMP2s7dX8ee3FZUjhqnoX_8WNnHpe20E-jTD5jl-Tz3laM4-ToORyhlFwnvDXTHVH2mGHCQkVPGNXgGLoGNLPkfTHKT8qhYqsf5Ux1mss2MLAXj-sjZPHnrwgZ2OI9JDBReNzso5i-XHr2KrkV");'
+                ></div>
+              </div>
+            </div>
+            <div class="w-full" style="height: 40px;"></div>
+          </div>
         </div>
-    </section>
-
-    <div class="popup-modal" th:if="${content.showPopup}">
-        <div class="popup-content">
-            <span class="popup-close">&times;</span>
-            <p th:text="${content.popupMessage}"></p>
-        </div>
+        <footer class="flex justify-center">
+          <div class="flex max-w-[960px] flex-1 flex-col">
+            <footer class="flex flex-col gap-6 px-5 py-10 text-center @container">
+              <p class="text-[#618089] text-base font-normal leading-normal">© 2025 azprojs.net. All rights reserved.</p>
+            </footer>
+          </div>
+        </footer>
+      </div>
     </div>
-
-    <footer>
-        <p>&copy; 2025 Data Flow Visualizer. All rights reserved.</p>
-    </footer>
-
-    <script th:if="${content.showPopup}">
-        const modal = document.querySelector('.popup-modal');
-        const closeBtn = document.querySelector('.popup-close');
-        modal.style.display = 'block';
-        closeBtn.onclick = () => {
-            modal.style.display = 'none';
-        }
-        window.onclick = (event) => {
-            if (event.target == modal) {
-                modal.style.display = 'none';
-            }
-        }
-    </script>
-</body>
+  </body>
 </html>
