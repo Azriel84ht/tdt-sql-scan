@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <title>SQL Flow Visualizer - App</title>
+    <title>Data Flow Visualizer - App</title>
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
@@ -76,7 +76,7 @@
 <body>
 
 <nav class="navbar">
-    <div class="logo">SQL Flow Visualizer</div>
+    <div class="logo">Data Flow Visualizer</div>
     <div class="nav-links">
         <span>Welcome, <span sec:authentication="name">User</span>!</span>
         <a th:href="@{/suggestions}">Suggestions</a>
@@ -245,6 +245,9 @@
         if (evt) {
             evt.currentTarget.className += " active";
         }
+
+        const table = document.getElementById('metadata-table');
+        table.innerHTML = "";
     }
 
     document.addEventListener("DOMContentLoaded", function() {
@@ -353,9 +356,7 @@
                     }
                 },
                 smooth: {
-                    type: 'cubicBezier',
-                    forceDirection: 'horizontal',
-                    roundness: 0.4
+                    type: 'dynamic'
                 }
             },
             physics: {
