@@ -10,6 +10,9 @@ public class BteqScript {
 
     private String scriptName;
     private final List<BteqCommand> commands;
+    private long size;
+    private String encoding;
+
 
     public BteqScript() {
         this.commands = new ArrayList<>();
@@ -34,5 +37,21 @@ public class BteqScript {
 
     public List<BteqCommand> getCommands() {
         return commands;
+    }
+
+    public long getSize() {
+        return size;
+    }
+
+    public void setSize(long size) {
+        this.size = size;
+    }
+
+    public String getEncoding() {
+        return encoding;
+    }
+
+    public void setEncoding(String encoding) {
+        this.encoding = encoding;
     }
 }

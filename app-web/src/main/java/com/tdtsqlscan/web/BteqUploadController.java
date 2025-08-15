@@ -70,6 +70,8 @@ public class BteqUploadController {
         for (MultipartFile file : files) {
             String content = new String(file.getBytes(), StandardCharsets.UTF_8);
             BteqScript script = bteqScriptParser.parse(content, file.getOriginalFilename());
+            script.setSize(file.getSize());
+            script.setEncoding(StandardCharsets.UTF_8.name());
             scripts.add(script);
         }
 
