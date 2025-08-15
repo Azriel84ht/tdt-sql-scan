@@ -41,7 +41,7 @@ public class BteqScriptParserTest {
         when(sqlParser.supports(anyString())).thenReturn(true);
         when(sqlParser.parse(anyString())).thenReturn(mockQuery);
 
-        BteqScript script = parser.parse(scriptText);
+        BteqScript script = parser.parse(scriptText, "test.bteq");
         List<BteqCommand> commands = script.getCommands();
 
         assertEquals(3, commands.size());

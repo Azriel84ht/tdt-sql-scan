@@ -24,6 +24,45 @@
         #context-menu a:hover { background-color: #f1f1f1; }
         .main-content { padding: 20px; }
         .upload-form { margin-bottom: 20px; }
+        .drop-zone { border: 2px dashed #ccc; border-radius: 10px; padding: 20px; text-align: center; cursor: pointer; margin-bottom: 20px; }
+        .drop-zone.dragover { border-color: #007bff; }
+        #file-list-container { margin-top: 20px; }
+        #file-list li { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        #file-list li input { width: 50px; margin-left: 10px; }
+        /* Style the tab */
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+        }
+        /* Style the buttons inside the tab */
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+        }
+        /* Change background color of buttons on hover */
+        .tab button:hover {
+            background-color: #ddd;
+        }
+        /* Create an active/current tablink class */
+        .tab button.active {
+            background-color: #ccc;
+        }
+        /* Style the tab content */
+        .tabcontent {
+            display: none;
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-top: none;
+        }
+        #chain-flow-network, #mynetwork {
+            height: 800px;
+        }
     </style>
 </head>
 <body>
@@ -50,13 +89,30 @@
         </label>
     </div>
 
-    <form id="upload-form" class="upload-form">
-        <p>Select one or more BTEQ script files to visualize their data flow.</p>
-        <input type="file" id="file-input" name="files" multiple/>
-        <button type="submit">Upload and Visualize</button>
-    </form>
+    <div id="drop-zone" class="drop-zone">
+        <p>Drag and drop your BTEQ files here, or click to select files.</p>
+        <input type="file" id="file-input" multiple style="display: none;" />
+    </div>
+    <div id="file-list-container" style="display: none;">
+        <h3>Selected Files:</h3>
+        <form id="file-order-form">
+            <ul id="file-list"></ul>
+            <button type="submit">Upload and Visualize</button>
+        </form>
+    </div>
 
-    <div id="mynetwork"></div>
+    <div class="tab">
+        <button class="tablinks" onclick="openTab(event, 'chain-flow')" id="defaultOpen">Flujo de cadena</button>
+        <button class="tablinks" onclick="openTab(event, 'bteq-flow')">Flujo de bteq</button>
+    </div>
+
+    <div id="chain-flow" class="tabcontent">
+        <div id="chain-flow-network" style="width: 100%; border: 1px solid lightgray;"></div>
+    </div>
+
+    <div id="bteq-flow" class="tabcontent">
+        <div id="mynetwork"></div>
+    </div>
 </div>
 
 <div id="myModal" class="modal">
@@ -73,8 +129,11 @@
 
 <script type="text/javascript" th:inline="javascript">
     /*<![CDATA[*/
-    const form = document.getElementById('upload-form');
+    const dropZone = document.getElementById('drop-zone');
     const fileInput = document.getElementById('file-input');
+    const fileListContainer = document.getElementById('file-list-container');
+    const fileList = document.getElementById('file-list');
+    const fileOrderForm = document.getElementById('file-order-form');
     const container = document.getElementById('mynetwork');
     const modal = document.getElementById("myModal");
     const modalText = document.getElementById("modal-text");
@@ -112,13 +171,80 @@
         }
     };
 
-    form.addEventListener('submit', (event) => {
+    let selectedFiles = [];
+
+    dropZone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => {
+        handleFiles(e.target.files);
+    });
+
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        handleFiles(e.dataTransfer.files);
+    });
+
+    function handleFiles(files) {
+        selectedFiles = [...files];
+        fileList.innerHTML = '';
+        selectedFiles.forEach((file, index) => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <span>${file.name}</span>
+                <input type="number" class="file-order" value="${index + 1}" min="1" />
+            `;
+            fileList.appendChild(li);
+        });
+        fileListContainer.style.display = selectedFiles.length > 0 ? 'block' : 'none';
+    }
+
+    function openTab(evt, tabName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(tabName).style.display = "block";
+        if (evt) {
+            evt.currentTarget.className += " active";
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        openTab(null, 'chain-flow');
+        document.querySelector('.tablinks').classList.add('active');
+    });
+
+    fileOrderForm.addEventListener('submit', (event) => {
         event.preventDefault();
 
         const formData = new FormData();
-        for (const file of fileInput.files) {
+        const fileOrder = [];
+        const fileOrderInputs = document.querySelectorAll('.file-order');
+
+        selectedFiles.forEach((file, index) => {
             formData.append('files', file);
-        }
+            fileOrder.push({
+                name: file.name,
+                order: fileOrderInputs[index].value
+            });
+        });
+        formData.append('fileOrder', JSON.stringify(fileOrder));
+
 
         const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
         const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
@@ -137,107 +263,119 @@
             return response.json();
         })
         .then(data => {
-            const nodes = new vis.DataSet(
-                data.nodes.map(node => {
-                    return {
-                        id: node.id,
-                        label: node.label,
-                        shape: node.properties.shape,
-                        x: node.properties.x,
-                        y: node.properties.y,
-                        fullText: node.properties.fullText,
-                        fixed: node.properties.fixed
-                    };
-                })
-            );
-            const edges = new vis.DataSet(data.edges.map(edge => {
-                return { ...edge, width: 2, arrows: 'to' };
-            }));
+            const chainFlowContainer = document.getElementById('chain-flow-network');
+            const bteqFlowContainer = document.getElementById('mynetwork');
 
-            const networkData = {
-                nodes: nodes,
-                edges: edges,
-            };
-            const options = {
-                nodes: {
-                    size: 25,
-                    font: {
-                        size: 14,
-                        face: 'arial'
-                    },
-                    shapeProperties: {
-                        interpolation: false
-                    }
-                },
-                edges: {
-                    arrows: {
-                        to: {
-                            enabled: true,
-                            scaleFactor: 0.5
-                        }
-                    },
-                    smooth: {
-                        type: 'cubicBezier',
-                        forceDirection: 'horizontal',
-                        roundness: 0.4
-                    }
-                },
-                physics: {
-                    enabled: false
-                }
-            };
-            const network = new vis.Network(container, networkData, options);
-
-            network.on('beforeDrawing', function(ctx) {
-                const canvasWidth = container.clientWidth;
-                const canvasHeight = container.clientHeight;
-
-                const viewCanvas = {
-                    topLeft: network.DOMtoCanvas({ x: 0, y: 0 }),
-                    bottomRight: network.DOMtoCanvas({ x: canvasWidth, y: canvasHeight })
-                };
-
-                if (data.horizontalLaneYs) {
-                    ctx.strokeStyle = '#e0e0e0';
-                    ctx.lineWidth = 1;
-                    ctx.setLineDash([5, 5]);
-                    data.horizontalLaneYs.forEach(laneY => {
-                        ctx.beginPath();
-                        ctx.moveTo(viewCanvas.topLeft.x, laneY);
-                        ctx.lineTo(viewCanvas.bottomRight.x, laneY);
-                        ctx.stroke();
-                    });
-                    ctx.setLineDash([]);
-                }
-
-                if (data.verticalLabelXs) {
-                    ctx.strokeStyle = '#ffc0cb';
-                    ctx.lineWidth = 2;
-                    data.verticalLabelXs.forEach(labelX => {
-                        ctx.beginPath();
-                        ctx.moveTo(labelX, viewCanvas.topLeft.y);
-                        ctx.lineTo(labelX, viewCanvas.bottomRight.y);
-                        ctx.stroke();
-                    });
-                }
-            });
-
-            network.on("oncontext", function (params) {
-                params.event.preventDefault();
-                const nodeId = network.getNodeAt(params.pointer.DOM);
-                if (nodeId) {
-                    activeNode = nodes.get(nodeId);
-                    contextMenu.style.left = params.event.pageX + 'px';
-                    contextMenu.style.top = params.event.pageY + 'px';
-                    contextMenu.style.display = 'block';
-                }
-            });
+            renderGraph(data.chainFlow, chainFlowContainer);
+            renderGraph(data.bteqFlow, bteqFlowContainer);
         })
         .catch(error => {
             console.error('Error:', error);
             alert('An error occurred while processing the file.');
         });
     });
+
+    function renderGraph(data, container) {
+        if (!data) {
+            console.error("No data for graph rendering in container:", container.id);
+            return;
+        }
+        const nodes = new vis.DataSet(
+            data.nodes.map(node => {
+                return {
+                    id: node.id,
+                    label: node.label,
+                    shape: node.properties.shape,
+                    x: node.properties.x,
+                    y: node.properties.y,
+                    fullText: node.properties.fullText,
+                    fixed: node.properties.fixed
+                };
+            })
+        );
+        const edges = new vis.DataSet(data.edges.map(edge => {
+            return { ...edge, width: 2, arrows: 'to' };
+        }));
+
+        const networkData = {
+            nodes: nodes,
+            edges: edges,
+        };
+        const options = {
+            nodes: {
+                size: 25,
+                font: {
+                    size: 14,
+                    face: 'arial'
+                },
+                shapeProperties: {
+                    interpolation: false
+                }
+            },
+            edges: {
+                arrows: {
+                    to: {
+                        enabled: true,
+                        scaleFactor: 0.5
+                    }
+                },
+                smooth: {
+                    type: 'cubicBezier',
+                    forceDirection: 'horizontal',
+                    roundness: 0.4
+                }
+            },
+            physics: {
+                enabled: false
+            }
+        };
+        const network = new vis.Network(container, networkData, options);
+
+        network.on('beforeDrawing', function(ctx) {
+            const canvasWidth = container.clientWidth;
+            const canvasHeight = container.clientHeight;
+
+            const viewCanvas = {
+                topLeft: network.DOMtoCanvas({ x: 0, y: 0 }),
+                bottomRight: network.DOMtoCanvas({ x: canvasWidth, y: canvasHeight })
+            };
+
+            if (data.horizontalLaneYs) {
+                ctx.strokeStyle = '#e0e0e0';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([5, 5]);
+                data.horizontalLaneYs.forEach(laneY => {
+                    ctx.beginPath();
+                    ctx.moveTo(viewCanvas.topLeft.x, laneY);
+                    ctx.lineTo(viewCanvas.bottomRight.x, laneY);
+                    ctx.stroke();
+                });
+                ctx.setLineDash([]);
+            }
+
+            if (data.verticalLabelXs) {
+                ctx.strokeStyle = '#ffc0cb';
+                ctx.lineWidth = 2;
+                data.verticalLabelXs.forEach(labelX => {
+                    ctx.beginPath();
+                    ctx.moveTo(labelX, viewCanvas.topLeft.y);
+                    ctx.lineTo(labelX, viewCanvas.bottomRight.y);
+                    ctx.stroke();
+                });
+            }
+        });
+
+        network.on("oncontext", function (params) {
+            params.event.preventDefault();
+            const nodeId = network.getNodeAt(params.pointer.DOM);
+            if (nodeId) {
+                activeNode = nodes.get(nodeId);
+                contextMenu.style.left = params.event.pageX + 'px';
+                contextMenu.style.top = params.event.pageY + 'px';
+                contextMenu.style.display = 'block';
+            }
+        });
+    }
     /*]]>*/
 </script>
 
