@@ -26,7 +26,7 @@ public class BlogController {
     public String listPosts(Model model) {
         try {
             logger.info("Finding all posts");
-            var posts = postService.findAll();
+            List<Post> posts = postService.findAll();
             logger.info("Found {} posts", posts.size());
             model.addAttribute("posts", posts);
             return "blog/list";
