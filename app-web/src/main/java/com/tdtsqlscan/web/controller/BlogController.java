@@ -1,6 +1,8 @@
 package com.tdtsqlscan.web.controller;
 
 import com.tdtsqlscan.web.service.PostService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/blog")
 public class BlogController {
 
+    private static final Logger logger = LoggerFactory.getLogger(BlogController.class);
     private final PostService postService;
 
     @Autowired
@@ -21,8 +24,16 @@ public class BlogController {
 
     @GetMapping
     public String listPosts(Model model) {
-        model.addAttribute("posts", postService.findAll());
-        return "blog/list";
+        try {
+            logger.info("Finding all posts");
+            var posts = postService.findAll();
+            logger.info("Found {} posts", posts.size());
+            model.addAttribute("posts", posts);
+            return "blog/list";
+        } catch (Exception e) {
+            logger.error("Error finding posts", e);
+            return "error/500";
+        }
     }
 
     @GetMapping("/{slug}")
