@@ -8,10 +8,24 @@ import java.util.ArrayList;
  */
 public class BteqScript {
 
+    private String scriptName;
     private final List<BteqCommand> commands;
 
     public BteqScript() {
         this.commands = new ArrayList<>();
+    }
+
+    public BteqScript(String scriptName) {
+        this.scriptName = scriptName;
+        this.commands = new ArrayList<>();
+    }
+
+    public String getScriptName() {
+        return scriptName;
+    }
+
+    public void setScriptName(String scriptName) {
+        this.scriptName = scriptName;
     }
 
     public void addCommand(BteqCommand command) {

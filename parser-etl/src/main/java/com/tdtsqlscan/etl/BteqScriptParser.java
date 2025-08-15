@@ -13,9 +13,9 @@ public class BteqScriptParser {
         this.sqlParsers = sqlParsers;
     }
 
-    public BteqScript parse(String bteqScript) {
+    public BteqScript parse(String bteqScript, String scriptName) {
         String scriptWithoutComments = bteqScript.replaceAll("--.*|/\\*(?s:.*?)\\*/", "");
-        BteqScript script = new BteqScript();
+        BteqScript script = new BteqScript(scriptName);
         StringBuilder sqlBuffer = new StringBuilder();
         boolean inSql = false;
 
