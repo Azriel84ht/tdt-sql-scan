@@ -1,8 +1,10 @@
 package com.tdtsqlscan.web.controller;
 
+import com.tdtsqlscan.web.domain.Post;
 import com.tdtsqlscan.web.service.PostService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
