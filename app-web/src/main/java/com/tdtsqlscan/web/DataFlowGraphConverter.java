@@ -345,17 +345,6 @@ public class DataFlowGraphConverter {
                 toEdge.addProperty("arrows", "to");
                 graph.addEdge(toEdge);
             }
-        } else if (query instanceof DropTableQuery) {
-            DropTableQuery dropTableQuery = (DropTableQuery) query;
-            String tableName = dropTableQuery.getTableName();
-
-            if (tableName != null) {
-                Node tableNode = getOrCreateTableNode(tableName.toUpperCase(), yPos);
-                tableNode.addProperty("x", currentX);
-                Edge edge = new Edge(commandNode.getId(), tableNode.getId(), "drops");
-                edge.addProperty("arrows", "to");
-                graph.addEdge(edge);
-            }
         }
     }
 
