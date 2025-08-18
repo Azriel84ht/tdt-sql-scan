@@ -231,7 +231,6 @@ public class DataFlowGraphConverter {
     }
 
     private Node createCommandNode(BteqCommand command, String id) {
-        Node node = new Node(id, "");
         String label = "UNKNOWN";
         String shape = "box";
         String image = null;
@@ -280,7 +279,7 @@ public class DataFlowGraphConverter {
             }
         }
 
-        node.setLabel(label);
+        Node node = new Node(id, label);
         node.addProperty("shape", shape);
         if (image != null) {
             node.addProperty("image", image);
