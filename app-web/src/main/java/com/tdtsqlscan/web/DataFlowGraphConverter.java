@@ -293,62 +293,8 @@ public class DataFlowGraphConverter {
     }
 
     private void handleDataFlow(Node commandNode, BteqSqlCommand sqlCommand, int yPos, int currentX) {
-        Object query = sqlCommand.getQuery();
-        if (query instanceof CreateTableQuery) {
-            CreateTableQuery createTableQuery = (CreateTableQuery) query;
-            String tableName = createTableQuery.getTableName();
-            if (tableName == null) return;
-
-            // Handle the target table
-            Node tableNode = getOrCreateTableNode(tableName, yPos);
-            tableNode.addProperty("x", currentX + X_OFFSET_STEP); // Place table to the right
-            Edge edge = new Edge(commandNode.getId(), tableNode.getId(), "creates");
-            edge.addProperty("arrows", "to");
-            graph.addEdge(edge);
-
-            // Handle source tables for CTAS
-            for (String sourceTable : createTableQuery.getSourceTables()) {
-                Node sourceNode = getOrCreateTableNode(sourceTable, yPos);
-                sourceNode.addProperty("x", currentX); // Place source table to the left
-                Edge fromEdge = new Edge(sourceNode.getId(), commandNode.getId(), "");
-                fromEdge.addProperty("arrows", "to");
-                graph.addEdge(fromEdge);
-            }
-
-        } else if (query instanceof InsertQuery) {
-            InsertQuery insertQuery = (InsertQuery) query;
-            String targetTable = insertQuery.getTableName();
-            String sourceTable = insertQuery.getSourceTableName();
-
-            // For INSERT...SELECT, we draw the source and target tables.
-            // For INSERT...VALUES, we do not draw the target table, as per user request.
-            if (sourceTable != null) {
-                Node sourceNode = getOrCreateTableNode(sourceTable, yPos);
-                sourceNode.addProperty("x", currentX);
-                Edge fromEdge = new Edge(sourceNode.getId(), commandNode.getId(), "");
-                fromEdge.addProperty("arrows", "to");
-                graph.addEdge(fromEdge);
-
-                if (targetTable != null) {
-                    Node targetNode = getOrCreateTableNode(targetTable, yPos);
-                    targetNode.addProperty("x", currentX + X_OFFSET_STEP);
-                    Edge toEdge = new Edge(commandNode.getId(), targetNode.getId(), "inserts");
-                    toEdge.addProperty("arrows", "to");
-                    graph.addEdge(toEdge);
-                }
-            }
-        } else if (query instanceof UpdateQuery) {
-            UpdateQuery updateQuery = (UpdateQuery) query;
-            String targetTable = updateQuery.getTargetTable();
-
-            if (targetTable != null) {
-                Node targetNode = getOrCreateTableNode(targetTable, yPos);
-                targetNode.addProperty("x", currentX + X_OFFSET_STEP);
-                Edge toEdge = new Edge(commandNode.getId(), targetNode.getId(), "updates");
-                toEdge.addProperty("arrows", "to");
-                graph.addEdge(toEdge);
-            }
-        }
+        // This method is now obsolete, as per the user's request to not show data flow arrows
+        // or table nodes, only the command nodes on the correct lanes.
     }
 
     private Node getOrCreateTableNode(String tableName, int yPos) {
@@ -362,7 +308,7 @@ public class DataFlowGraphConverter {
             tableNode.addProperty("fixed", true);
             // Use the uppercase name for the map key to ensure case-insensitivity
             tableNodes.put(upperCaseTableName, tableNode);
-            graph.addNode(tableNode);
+            // DO NOT add the node to the graph.
         }
         return tableNode;
     }
