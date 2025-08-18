@@ -42,6 +42,8 @@ public class BlogController {
     public String viewPost(@PathVariable String slug, Model model) {
         return postService.findBySlug(slug)
                 .map(post -> {
+                    post.setImpressions(post.getImpressions() + 1);
+                    postService.save(post);
                     model.addAttribute("post", post);
                     return "blog/post";
                 })
