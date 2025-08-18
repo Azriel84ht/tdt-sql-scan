@@ -159,7 +159,9 @@ public class DataFlowGraphConverter {
         }
         String label = String.format("Batch INSERT (%d)", group.size());
         Node commandNode = new Node(commandNodeId, label);
-        commandNode.addProperty("shape", "box");
+        commandNode.addProperty("shape", "image");
+        commandNode.addProperty("image", "images/insert.png");
+        commandNode.addProperty("size", 30);
         commandNode.addProperty("fullText", fullText.toString().trim());
         commandNode.addProperty("fixed", true);
 
@@ -230,8 +232,9 @@ public class DataFlowGraphConverter {
     }
 
     private Node createCommandNode(BteqCommand command, String id) {
-        String label;
+        String label = "UNKNOWN";
         String shape = "box";
+        String image = null;
 
         if (command instanceof BteqConfigurationCommand) {
             label = "CONFIG";
@@ -241,31 +244,48 @@ public class DataFlowGraphConverter {
             label = "." + controlCommand.getType().toString();
             shape = "ellipse";
             if (controlCommand.getType() == BteqCommandType.EXIT) {
-                shape = "star"; // Using a star for EXIT
+                shape = "star";
             }
         } else if (command instanceof BteqSqlCommand) {
             Object query = ((BteqSqlCommand) command).getQuery();
+            shape = "image"; // Default to image for SQL commands
+
             if (query instanceof CreateTableQuery) {
-                label = "CREATE TABLE";
+                CreateTableQuery createTableQuery = (CreateTableQuery) query;
+                if (createTableQuery.isVolatile()) {
+                    label = "CREATE VOLATILE TABLE";
+                    image = "images/create_volatile_table.png";
+                } else {
+                    label = "CREATE TABLE";
+                    image = "images/create_table.png";
+                }
             } else if (query instanceof InsertQuery) {
                 label = "INSERT";
+                image = "images/insert.png";
             } else if (query instanceof com.tdtsqlscan.select.SelectQuery) {
                 label = "SELECT";
+                image = "images/select.png";
             } else if (query instanceof UpdateQuery) {
                 label = "UPDATE";
+                shape = "box"; // Revert to box for non-imaged SQL
             } else if (query instanceof DropTableQuery) {
                 label = "DROP TABLE";
+                image = "images/drop_table.png";
             } else if (query instanceof DeleteQuery) {
                 label = "DELETE";
+                image = "images/delete.png";
             } else {
                 label = "SQL";
+                shape = "box"; // Revert to box for other SQL
             }
-        } else {
-            label = "UNKNOWN";
         }
 
         Node node = new Node(id, label);
         node.addProperty("shape", shape);
+        if (image != null) {
+            node.addProperty("image", image);
+            node.addProperty("size", 30);
+        }
         node.addProperty("fullText", command.getRawText());
         node.addProperty("fixed", true);
         return node;
@@ -274,28 +294,44 @@ public class DataFlowGraphConverter {
     private void handleDataFlow(Node commandNode, BteqSqlCommand sqlCommand, int yPos, int currentX) {
         Object query = sqlCommand.getQuery();
         if (query instanceof CreateTableQuery) {
-            String tableName = ((CreateTableQuery) query).getTableName();
+            CreateTableQuery createTableQuery = (CreateTableQuery) query;
+            String tableName = createTableQuery.getTableName();
             if (tableName == null) return;
 
+            // Handle the target table
             Node tableNode = getOrCreateTableNode(tableName, yPos);
             tableNode.addProperty("x", currentX + X_OFFSET_STEP); // Place table to the right
             Edge edge = new Edge(commandNode.getId(), tableNode.getId(), "creates");
             edge.addProperty("arrows", "to");
             graph.addEdge(edge);
 
+            // Handle source tables for CTAS
+            for (String sourceTable : createTableQuery.getSourceTables()) {
+                Node sourceNode = getOrCreateTableNode(sourceTable, yPos);
+                sourceNode.addProperty("x", currentX); // Place source table to the left
+                Edge fromEdge = new Edge(sourceNode.getId(), commandNode.getId(), "");
+                fromEdge.addProperty("arrows", "to");
+                graph.addEdge(fromEdge);
+            }
+
         } else if (query instanceof InsertQuery) {
             InsertQuery insertQuery = (InsertQuery) query;
             String targetTable = insertQuery.getTableName();
             String sourceTable = insertQuery.getSourceTableName();
 
-            if (sourceTable != null) {
-                // Keep this call to register the table for lane management, but don't create an edge
-                getOrCreateTableNode(sourceTable, yPos);
-            }
-
             if (targetTable != null) {
-                // Keep this call to register the table for lane management, but don't create an edge
-                getOrCreateTableNode(targetTable, yPos);
+                Node targetNode = getOrCreateTableNode(targetTable, yPos);
+                targetNode.addProperty("x", currentX + X_OFFSET_STEP);
+                Edge toEdge = new Edge(commandNode.getId(), targetNode.getId(), "inserts");
+                toEdge.addProperty("arrows", "to");
+                graph.addEdge(toEdge);
+            }
+            if (sourceTable != null) {
+                Node sourceNode = getOrCreateTableNode(sourceTable, yPos);
+                sourceNode.addProperty("x", currentX);
+                Edge fromEdge = new Edge(sourceNode.getId(), commandNode.getId(), "");
+                fromEdge.addProperty("arrows", "to");
+                graph.addEdge(fromEdge);
             }
         } else if (query instanceof UpdateQuery) {
             UpdateQuery updateQuery = (UpdateQuery) query;

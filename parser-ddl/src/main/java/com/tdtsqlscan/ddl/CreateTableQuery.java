@@ -7,17 +7,33 @@ import java.util.List;
 /**
  * Representa una sentencia CREATE TABLE.
  */
+import java.util.Collections;
+
 public class CreateTableQuery extends SQLQuery {
     private final String tableName;
     private final List<ColumnDefinition> columns;
+    private final boolean isVolatile;
+    private final List<String> sourceTables;
 
     public CreateTableQuery(String sql,
                             String tableName,
-                            List<ColumnDefinition> columns) {
+                            List<ColumnDefinition> columns,
+                            boolean isVolatile) {
+        this(sql, tableName, columns, isVolatile, null);
+    }
+
+    public CreateTableQuery(String sql,
+                            String tableName,
+                            List<ColumnDefinition> columns,
+                            boolean isVolatile,
+                            List<String> sourceTables) {
         super(sql);
         this.tableName = tableName;
         this.columns = columns;
+        this.isVolatile = isVolatile;
+        this.sourceTables = sourceTables != null ? sourceTables : Collections.emptyList();
     }
+
 
     @Override
     public Type getType() {
@@ -30,5 +46,13 @@ public class CreateTableQuery extends SQLQuery {
 
     public List<ColumnDefinition> getColumns() {
         return columns;
+    }
+
+    public boolean isVolatile() {
+        return isVolatile;
+    }
+
+    public List<String> getSourceTables() {
+        return sourceTables;
     }
 }
