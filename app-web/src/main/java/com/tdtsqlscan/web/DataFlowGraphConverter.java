@@ -301,7 +301,6 @@ public class DataFlowGraphConverter {
 
             // Handle the target table
             Node tableNode = getOrCreateTableNode(tableName, yPos);
-            graph.addNode(tableNode); // Explicitly add to graph
             tableNode.addProperty("x", currentX + X_OFFSET_STEP); // Place table to the right
             Edge edge = new Edge(commandNode.getId(), tableNode.getId(), "creates");
             edge.addProperty("arrows", "to");
@@ -310,7 +309,6 @@ public class DataFlowGraphConverter {
             // Handle source tables for CTAS
             for (String sourceTable : createTableQuery.getSourceTables()) {
                 Node sourceNode = getOrCreateTableNode(sourceTable, yPos);
-                graph.addNode(sourceNode); // Explicitly add to graph
                 sourceNode.addProperty("x", currentX); // Place source table to the left
                 Edge fromEdge = new Edge(sourceNode.getId(), commandNode.getId(), "");
                 fromEdge.addProperty("arrows", "to");
@@ -326,7 +324,6 @@ public class DataFlowGraphConverter {
             // For INSERT...VALUES, we do not draw the target table, as per user request.
             if (sourceTable != null) {
                 Node sourceNode = getOrCreateTableNode(sourceTable, yPos);
-                graph.addNode(sourceNode);
                 sourceNode.addProperty("x", currentX);
                 Edge fromEdge = new Edge(sourceNode.getId(), commandNode.getId(), "");
                 fromEdge.addProperty("arrows", "to");
@@ -334,7 +331,6 @@ public class DataFlowGraphConverter {
 
                 if (targetTable != null) {
                     Node targetNode = getOrCreateTableNode(targetTable, yPos);
-                    graph.addNode(targetNode);
                     targetNode.addProperty("x", currentX + X_OFFSET_STEP);
                     Edge toEdge = new Edge(commandNode.getId(), targetNode.getId(), "inserts");
                     toEdge.addProperty("arrows", "to");
@@ -347,7 +343,6 @@ public class DataFlowGraphConverter {
 
             if (targetTable != null) {
                 Node targetNode = getOrCreateTableNode(targetTable, yPos);
-                graph.addNode(targetNode);
                 targetNode.addProperty("x", currentX + X_OFFSET_STEP);
                 Edge toEdge = new Edge(commandNode.getId(), targetNode.getId(), "updates");
                 toEdge.addProperty("arrows", "to");
@@ -367,6 +362,7 @@ public class DataFlowGraphConverter {
             tableNode.addProperty("fixed", true);
             // Use the uppercase name for the map key to ensure case-insensitivity
             tableNodes.put(upperCaseTableName, tableNode);
+            graph.addNode(tableNode);
         }
         return tableNode;
     }
