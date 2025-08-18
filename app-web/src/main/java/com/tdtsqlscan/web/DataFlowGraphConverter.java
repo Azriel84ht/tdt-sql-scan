@@ -161,6 +161,7 @@ public class DataFlowGraphConverter {
         Node commandNode = new Node(commandNodeId, label);
         commandNode.addProperty("shape", "image");
         commandNode.addProperty("image", "images/insert.png");
+        commandNode.addProperty("size", 30);
         commandNode.addProperty("fullText", fullText.toString().trim());
         commandNode.addProperty("fixed", true);
 
@@ -283,6 +284,7 @@ public class DataFlowGraphConverter {
         node.addProperty("shape", shape);
         if (image != null) {
             node.addProperty("image", image);
+            node.addProperty("size", 30);
         }
         node.addProperty("fullText", command.getRawText());
         node.addProperty("fixed", true);
