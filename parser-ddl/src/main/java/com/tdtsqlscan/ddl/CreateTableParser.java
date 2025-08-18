@@ -21,7 +21,9 @@ public class CreateTableParser implements QueryParser {
     public CreateTableQuery parse(String sql) throws SQLParseException {
         String upperSql = sql.trim().toUpperCase();
         String tableName;
-        if (upperSql.startsWith("CREATE VOLATILE TABLE")) {
+        boolean isVolatile = upperSql.startsWith("CREATE VOLATILE TABLE");
+
+        if (isVolatile) {
             tableName = SQLParserUtils.extractBetweenKeywords(upperSql, "CREATE VOLATILE TABLE", "(").trim();
         } else {
             tableName = SQLParserUtils.extractBetweenKeywords(upperSql, "CREATE TABLE", "(").trim();
@@ -34,6 +36,6 @@ public class CreateTableParser implements QueryParser {
             columns.add(ColumnDefinition.from(col.trim()));
         }
 
-        return new CreateTableQuery(sql, tableName, columns);
+        return new CreateTableQuery(sql, tableName, columns, isVolatile);
     }
 }

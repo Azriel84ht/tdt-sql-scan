@@ -159,7 +159,8 @@ public class DataFlowGraphConverter {
         }
         String label = String.format("Batch INSERT (%d)", group.size());
         Node commandNode = new Node(commandNodeId, label);
-        commandNode.addProperty("shape", "box");
+        commandNode.addProperty("shape", "image");
+        commandNode.addProperty("image", "/images/insert.png");
         commandNode.addProperty("fullText", fullText.toString().trim());
         commandNode.addProperty("fixed", true);
 
@@ -230,8 +231,10 @@ public class DataFlowGraphConverter {
     }
 
     private Node createCommandNode(BteqCommand command, String id) {
-        String label;
+        Node node = new Node(id, "");
+        String label = "UNKNOWN";
         String shape = "box";
+        String image = null;
 
         if (command instanceof BteqConfigurationCommand) {
             label = "CONFIG";
@@ -241,31 +244,47 @@ public class DataFlowGraphConverter {
             label = "." + controlCommand.getType().toString();
             shape = "ellipse";
             if (controlCommand.getType() == BteqCommandType.EXIT) {
-                shape = "star"; // Using a star for EXIT
+                shape = "star";
             }
         } else if (command instanceof BteqSqlCommand) {
             Object query = ((BteqSqlCommand) command).getQuery();
+            shape = "image"; // Default to image for SQL commands
+
             if (query instanceof CreateTableQuery) {
-                label = "CREATE TABLE";
+                CreateTableQuery createTableQuery = (CreateTableQuery) query;
+                if (createTableQuery.isVolatile()) {
+                    label = "CREATE VOLATILE TABLE";
+                    image = "/images/create_volatile_table.png";
+                } else {
+                    label = "CREATE TABLE";
+                    image = "/images/create_table.png";
+                }
             } else if (query instanceof InsertQuery) {
                 label = "INSERT";
+                image = "/images/insert.png";
             } else if (query instanceof com.tdtsqlscan.select.SelectQuery) {
                 label = "SELECT";
+                image = "/images/select.png";
             } else if (query instanceof UpdateQuery) {
                 label = "UPDATE";
+                shape = "box"; // Revert to box for non-imaged SQL
             } else if (query instanceof DropTableQuery) {
                 label = "DROP TABLE";
+                image = "/images/drop_table.png";
             } else if (query instanceof DeleteQuery) {
                 label = "DELETE";
+                image = "/images/delete.png";
             } else {
                 label = "SQL";
+                shape = "box"; // Revert to box for other SQL
             }
-        } else {
-            label = "UNKNOWN";
         }
 
-        Node node = new Node(id, label);
+        node.setLabel(label);
         node.addProperty("shape", shape);
+        if (image != null) {
+            node.addProperty("image", image);
+        }
         node.addProperty("fullText", command.getRawText());
         node.addProperty("fixed", true);
         return node;

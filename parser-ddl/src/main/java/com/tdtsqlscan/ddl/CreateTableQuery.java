@@ -10,13 +10,16 @@ import java.util.List;
 public class CreateTableQuery extends SQLQuery {
     private final String tableName;
     private final List<ColumnDefinition> columns;
+    private final boolean isVolatile;
 
     public CreateTableQuery(String sql,
                             String tableName,
-                            List<ColumnDefinition> columns) {
+                            List<ColumnDefinition> columns,
+                            boolean isVolatile) {
         super(sql);
         this.tableName = tableName;
         this.columns = columns;
+        this.isVolatile = isVolatile;
     }
 
     @Override
@@ -30,5 +33,9 @@ public class CreateTableQuery extends SQLQuery {
 
     public List<ColumnDefinition> getColumns() {
         return columns;
+    }
+
+    public boolean isVolatile() {
+        return isVolatile;
     }
 }
