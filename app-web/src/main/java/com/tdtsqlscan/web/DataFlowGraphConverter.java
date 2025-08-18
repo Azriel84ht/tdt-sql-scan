@@ -124,15 +124,16 @@ public class DataFlowGraphConverter {
     }
 
     private String getTargetTable(BteqCommand command) {
+        String tableName = null;
         if (command instanceof BteqSqlCommand) {
             Object query = ((BteqSqlCommand) command).getQuery();
-            if (query instanceof CreateTableQuery) return ((CreateTableQuery) query).getTableName();
-            if (query instanceof InsertQuery) return ((InsertQuery) query).getTableName();
-            if (query instanceof UpdateQuery) return ((UpdateQuery) query).getTargetTable();
-            if (query instanceof DropTableQuery) return ((DropTableQuery) query).getTableName();
-            if (query instanceof DeleteQuery) return ((DeleteQuery) query).getTable();
+            if (query instanceof CreateTableQuery) tableName = ((CreateTableQuery) query).getTableName();
+            else if (query instanceof InsertQuery) tableName = ((InsertQuery) query).getTableName();
+            else if (query instanceof UpdateQuery) tableName = ((UpdateQuery) query).getTargetTable();
+            else if (query instanceof DropTableQuery) tableName = ((DropTableQuery) query).getTableName();
+            else if (query instanceof DeleteQuery) tableName = ((DeleteQuery) query).getTable();
         }
-        return null;
+        return tableName != null ? tableName.toUpperCase() : null;
     }
 
     private boolean isGroupableInsert(BteqCommand command) {
@@ -149,7 +150,7 @@ public class DataFlowGraphConverter {
 
     private Node processInsertGroup(List<BteqCommand> group, int startIndex, Node lastCommandNode) {
         BteqCommand firstCommand = group.get(0);
-        String targetTable = ((InsertQuery) ((BteqSqlCommand) firstCommand).getQuery()).getTableName();
+        String targetTable = ((InsertQuery) ((BteqSqlCommand) firstCommand).getQuery()).getTableName().toUpperCase();
         String commandNodeId = "cmd-group-" + startIndex;
 
         // Build the consolidated node
@@ -307,7 +308,7 @@ public class DataFlowGraphConverter {
 
             // Handle source tables for CTAS
             for (String sourceTable : createTableQuery.getSourceTables()) {
-                Node sourceNode = getOrCreateTableNode(sourceTable, yPos);
+                Node sourceNode = getOrCreateTableNode(sourceTable.toUpperCase(), yPos);
                 sourceNode.addProperty("x", currentX); // Place source table to the left
                 Edge fromEdge = new Edge(sourceNode.getId(), commandNode.getId(), "");
                 fromEdge.addProperty("arrows", "to");
@@ -320,14 +321,14 @@ public class DataFlowGraphConverter {
             String sourceTable = insertQuery.getSourceTableName();
 
             if (targetTable != null) {
-                Node targetNode = getOrCreateTableNode(targetTable, yPos);
+                Node targetNode = getOrCreateTableNode(targetTable.toUpperCase(), yPos);
                 targetNode.addProperty("x", currentX + X_OFFSET_STEP);
                 Edge toEdge = new Edge(commandNode.getId(), targetNode.getId(), "inserts");
                 toEdge.addProperty("arrows", "to");
                 graph.addEdge(toEdge);
             }
             if (sourceTable != null) {
-                Node sourceNode = getOrCreateTableNode(sourceTable, yPos);
+                Node sourceNode = getOrCreateTableNode(sourceTable.toUpperCase(), yPos);
                 sourceNode.addProperty("x", currentX);
                 Edge fromEdge = new Edge(sourceNode.getId(), commandNode.getId(), "");
                 fromEdge.addProperty("arrows", "to");
@@ -338,7 +339,7 @@ public class DataFlowGraphConverter {
             String targetTable = updateQuery.getTargetTable();
 
             if (targetTable != null) {
-                Node targetNode = getOrCreateTableNode(targetTable, yPos);
+                Node targetNode = getOrCreateTableNode(targetTable.toUpperCase(), yPos);
                 targetNode.addProperty("x", currentX + X_OFFSET_STEP);
                 Edge toEdge = new Edge(commandNode.getId(), targetNode.getId(), "updates");
                 toEdge.addProperty("arrows", "to");
@@ -349,7 +350,7 @@ public class DataFlowGraphConverter {
             String tableName = dropTableQuery.getTableName();
 
             if (tableName != null) {
-                Node tableNode = getOrCreateTableNode(tableName, yPos);
+                Node tableNode = getOrCreateTableNode(tableName.toUpperCase(), yPos);
                 tableNode.addProperty("x", currentX);
                 Edge edge = new Edge(commandNode.getId(), tableNode.getId(), "drops");
                 edge.addProperty("arrows", "to");
@@ -359,15 +360,17 @@ public class DataFlowGraphConverter {
     }
 
     private Node getOrCreateTableNode(String tableName, int yPos) {
-        Node tableNode = tableNodes.get(tableName);
+        String upperCaseTableName = tableName.toUpperCase();
+        Node tableNode = tableNodes.get(upperCaseTableName);
         if (tableNode == null) {
+            // Use the original case-preserved name for the node's ID and label for display
             tableNode = new Node(tableName, tableName);
             tableNode.addProperty("shape", "database");
             tableNode.addProperty("y", yPos);
             tableNode.addProperty("fixed", true);
-            tableNodes.put(tableName, tableNode);
-            // By not adding the table node to the graph, we prevent it from being drawn.
-            // graph.addNode(tableNode);
+            // Use the uppercase name for the map key to ensure case-insensitivity
+            tableNodes.put(upperCaseTableName, tableNode);
+            graph.addNode(tableNode);
         }
         return tableNode;
     }
