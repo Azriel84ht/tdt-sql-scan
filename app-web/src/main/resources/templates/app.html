@@ -115,15 +115,14 @@
         <div id="flow-main">
             <div class="tab">
                 <button class="tablinks" onclick="openTab(event, 'chain-flow')" id="defaultOpen">Flujo de cadena</button>
-                <button class="tablinks" onclick="openTab(event, 'bteq-flow')">Flujo de bteq</button>
             </div>
 
             <div id="chain-flow" class="tabcontent">
                 <div id="chain-flow-network" style="width: 100%; border: 1px solid lightgray;"></div>
             </div>
 
-            <div id="bteq-flow" class="tabcontent">
-                <div id="mynetwork"></div>
+            <div id="bteq-flow-container" class="tabcontent">
+                <!-- BTEQ script tabs will be dynamically inserted here -->
             </div>
         </div>
         <div id="metadata-sidebar">
@@ -293,11 +292,63 @@
             return response.json();
         })
         .then(data => {
+            // Render Chain Flow graph
             const chainFlowContainer = document.getElementById('chain-flow-network');
-            const bteqFlowContainer = document.getElementById('mynetwork');
-
             renderGraph(data.chainFlow, chainFlowContainer);
-            renderGraph(data.bteqFlow, bteqFlowContainer);
+
+            // --- Render BTEQ Flow Graphs ---
+
+            // 1. Clear previous BTEQ tabs and content
+            const tabContainer = document.querySelector('.tab');
+            document.querySelectorAll('.bteq-tab').forEach(tab => tab.remove());
+            document.querySelectorAll('.bteq-tab-content').forEach(content => content.remove());
+
+            // 2. Dynamically create tabs and containers for each BTEQ script
+            const bteqFlows = data.bteqFlows;
+            const flowMainContainer = document.getElementById('flow-main');
+            let firstBteqTabButton = null;
+
+            for (const scriptName in bteqFlows) {
+                if (Object.hasOwnProperty.call(bteqFlows, scriptName)) {
+                    const graphData = bteqFlows[scriptName];
+
+                    const safeId = scriptName.replace(/[^a-zA-Z0-9]/g, '_');
+                    const tabId = `bteq-tab-content-${safeId}`;
+                    const containerId = `bteq-graph-container-${safeId}`;
+
+                    // Create the tab button
+                    const tabButton = document.createElement('button');
+                    tabButton.className = 'tablinks bteq-tab';
+                    tabButton.textContent = scriptName;
+                    tabButton.onclick = (event) => openTab(event, tabId);
+                    tabContainer.appendChild(tabButton);
+
+                    // Create the tab content pane
+                    const tabContent = document.createElement('div');
+                    tabContent.id = tabId;
+                    tabContent.className = 'tabcontent bteq-tab-content';
+
+                    // Create the actual div that will hold the graph
+                    const graphContainer = document.createElement('div');
+                    graphContainer.id = containerId;
+                    graphContainer.style.height = '800px';
+
+                    tabContent.appendChild(graphContainer);
+                    flowMainContainer.appendChild(tabContent);
+
+                    // Render the graph in the new container
+                    renderGraph(graphData, graphContainer);
+
+                    if (!firstBteqTabButton) {
+                        firstBteqTabButton = tabButton;
+                    }
+                }
+            }
+
+            // 3. Open the first BTEQ tab by default if it exists
+            if (firstBteqTabButton) {
+                firstBteqTabButton.click();
+            }
         })
         .catch(error => {
             console.error('Error:', error);
