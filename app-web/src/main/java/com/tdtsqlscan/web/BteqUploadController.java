@@ -26,6 +26,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.stream.Collectors;
 
 @RestController
@@ -34,13 +36,12 @@ public class BteqUploadController {
     private static final Logger logger = LoggerFactory.getLogger(BteqUploadController.class);
 
     private final BteqScriptParser bteqScriptParser;
-    private final DataFlowGraphConverter dataFlowGraphConverter;
     private final ChainFlowGraphConverter chainFlowGraphConverter;
     private final ObjectMapper objectMapper;
 
     public static class GraphResponse {
         public Graph chainFlow;
-        public Graph bteqFlow;
+        public Map<String, Graph> bteqFlows;
     }
 
     public BteqUploadController() {
@@ -54,7 +55,6 @@ public class BteqUploadController {
         sqlParsers.add(new UpdateParser());
         sqlParsers.add(new DeleteParser());
         this.bteqScriptParser = new BteqScriptParser(sqlParsers);
-        this.dataFlowGraphConverter = new DataFlowGraphConverter();
         this.chainFlowGraphConverter = new ChainFlowGraphConverter();
         this.objectMapper = new ObjectMapper();
         logger.info("BteqUploadController initialized");
@@ -64,7 +64,10 @@ public class BteqUploadController {
     public GraphResponse handleFileUpload(@RequestParam("files") MultipartFile[] files, @RequestParam("fileOrder") String fileOrderJson) throws IOException {
         logger.info("Received {} files for upload", files.length);
 
-        List<Map<String, String>> fileOrder = objectMapper.readValue(fileOrderJson, new TypeReference<List<Map<String, String>>>(){});
+        List<Map<String, String>> fileOrderList = objectMapper.readValue(fileOrderJson, new TypeReference<List<Map<String, String>>>(){});
+        Map<String, Integer> fileOrderMap = fileOrderList.stream()
+                .collect(Collectors.toMap(map -> map.get("name"), map -> Integer.parseInt(map.get("order"))));
+
 
         List<BteqScript> scripts = new ArrayList<>();
         for (MultipartFile file : files) {
@@ -75,29 +78,28 @@ public class BteqUploadController {
             scripts.add(script);
         }
 
-        Graph chainFlowGraph = chainFlowGraphConverter.convert(scripts, fileOrder);
+        // Sort scripts: primary by user order, secondary by script name
+        scripts.sort(Comparator
+                .comparing((BteqScript s) -> fileOrderMap.getOrDefault(s.getScriptName(), Integer.MAX_VALUE))
+                .thenComparing(BteqScript::getScriptName));
+
+
+        Graph chainFlowGraph = chainFlowGraphConverter.convert(scripts, fileOrderList);
         logger.info("Generated chain flow graph with {} nodes and {} edges", chainFlowGraph.getNodes().size(), chainFlowGraph.getEdges().size());
 
-        BteqScript combinedScript = new BteqScript();
-        // The order of combining scripts might matter, so we should sort them
-        List<String> sortedFileNames = fileOrder.stream()
-                .sorted((a, b) -> Integer.compare(Integer.parseInt(a.get("order")), Integer.parseInt(b.get("order"))))
-                .map(map -> map.get("name"))
-                .collect(Collectors.toList());
-
-        for (String fileName : sortedFileNames) {
-            scripts.stream()
-                    .filter(s -> s.getScriptName().equals(fileName))
-                    .findFirst()
-                    .ifPresent(s -> s.getCommands().forEach(combinedScript::addCommand));
+        Map<String, Graph> bteqFlows = new LinkedHashMap<>();
+        for (BteqScript script : scripts) {
+            // Important: Create a new converter for each script as it's stateful
+            DataFlowGraphConverter dataFlowGraphConverter = new DataFlowGraphConverter();
+            Graph bteqFlowGraph = dataFlowGraphConverter.convert(script);
+            bteqFlows.put(script.getScriptName(), bteqFlowGraph);
+            logger.info("Generated data flow graph for {} with {} nodes and {} edges",
+                    script.getScriptName(), bteqFlowGraph.getNodes().size(), bteqFlowGraph.getEdges().size());
         }
-
-        Graph bteqFlowGraph = dataFlowGraphConverter.convert(combinedScript);
-        logger.info("Generated data flow graph with {} nodes and {} edges", bteqFlowGraph.getNodes().size(), bteqFlowGraph.getEdges().size());
 
         GraphResponse response = new GraphResponse();
         response.chainFlow = chainFlowGraph;
-        response.bteqFlow = bteqFlowGraph;
+        response.bteqFlows = bteqFlows;
 
         return response;
     }
