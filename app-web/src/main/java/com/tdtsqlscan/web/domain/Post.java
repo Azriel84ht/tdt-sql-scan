@@ -36,6 +36,8 @@ public class Post {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
+    private int impressions = 0;
+
     public Post() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
@@ -97,5 +99,13 @@ public class Post {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public int getImpressions() {
+        return impressions;
+    }
+
+    public void setImpressions(int impressions) {
+        this.impressions = impressions;
     }
 }
