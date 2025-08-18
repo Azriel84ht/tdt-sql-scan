@@ -38,31 +38,37 @@ public class BteqScriptParser {
                 configCommands = new ArrayList<>();
             }
 
-            if (inSql) {
-                sqlBuffer.append(" ").append(trimmedLine);
-                if (trimmedLine.endsWith(";")) {
-                    String sql = sqlBuffer.toString();
-                    sql = sql.substring(0, sql.length() - 1).trim(); // Remove semicolon
-                    SQLQuery query = parseSql(sql);
-                    script.addCommand(new BteqSqlCommand(sql, query));
+            if (trimmedLine.startsWith(".")) {
+                if(inSql) { // If we encounter a BTEQ command, the previous SQL buffer is implicitly ended
+                    String sql = sqlBuffer.toString().trim();
+                    if (!sql.isEmpty()) {
+                        SQLQuery query = parseSql(sql);
+                        script.addCommand(new BteqSqlCommand(sql, query));
+                    }
                     sqlBuffer.setLength(0);
                     inSql = false;
                 }
-            } else {
-                if (trimmedLine.startsWith(".")) {
-                    script.addCommand(parseBteqControlCommand(trimmedLine));
-                } else {
-                    sqlBuffer.append(trimmedLine);
-                    if (trimmedLine.endsWith(";")) {
-                        String sql = sqlBuffer.toString();
-                        sql = sql.substring(0, sql.length() - 1).trim(); // Remove semicolon
-                        SQLQuery query = parseSql(sql);
-                        script.addCommand(new BteqSqlCommand(sql, query));
-                        sqlBuffer.setLength(0);
-                    } else {
-                        inSql = true;
-                    }
+                script.addCommand(parseBteqControlCommand(trimmedLine));
+                continue;
+            }
+
+            // Append the line to the current SQL buffer
+            if (sqlBuffer.length() > 0) {
+                sqlBuffer.append(" ");
+            }
+            sqlBuffer.append(trimmedLine);
+            inSql = true;
+
+            // Check if the buffer now ends with a terminator
+            String currentBuffer = sqlBuffer.toString();
+            if (currentBuffer.endsWith(";") || currentBuffer.endsWith(".")) {
+                String sql = currentBuffer.substring(0, currentBuffer.length() - 1).trim();
+                if (!sql.isEmpty()) {
+                    SQLQuery query = parseSql(sql);
+                    script.addCommand(new BteqSqlCommand(sql, query));
                 }
+                sqlBuffer.setLength(0);
+                inSql = false;
             }
         }
 

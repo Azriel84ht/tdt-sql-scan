@@ -11,11 +11,21 @@ import java.util.regex.Pattern;
 /**
  * Parser para CREATE TABLE.
  */
+import com.tdtsqlscan.core.SQLJoin;
+import com.tdtsqlscan.core.SQLTableRef;
+import com.tdtsqlscan.select.SelectParser;
+
 public class CreateTableParser implements QueryParser {
 
-    // Pattern to capture CREATE [MULTISET|SET] [VOLATILE] TABLE ...
+    // Enhanced pattern to handle CTAS: CREATE ... TABLE ... [AS (SELECT ...)]
     private static final Pattern CREATE_TABLE_PATTERN = Pattern.compile(
-            "^CREATE\\s+(?:(?:MULTISET|SET)\\s+)?(VOLATILE\\s+)?TABLE\\s+([^\\s(]+)", Pattern.CASE_INSENSITIVE);
+            "^CREATE\\s+(?:(?:MULTISET|SET)\\s+)?(VOLATILE\\s+)?TABLE\\s+([^\\s(]+)(?:\\s+AS\\s*\\((.*)\\))?", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
+    private final SelectParser selectParser;
+
+    public CreateTableParser() {
+        this.selectParser = new SelectParser();
+    }
 
     @Override
     public boolean supports(String sql) {
@@ -31,14 +41,29 @@ public class CreateTableParser implements QueryParser {
 
         boolean isVolatile = matcher.group(1) != null;
         String tableName = matcher.group(2);
+        String asClause = matcher.group(3);
 
-        String colsInside = SQLParserUtils.extractBetweenKeywords(sql, "(", ")");
-        List<String> colDefs = SQLParserUtils.splitTopLevel(colsInside, ",");
         List<ColumnDefinition> columns = new ArrayList<>();
-        for (String col : colDefs) {
-            columns.add(ColumnDefinition.from(col.trim()));
+        List<String> sourceTables = new ArrayList<>();
+
+        if (asClause != null) {
+            // This is a CTAS statement. We need to parse the sub-select to find source tables.
+            com.tdtsqlscan.select.SelectQuery selectQuery = (com.tdtsqlscan.select.SelectQuery) selectParser.parse(asClause);
+            for (SQLTableRef tableRef : selectQuery.getTables()) {
+                sourceTables.add(tableRef.getExpression());
+            }
+            for (SQLJoin join : selectQuery.getJoins()) {
+                sourceTables.add(join.getRight().getExpression());
+            }
+        } else {
+            // This is a standard CREATE TABLE with column definitions.
+            String colsInside = SQLParserUtils.extractBetweenKeywords(sql, "(", ")");
+            List<String> colDefs = SQLParserUtils.splitTopLevel(colsInside, ",");
+            for (String col : colDefs) {
+                columns.add(ColumnDefinition.from(col.trim()));
+            }
         }
 
-        return new CreateTableQuery(sql, tableName, columns, isVolatile);
+        return new CreateTableQuery(sql, tableName, columns, isVolatile, sourceTables);
     }
 }
