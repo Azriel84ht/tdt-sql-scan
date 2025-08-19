@@ -48,6 +48,12 @@ public class ChainFlowGraphConverter {
                                 node.getProperties().put("shape", "image");
                                 node.getProperties().put("image", "/images/bteq_script.png");
                                 node.getProperties().put("size", "50");
+
+                                Map<String, Object> font = new java.util.HashMap<>();
+                                font.put("background", "rgba(255, 255, 255, 0.8)");
+                                font.put("color", "black");
+                                node.getProperties().put("font", font);
+
                                 BteqScript originalScript = scriptsByName.get(script.getScriptName());
                                 if (originalScript != null) {
                                     node.getProperties().put("fileName", originalScript.getScriptName());

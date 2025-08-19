@@ -164,10 +164,42 @@
     const darkModeToggle = document.getElementById('dark-mode-toggle');
     const darkModeStylesheet = document.getElementById('dark-mode-stylesheet');
     let activeNode = null;
+    let fileMetadata = {};
+    let networks = {}; // Store network instances
 
-    darkModeToggle.addEventListener('change', () => {
-        darkModeStylesheet.disabled = !darkModeToggle.checked;
-    });
+    function updateTheme() {
+        const isDarkMode = darkModeToggle.checked;
+        if (isDarkMode) {
+            document.body.classList.add('dark-mode');
+        } else {
+            document.body.classList.remove('dark-mode');
+        }
+        darkModeStylesheet.disabled = !isDarkMode;
+
+        const fontOptions = isDarkMode
+            ? { background: 'rgba(55, 65, 81, 0.8)', color: 'white' } // Dark mode
+            : { background: 'rgba(255, 255, 255, 0.8)', color: 'black' }; // Light mode
+
+        for (const key in networks) {
+            if (Object.hasOwnProperty.call(networks, key)) {
+                const network = networks[key];
+                const dataSet = network.body.data.nodes;
+                const updatedNodes = [];
+
+                dataSet.forEach(node => {
+                    if (node.image && node.image.includes('bteq_script.png')) {
+                        updatedNodes.push({ id: node.id, font: fontOptions });
+                    }
+                });
+
+                if (updatedNodes.length > 0) {
+                    dataSet.update(updatedNodes);
+                }
+            }
+        }
+    }
+
+    darkModeToggle.addEventListener('change', updateTheme);
 
     span.onclick = function() {
         modal.style.display = "none";
@@ -252,6 +284,11 @@
     document.addEventListener("DOMContentLoaded", function() {
         openTab(null, 'chain-flow');
         document.querySelector('.tablinks').classList.add('active');
+        // Apply theme on load
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            darkModeToggle.checked = true;
+        }
+        updateTheme();
     });
 
     fileOrderForm.addEventListener('submit', (event) => {
@@ -292,9 +329,10 @@
             return response.json();
         })
         .then(data => {
+            fileMetadata = data.fileMetadata; // Store metadata
             // Render Chain Flow graph
             const chainFlowContainer = document.getElementById('chain-flow-network');
-            renderGraph(data.chainFlow, chainFlowContainer);
+            renderGraph(data.chainFlow, chainFlowContainer, false); // No context menu for chain flow
 
             // --- Render BTEQ Flow Graphs ---
 
@@ -337,7 +375,7 @@
                     flowMainContainer.appendChild(tabContent);
 
                     // Render the graph in the new container
-                    renderGraph(graphData, graphContainer);
+                    renderGraph(graphData, graphContainer, true); // Enable context menu for BTEQ flows
 
                     if (!firstBteqTabButton) {
                         firstBteqTabButton = tabButton;
@@ -356,7 +394,7 @@
         });
     });
 
-    function renderGraph(data, container) {
+    function renderGraph(data, container, enableContextMenu) {
         if (!data) {
             console.error("No data for graph rendering in container:", container.id);
             return;
@@ -375,7 +413,8 @@
                     fixed: true,
                     fileName: node.properties.fileName,
                     fileSize: node.properties.fileSize,
-                    fileEncoding: node.properties.fileEncoding
+                    fileEncoding: node.properties.fileEncoding,
+                    font: node.properties.font // Pass font properties from server
                 };
                 return nodeData;
             })
@@ -415,6 +454,8 @@
             }
         };
         const network = new vis.Network(container, networkData, options);
+        networks[container.id] = network; // Store the network instance
+        updateTheme(); // Apply theme to the newly created graph
 
         network.on('beforeDrawing', function(ctx) {
             const canvasWidth = container.clientWidth;
@@ -450,43 +491,53 @@
             }
         });
 
-        network.on("oncontext", function (params) {
-            params.event.preventDefault();
-            const nodeId = network.getNodeAt(params.pointer.DOM);
-            if (nodeId) {
-                activeNode = nodes.get(nodeId);
-                contextMenu.style.left = params.event.pageX + 'px';
-                contextMenu.style.top = params.event.pageY + 'px';
-                contextMenu.style.display = 'block';
+        if (enableContextMenu) {
+            network.on("oncontext", function (params) {
+                params.event.preventDefault();
+                const nodeId = network.getNodeAt(params.pointer.DOM);
+                if (nodeId) {
+                    activeNode = nodes.get(nodeId);
+                    contextMenu.style.left = params.event.pageX + 'px';
+                    contextMenu.style.top = params.event.pageY + 'px';
+                    contextMenu.style.display = 'block';
+                }
+            });
+        }
+
+        network.on("selectNode", function (params) {
+            if (params.nodes.length > 0) {
+                const nodeId = params.nodes[0];
+                const clickedNode = nodes.get(nodeId);
+                if (clickedNode && clickedNode.fileName) { // Check if it's a file node
+                    const metadata = fileMetadata[clickedNode.fileName];
+                    const table = document.getElementById('metadata-table');
+                    let tableHtml = `
+                        <tr><th>Attribute</th><th>Value</th></tr>
+                        <tr><td>File Name</td><td>${clickedNode.fileName}</td></tr>
+                        <tr><td>File Size</td><td>${clickedNode.fileSize} bytes</td></tr>
+                        <tr><td>Encoding</td><td>${clickedNode.fileEncoding}</td></tr>
+                    `;
+
+                    if (metadata) {
+                        tableHtml += `
+                            <tr><td>Transactions</td><td>${metadata.transactions}</td></tr>
+                            <tr>
+                                <td>Input Tables</td>
+                                <td>${metadata.inputTables && metadata.inputTables.length > 0 ? metadata.inputTables.join('<br>') : '-'}</td>
+                            </tr>
+                            <tr>
+                                <td>Output Tables</td>
+                                <td>${metadata.outputTables && metadata.outputTables.length > 0 ? metadata.outputTables.join('<br>') : '-'}</td>
+                            </tr>
+                        `;
+                    }
+                    table.innerHTML = tableHtml;
+                }
             }
         });
 
-        network.on("click", function (params) {
-            const nodeId = network.getNodeAt(params.pointer.DOM);
-            if (nodeId) {
-                const clickedNode = nodes.get(nodeId);
-                if (clickedNode && clickedNode.fileName) { // Check if it's a file node
-                    const table = document.getElementById('metadata-table');
-                    table.innerHTML = `
-                        <tr>
-                            <th>Attribute</th>
-                            <th>Value</th>
-                        </tr>
-                        <tr>
-                            <td>File Name</td>
-                            <td>${clickedNode.fileName}</td>
-                        </tr>
-                        <tr>
-                            <td>File Size</td>
-                            <td>${clickedNode.fileSize} bytes</td>
-                        </tr>
-                        <tr>
-                            <td>Encoding</td>
-                            <td>${clickedNode.fileEncoding}</td>
-                        </tr>
-                    `;
-                }
-            }
+        network.on("deselectNode", function (params) {
+            document.getElementById('metadata-table').innerHTML = "";
         });
     }
     /*]]>*/
