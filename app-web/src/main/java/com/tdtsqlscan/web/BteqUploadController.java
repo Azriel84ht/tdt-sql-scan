@@ -42,7 +42,6 @@ public class BteqUploadController {
     public static class GraphResponse {
         public Graph chainFlow;
         public Map<String, Graph> bteqFlows;
-        public Map<String, Map<String, Object>> fileMetadata;
     }
 
     public BteqUploadController() {
@@ -98,19 +97,9 @@ public class BteqUploadController {
                     script.getScriptName(), bteqFlowGraph.getNodes().size(), bteqFlowGraph.getEdges().size());
         }
 
-        Map<String, Map<String, Object>> fileMetadata = new LinkedHashMap<>();
-        for (BteqScript script : scripts) {
-            Map<String, Object> metadata = new LinkedHashMap<>();
-            metadata.put("transactions", script.getTransactions());
-            metadata.put("inputTables", script.getInputTables());
-            metadata.put("outputTables", script.getOutputTables());
-            fileMetadata.put(script.getScriptName(), metadata);
-        }
-
         GraphResponse response = new GraphResponse();
         response.chainFlow = chainFlowGraph;
         response.bteqFlows = bteqFlows;
-        response.fileMetadata = fileMetadata;
 
         return response;
     }

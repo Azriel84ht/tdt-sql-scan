@@ -24,44 +24,32 @@
         justify-content: center;
         align-items: center;
         z-index: 1000;
-        -webkit-backdrop-filter: blur(4px);
-        backdrop-filter: blur(4px);
       }
       .popup-content {
-        background-color: rgba(31, 41, 55, 0.7); /* bg-gray-800 with 70% opacity */
-        -webkit-backdrop-filter: blur(16px); /* backdrop-blur-lg */
-        backdrop-filter: blur(16px);
-        border-radius: 0.75rem; /* rounded-xl */
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        max-width: 28rem; /* max-w-md */
+        background-color: white;
+        padding: 20px;
+        border-radius: 5px;
+        max-width: 500px;
         width: 90%;
-        color: #e5e7eb; /* text-gray-200 */
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        position: relative;
+      }
+      .popup-close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        cursor: pointer;
+        font-size: 20px;
+        color: #888;
       }
     </style>
   </head>
   <body>
     <div th:if="${content.showPopup}" id="popup-overlay" class="popup-overlay">
-      <div class="popup-content">
-        <!-- Header -->
-        <div class="flex items-center justify-between p-4 border-b border-white/10">
-          <div class="flex items-center">
-            <svg class="w-6 h-6 text-yellow-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-            <h3 class="text-lg font-semibold text-cyan-400">Attention</h3>
-          </div>
-          <button id="popup-close-x" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+        <div class="popup-content">
+            <span id="popup-close" class="popup-close">&times;</span>
+            <p th:text="${content.popupMessage}"></p>
         </div>
-        <!-- Body -->
-        <div class="p-6">
-          <p th:text="${content.popupMessage}"></p>
-        </div>
-        <!-- Footer -->
-        <div class="flex justify-end p-4 border-t border-white/10">
-          <button id="popup-accept" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg">
-            Aceptar
-          </button>
-        </div>
-      </div>
     </div>
 
     <div class="relative flex size-full min-h-screen flex-col bg-white group/design-root overflow-x-hidden" style='font-family: Inter, "Noto Sans", sans-serif;'>
@@ -140,21 +128,12 @@
     </div>
     <script>
       const popupOverlay = document.getElementById('popup-overlay');
-      const popupCloseX = document.getElementById('popup-close-x');
-      const popupAccept = document.getElementById('popup-accept');
+      const popupClose = document.getElementById('popup-close');
 
-      function closePopup() {
-        if (popupOverlay) {
+      if (popupClose) {
+        popupClose.addEventListener('click', () => {
           popupOverlay.style.display = 'none';
-        }
-      }
-
-      if (popupCloseX) {
-        popupCloseX.addEventListener('click', closePopup);
-      }
-
-      if (popupAccept) {
-        popupAccept.addEventListener('click', closePopup);
+        });
       }
     </script>
   </body>

@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -40,20 +39,10 @@ public class AdminController {
     }
 
     @PostMapping("/content")
-    public String saveContent(@ModelAttribute HomepageContent content,
-                              @RequestParam(name = "showPopup", required = false) String showPopupCheckbox,
-                              Model model) {
-        HomepageContent existingContent = contentService.getContent();
-        existingContent.setHeroTitle(content.getHeroTitle());
-        existingContent.setHeroSubtitle(content.getHeroSubtitle());
-        existingContent.setNewsSection(content.getNewsSection());
-        existingContent.setPopupMessage(content.getPopupMessage());
-        existingContent.setShowPopup(showPopupCheckbox != null);
-
-        contentService.saveContent(existingContent);
-
+    public String saveContent(@ModelAttribute HomepageContent content, Model model) {
+        contentService.saveContent(content);
         model.addAttribute("message", "Homepage content updated successfully!");
-        model.addAttribute("content", existingContent);
+        model.addAttribute("content", content);
         return "admin/content";
     }
 

@@ -18,7 +18,7 @@ public class DataFlowGraphConverter {
     private static final int BTEQ_LANE_Y = 0;
     private static final int DATA_LANE_START_Y = 150;
     private static final int LANE_HEIGHT = 120;
-    private static final int X_OFFSET_STEP = 180;
+    private static final int X_OFFSET_STEP = 150;
 
     private Graph graph;
     private Map<String, Node> tableNodes;

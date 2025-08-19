@@ -164,7 +164,6 @@
     const darkModeToggle = document.getElementById('dark-mode-toggle');
     const darkModeStylesheet = document.getElementById('dark-mode-stylesheet');
     let activeNode = null;
-    let fileMetadata = {};
 
     darkModeToggle.addEventListener('change', () => {
         darkModeStylesheet.disabled = !darkModeToggle.checked;
@@ -293,10 +292,9 @@
             return response.json();
         })
         .then(data => {
-            fileMetadata = data.fileMetadata; // Store metadata
             // Render Chain Flow graph
             const chainFlowContainer = document.getElementById('chain-flow-network');
-            renderGraph(data.chainFlow, chainFlowContainer, false); // No context menu for chain flow
+            renderGraph(data.chainFlow, chainFlowContainer);
 
             // --- Render BTEQ Flow Graphs ---
 
@@ -339,7 +337,7 @@
                     flowMainContainer.appendChild(tabContent);
 
                     // Render the graph in the new container
-                    renderGraph(graphData, graphContainer, true); // Enable context menu for BTEQ flows
+                    renderGraph(graphData, graphContainer);
 
                     if (!firstBteqTabButton) {
                         firstBteqTabButton = tabButton;
@@ -358,7 +356,7 @@
         });
     });
 
-    function renderGraph(data, container, enableContextMenu) {
+    function renderGraph(data, container) {
         if (!data) {
             console.error("No data for graph rendering in container:", container.id);
             return;
@@ -452,47 +450,41 @@
             }
         });
 
-        if (enableContextMenu) {
-            network.on("oncontext", function (params) {
-                params.event.preventDefault();
-                const nodeId = network.getNodeAt(params.pointer.DOM);
-                if (nodeId) {
-                    activeNode = nodes.get(nodeId);
-                    contextMenu.style.left = params.event.pageX + 'px';
-                    contextMenu.style.top = params.event.pageY + 'px';
-                    contextMenu.style.display = 'block';
-                }
-            });
-        }
+        network.on("oncontext", function (params) {
+            params.event.preventDefault();
+            const nodeId = network.getNodeAt(params.pointer.DOM);
+            if (nodeId) {
+                activeNode = nodes.get(nodeId);
+                contextMenu.style.left = params.event.pageX + 'px';
+                contextMenu.style.top = params.event.pageY + 'px';
+                contextMenu.style.display = 'block';
+            }
+        });
 
         network.on("click", function (params) {
             const nodeId = network.getNodeAt(params.pointer.DOM);
             if (nodeId) {
                 const clickedNode = nodes.get(nodeId);
                 if (clickedNode && clickedNode.fileName) { // Check if it's a file node
-                    const metadata = fileMetadata[clickedNode.fileName];
                     const table = document.getElementById('metadata-table');
-                    let tableHtml = `
-                        <tr><th>Attribute</th><th>Value</th></tr>
-                        <tr><td>File Name</td><td>${clickedNode.fileName}</td></tr>
-                        <tr><td>File Size</td><td>${clickedNode.fileSize} bytes</td></tr>
-                        <tr><td>Encoding</td><td>${clickedNode.fileEncoding}</td></tr>
+                    table.innerHTML = `
+                        <tr>
+                            <th>Attribute</th>
+                            <th>Value</th>
+                        </tr>
+                        <tr>
+                            <td>File Name</td>
+                            <td>${clickedNode.fileName}</td>
+                        </tr>
+                        <tr>
+                            <td>File Size</td>
+                            <td>${clickedNode.fileSize} bytes</td>
+                        </tr>
+                        <tr>
+                            <td>Encoding</td>
+                            <td>${clickedNode.fileEncoding}</td>
+                        </tr>
                     `;
-
-                    if (metadata) {
-                        tableHtml += `
-                            <tr><td>Transactions</td><td>${metadata.transactions}</td></tr>
-                            <tr>
-                                <td>Input Tables</td>
-                                <td>${metadata.inputTables && metadata.inputTables.length > 0 ? metadata.inputTables.join('<br>') : '-'}</td>
-                            </tr>
-                            <tr>
-                                <td>Output Tables</td>
-                                <td>${metadata.outputTables && metadata.outputTables.length > 0 ? metadata.outputTables.join('<br>') : '-'}</td>
-                            </tr>
-                        `;
-                    }
-                    table.innerHTML = tableHtml;
                 }
             }
         });
