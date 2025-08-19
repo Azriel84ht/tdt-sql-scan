@@ -19,36 +19,99 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
+        background-color: rgba(0, 0, 0, 0.5); /* Fondo oscurecido */
+        backdrop-filter: blur(5px); /* Desenfoque del fondo */
+        -webkit-backdrop-filter: blur(5px); /* Compatibilidad con Safari */
         display: flex;
         justify-content: center;
         align-items: center;
         z-index: 1000;
       }
       .popup-content {
-        background-color: white;
-        padding: 20px;
-        border-radius: 5px;
+        /* Estilo Glassmorphism */
+        background: rgba(40, 40, 40, 0.65);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        color: #e5e7eb;
         max-width: 500px;
         width: 90%;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         position: relative;
+        /* Remove padding to allow header/footer to span full width */
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+      }
+      .popup-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      }
+      .popup-title {
+        display: flex;
+        align-items: center;
+        font-weight: bold;
+      }
+      .alert-icon {
+        color: #ffc107; /* Yellow */
+        font-size: 24px;
+        margin-right: 10px;
+      }
+      .popup-body {
+        padding: 20px;
+        text-align: left;
+      }
+      .popup-footer {
+        padding: 15px 20px;
+        text-align: center;
+      }
+      .popup-ok-button {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 30px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1rem;
+      }
+      .popup-ok-button:hover {
+        background-color: #0056b3;
       }
       .popup-close {
-        position: absolute;
-        top: 10px;
-        right: 10px;
         cursor: pointer;
-        font-size: 20px;
-        color: #888;
+        font-size: 24px;
+        color: #9ca3af;
+        background: none;
+        border: none;
+        transition: color 0.2s ease-in-out;
+        /* Remove absolute positioning */
+      }
+      .popup-close:hover {
+        color: #ffffff;
       }
     </style>
   </head>
   <body>
     <div th:if="${content.showPopup}" id="popup-overlay" class="popup-overlay">
         <div class="popup-content">
-            <span id="popup-close" class="popup-close">&times;</span>
-            <p th:text="${content.popupMessage}"></p>
+            <div class="popup-header">
+                <div class="popup-title">
+                    <!-- Placeholder for yellow alert icon -->
+                    <span class="alert-icon">&#9888;</span>
+                    <span>ATTENTION</span>
+                </div>
+                <span id="popup-close" class="popup-close">&times;</span>
+            </div>
+            <div class="popup-body">
+                <p th:text="${content.popupMessage}"></p>
+            </div>
+            <div class="popup-footer">
+                <button id="popup-ok" class="popup-ok-button">OK</button>
+            </div>
         </div>
     </div>
 
@@ -129,11 +192,20 @@
     <script>
       const popupOverlay = document.getElementById('popup-overlay');
       const popupClose = document.getElementById('popup-close');
+      const popupOk = document.getElementById('popup-ok');
+
+      const closePopup = () => {
+        if (popupOverlay) {
+          popupOverlay.style.display = 'none';
+        }
+      };
 
       if (popupClose) {
-        popupClose.addEventListener('click', () => {
-          popupOverlay.style.display = 'none';
-        });
+        popupClose.addEventListener('click', closePopup);
+      }
+
+      if (popupOk) {
+        popupOk.addEventListener('click', closePopup);
       }
     </script>
   </body>
