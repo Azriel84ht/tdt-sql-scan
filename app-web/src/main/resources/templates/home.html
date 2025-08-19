@@ -12,10 +12,37 @@
     <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
 
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <style>
+      .popup-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        -webkit-backdrop-filter: blur(4px);
+        backdrop-filter: blur(4px);
+      }
+      .popup-content {
+        background-color: rgba(31, 41, 55, 0.7); /* bg-gray-800 with 70% opacity */
+        -webkit-backdrop-filter: blur(16px); /* backdrop-blur-lg */
+        backdrop-filter: blur(16px);
+        border-radius: 0.75rem; /* rounded-xl */
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        max-width: 28rem; /* max-w-md */
+        width: 90%;
+        color: #e5e7eb; /* text-gray-200 */
+      }
+    </style>
   </head>
   <body>
-    <div th:if="${content.showPopup}" id="popup-overlay" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center z-1000">
-      <div class="bg-gray-800 bg-opacity-70 backdrop-blur-lg rounded-xl border border-white/10 shadow-lg max-w-md w-full text-white">
+    <div th:if="${content.showPopup}" id="popup-overlay" class="popup-overlay">
+      <div class="popup-content">
         <!-- Header -->
         <div class="flex items-center justify-between p-4 border-b border-white/10">
           <div class="flex items-center">
@@ -26,7 +53,7 @@
         </div>
         <!-- Body -->
         <div class="p-6">
-          <p class="text-gray-200" th:text="${content.popupMessage}"></p>
+          <p th:text="${content.popupMessage}"></p>
         </div>
         <!-- Footer -->
         <div class="flex justify-end p-4 border-t border-white/10">
