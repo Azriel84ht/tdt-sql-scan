@@ -167,7 +167,7 @@
     let fileMetadata = {};
     let networks = {}; // Store network instances
 
-    darkModeToggle.addEventListener('change', () => {
+    function updateTheme() {
         const isDarkMode = darkModeToggle.checked;
         if (isDarkMode) {
             document.body.classList.add('dark-mode');
@@ -187,7 +187,6 @@
                 const updatedNodes = [];
 
                 dataSet.forEach(node => {
-                    // Check if it's a BTEQ script node (they have an image)
                     if (node.image && node.image.includes('bteq_script.png')) {
                         updatedNodes.push({ id: node.id, font: fontOptions });
                     }
@@ -198,7 +197,9 @@
                 }
             }
         }
-    });
+    }
+
+    darkModeToggle.addEventListener('change', updateTheme);
 
     span.onclick = function() {
         modal.style.display = "none";
@@ -283,6 +284,8 @@
     document.addEventListener("DOMContentLoaded", function() {
         openTab(null, 'chain-flow');
         document.querySelector('.tablinks').classList.add('active');
+        // Apply theme on load
+        updateTheme();
     });
 
     fileOrderForm.addEventListener('submit', (event) => {
@@ -449,6 +452,7 @@
         };
         const network = new vis.Network(container, networkData, options);
         networks[container.id] = network; // Store the network instance
+        updateTheme(); // Apply theme to the newly created graph
 
         network.on('beforeDrawing', function(ctx) {
             const canvasWidth = container.clientWidth;
