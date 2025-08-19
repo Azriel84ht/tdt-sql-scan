@@ -1,0 +1,8 @@
+[INFO] Scanning for projects...
+[INFO]
+[INFO] -----------------------< com.tdtsqlscan:app-web >-----------------------
+[INFO] Building app-web 1.0.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO]
+[INFO] >>> spring-boot:2.6.3:run (default-cli) > test-compile @ app-web >>>
