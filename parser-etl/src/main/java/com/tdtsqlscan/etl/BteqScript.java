@@ -63,33 +63,61 @@ public class BteqScript {
                 .count();
     }
 
+    private String extractTableName(String expression) {
+        if (expression == null) {
+            return null;
+        }
+        // Eliminar el calificador de base de datos si existe
+        if (expression.contains(".")) {
+            expression = expression.substring(expression.indexOf(".") + 1);
+        }
+        // Dividir por espacios para separar el nombre de la tabla del alias
+        String[] parts = expression.trim().split("\\s+");
+        return parts[0];
+    }
+
+    private List<String> getCreatedTables() {
+        return commands.stream()
+                .filter(c -> c instanceof BteqSqlCommand)
+                .map(c -> ((BteqSqlCommand) c).getQuery())
+                .filter(q -> q instanceof com.tdtsqlscan.ddl.CreateTableQuery)
+                .map(q -> ((com.tdtsqlscan.ddl.CreateTableQuery) q).getTableName())
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
     public List<String> getInputTables() {
         List<String> tables = new ArrayList<>();
+        List<String> createdTables = getCreatedTables();
+
         for (BteqCommand command : commands) {
             if (command instanceof BteqSqlCommand) {
                 SQLQuery query = ((BteqSqlCommand) command).getQuery();
                 if (query instanceof com.tdtsqlscan.select.SelectQuery) {
                     com.tdtsqlscan.select.SelectQuery q = (com.tdtsqlscan.select.SelectQuery) query;
-                    q.getTables().forEach(t -> tables.add(t.getExpression()));
-                    q.getJoins().forEach(j -> tables.add(j.getRight().getExpression()));
+                    q.getTables().forEach(t -> tables.add(extractTableName(t.getExpression())));
+                    q.getJoins().forEach(j -> tables.add(extractTableName(j.getRight().getExpression())));
                 } else if (query instanceof com.tdtsqlscan.dml.UpdateQuery) {
                     com.tdtsqlscan.dml.UpdateQuery q = (com.tdtsqlscan.dml.UpdateQuery) query;
-                    tables.addAll(q.getSourceTables());
+                    tables.addAll(q.getSourceTables().stream().map(this::extractTableName).collect(Collectors.toList()));
                 } else if (query instanceof com.tdtsqlscan.dml.DeleteQuery) {
                     com.tdtsqlscan.dml.DeleteQuery q = (com.tdtsqlscan.dml.DeleteQuery) query;
-                    tables.add(q.getTable());
+                    tables.add(extractTableName(q.getTable()));
                 } else if (query instanceof com.tdtsqlscan.dml.InsertQuery) {
                     com.tdtsqlscan.dml.InsertQuery q = (com.tdtsqlscan.dml.InsertQuery) query;
                     if (q.getSourceTableName() != null) {
-                        tables.add(q.getSourceTableName());
+                        tables.add(extractTableName(q.getSourceTableName()));
                     }
                 } else if (query instanceof com.tdtsqlscan.ddl.CreateTableQuery) {
                     com.tdtsqlscan.ddl.CreateTableQuery q = (com.tdtsqlscan.ddl.CreateTableQuery) query;
-                    tables.addAll(q.getSourceTables());
+                    tables.addAll(q.getSourceTables().stream().map(this::extractTableName).collect(Collectors.toList()));
                 }
             }
         }
-        return tables.stream().distinct().sorted().collect(java.util.stream.Collectors.toList());
+
+        tables.removeAll(createdTables);
+
+        return tables.stream().filter(t -> t != null && !t.isEmpty()).distinct().sorted().collect(Collectors.toList());
     }
 
     public List<String> getOutputTables() {
