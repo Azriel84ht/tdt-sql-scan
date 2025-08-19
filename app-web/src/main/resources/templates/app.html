@@ -164,9 +164,35 @@
     const darkModeToggle = document.getElementById('dark-mode-toggle');
     const darkModeStylesheet = document.getElementById('dark-mode-stylesheet');
     let activeNode = null;
+    let fileMetadata = {};
+    let networks = {}; // Store network instances
 
     darkModeToggle.addEventListener('change', () => {
-        darkModeStylesheet.disabled = !darkModeToggle.checked;
+        const isDarkMode = darkModeToggle.checked;
+        darkModeStylesheet.disabled = !isDarkMode;
+
+        const fontOptions = isDarkMode
+            ? { background: 'rgba(55, 65, 81, 0.8)', color: 'white' } // Dark mode
+            : { background: 'rgba(255, 255, 255, 0.8)', color: 'black' }; // Light mode
+
+        for (const key in networks) {
+            if (Object.hasOwnProperty.call(networks, key)) {
+                const network = networks[key];
+                const dataSet = network.body.data.nodes;
+                const updatedNodes = [];
+
+                dataSet.forEach(node => {
+                    // Check if it's a BTEQ script node (they have an image)
+                    if (node.image && node.image.includes('bteq_script.png')) {
+                        updatedNodes.push({ id: node.id, font: fontOptions });
+                    }
+                });
+
+                if (updatedNodes.length > 0) {
+                    dataSet.update(updatedNodes);
+                }
+            }
+        }
     });
 
     span.onclick = function() {
@@ -292,9 +318,10 @@
             return response.json();
         })
         .then(data => {
+            fileMetadata = data.fileMetadata; // Store metadata
             // Render Chain Flow graph
             const chainFlowContainer = document.getElementById('chain-flow-network');
-            renderGraph(data.chainFlow, chainFlowContainer);
+            renderGraph(data.chainFlow, chainFlowContainer, false); // No context menu for chain flow
 
             // --- Render BTEQ Flow Graphs ---
 
@@ -337,7 +364,7 @@
                     flowMainContainer.appendChild(tabContent);
 
                     // Render the graph in the new container
-                    renderGraph(graphData, graphContainer);
+                    renderGraph(graphData, graphContainer, true); // Enable context menu for BTEQ flows
 
                     if (!firstBteqTabButton) {
                         firstBteqTabButton = tabButton;
@@ -356,7 +383,7 @@
         });
     });
 
-    function renderGraph(data, container) {
+    function renderGraph(data, container, enableContextMenu) {
         if (!data) {
             console.error("No data for graph rendering in container:", container.id);
             return;
@@ -375,7 +402,8 @@
                     fixed: true,
                     fileName: node.properties.fileName,
                     fileSize: node.properties.fileSize,
-                    fileEncoding: node.properties.fileEncoding
+                    fileEncoding: node.properties.fileEncoding,
+                    font: node.properties.font // Pass font properties from server
                 };
                 return nodeData;
             })
@@ -415,6 +443,7 @@
             }
         };
         const network = new vis.Network(container, networkData, options);
+        networks[container.id] = network; // Store the network instance
 
         network.on('beforeDrawing', function(ctx) {
             const canvasWidth = container.clientWidth;
