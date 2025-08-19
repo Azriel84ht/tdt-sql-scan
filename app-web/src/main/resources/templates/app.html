@@ -488,16 +488,18 @@
             }
         });
 
-        network.on("oncontext", function (params) {
-            params.event.preventDefault();
-            const nodeId = network.getNodeAt(params.pointer.DOM);
-            if (nodeId) {
-                activeNode = nodes.get(nodeId);
-                contextMenu.style.left = params.event.pageX + 'px';
-                contextMenu.style.top = params.event.pageY + 'px';
-                contextMenu.style.display = 'block';
-            }
-        });
+        if (enableContextMenu) {
+            network.on("oncontext", function (params) {
+                params.event.preventDefault();
+                const nodeId = network.getNodeAt(params.pointer.DOM);
+                if (nodeId) {
+                    activeNode = nodes.get(nodeId);
+                    contextMenu.style.left = params.event.pageX + 'px';
+                    contextMenu.style.top = params.event.pageY + 'px';
+                    contextMenu.style.display = 'block';
+                }
+            });
+        }
 
         network.on("click", function (params) {
             const nodeId = network.getNodeAt(params.pointer.DOM);
