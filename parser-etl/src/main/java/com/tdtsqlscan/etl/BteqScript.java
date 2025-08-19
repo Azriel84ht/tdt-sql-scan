@@ -73,7 +73,7 @@ public class BteqScript {
         }
         // Dividir por espacios para separar el nombre de la tabla del alias
         String[] parts = expression.trim().split("\\s+");
-        return parts[0];
+        return parts[0].toLowerCase();
     }
 
     private List<String> getCreatedTables() {
@@ -81,7 +81,7 @@ public class BteqScript {
                 .filter(c -> c instanceof BteqSqlCommand)
                 .map(c -> ((BteqSqlCommand) c).getQuery())
                 .filter(q -> q instanceof com.tdtsqlscan.ddl.CreateTableQuery)
-                .map(q -> ((com.tdtsqlscan.ddl.CreateTableQuery) q).getTableName())
+                .map(q -> ((com.tdtsqlscan.ddl.CreateTableQuery) q).getTableName().toLowerCase())
                 .distinct()
                 .collect(Collectors.toList());
     }
