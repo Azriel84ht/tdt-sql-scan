@@ -57,6 +57,29 @@ body {
     color: #3498DB;
 }
 
+.drop-zone {
+    border-color: #5a5a5a;
+    color: #ccc;
+}
+
+.drop-zone.dragover {
+    border-color: #3498DB;
+    color: #3498DB;
+}
+
+#file-order-form button {
+    background-color: #3498DB;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#file-order-form button:hover {
+    background-color: #2980b9;
+}
+
 #file-list li {
     background-color: #34495e;
     color: #ecf0f1;
@@ -68,6 +91,10 @@ body {
 
 #metadata-table th {
     background-color: #34495e;
+}
+
+.main-content {
+    background-color: #333;
 }
 
 #file-list-container h3 {
