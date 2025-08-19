@@ -119,19 +119,19 @@ body.dark-mode .tab {
 }
 
 /* Style the buttons inside the tab */
-body.dark-mode .tab .tablinks {
+body.dark-mode .tab button {
     background-color: #34495e;
     color: #ecf0f1;
     border: none;
 }
 
 /* Change background color of buttons on hover */
-body.dark-mode .tab .tablinks:hover {
+body.dark-mode .tab button:hover {
     background-color: #4a4a4a;
 }
 
 /* Create an active/current tablink class */
-body.dark-mode .tab .tablinks.active {
+body.dark-mode .tab button.active {
     background-color: #5a5a5a;
 }
 

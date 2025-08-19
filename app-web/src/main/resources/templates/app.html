@@ -285,6 +285,9 @@
         openTab(null, 'chain-flow');
         document.querySelector('.tablinks').classList.add('active');
         // Apply theme on load
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            darkModeToggle.checked = true;
+        }
         updateTheme();
     });
 
