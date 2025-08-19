@@ -504,9 +504,9 @@
             });
         }
 
-        network.on("click", function (params) {
-            const nodeId = network.getNodeAt(params.pointer.DOM);
-            if (nodeId) {
+        network.on("selectNode", function (params) {
+            if (params.nodes.length > 0) {
+                const nodeId = params.nodes[0];
                 const clickedNode = nodes.get(nodeId);
                 if (clickedNode && clickedNode.fileName) { // Check if it's a file node
                     const metadata = fileMetadata[clickedNode.fileName];
@@ -534,6 +534,10 @@
                     table.innerHTML = tableHtml;
                 }
             }
+        });
+
+        network.on("deselectNode", function (params) {
+            document.getElementById('metadata-table').innerHTML = "";
         });
     }
     /*]]>*/
