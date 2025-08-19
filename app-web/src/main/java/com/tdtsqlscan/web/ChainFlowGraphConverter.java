@@ -41,13 +41,19 @@ public class ChainFlowGraphConverter {
                             for (int i = 0; i < scriptCount; i++) {
                                 BteqScript script = entry.getValue().get(i);
                                 Node node = new Node(script.getScriptName(), script.getScriptName());
-                                int x = entry.getKey() * 400;
+                                int x = entry.getKey() * 300;
                                 int y = (i * y_gap) - yOffset + max_y_offset;
                                 node.getProperties().put("x", String.valueOf(x));
                                 node.getProperties().put("y", String.valueOf(y));
                                 node.getProperties().put("shape", "image");
                                 node.getProperties().put("image", "/images/bteq_script.png");
                                 node.getProperties().put("size", "50");
+
+                                Map<String, Object> font = new HashMap<>();
+                                font.put("background", "rgba(255, 255, 255, 0.8)");
+                                font.put("color", "black");
+                                node.getProperties().put("font", font);
+
                                 BteqScript originalScript = scriptsByName.get(script.getScriptName());
                                 if (originalScript != null) {
                                     node.getProperties().put("fileName", originalScript.getScriptName());
