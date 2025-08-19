@@ -12,43 +12,25 @@
     <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
 
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <style>
-      .popup-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-      }
-      .popup-content {
-        background-color: white;
-        border-radius: 5px;
-        max-width: 500px;
-        width: 90%;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      }
-    </style>
   </head>
   <body>
-    <div th:if="${content.showPopup}" id="popup-overlay" class="popup-overlay">
-      <div class="popup-content">
-        <div class="flex items-center justify-between p-4 border-b">
+    <div th:if="${content.showPopup}" id="popup-overlay" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center z-1000">
+      <div class="bg-gray-800 bg-opacity-70 backdrop-blur-lg rounded-xl border border-white/10 shadow-lg max-w-md w-full text-white">
+        <!-- Header -->
+        <div class="flex items-center justify-between p-4 border-b border-white/10">
           <div class="flex items-center">
-            <svg class="w-6 h-6 text-yellow-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-            <h3 class="text-lg font-semibold">Attention</h3>
+            <svg class="w-6 h-6 text-yellow-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            <h3 class="text-lg font-semibold text-cyan-400">Attention</h3>
           </div>
-          <button id="popup-close-x" class="text-black">&times;</button>
+          <button id="popup-close-x" class="text-gray-400 hover:text-white text-2xl">&times;</button>
         </div>
-        <div class="p-4">
-          <p th:text="${content.popupMessage}"></p>
+        <!-- Body -->
+        <div class="p-6">
+          <p class="text-gray-200" th:text="${content.popupMessage}"></p>
         </div>
-        <div class="flex justify-end p-4 border-t">
-          <button id="popup-accept" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+        <!-- Footer -->
+        <div class="flex justify-end p-4 border-t border-white/10">
+          <button id="popup-accept" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg">
             Aceptar
           </button>
         </div>
