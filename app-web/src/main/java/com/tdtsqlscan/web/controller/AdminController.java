@@ -39,14 +39,18 @@ public class AdminController {
     }
 
     @PostMapping("/content")
-    public String saveContent(@ModelAttribute HomepageContent content, Model model) {
+    public String saveContent(@ModelAttribute HomepageContent content,
+                              @RequestParam(name = "showPopup", required = false) String showPopupCheckbox,
+                              Model model) {
         HomepageContent existingContent = contentService.getContent();
         existingContent.setHeroTitle(content.getHeroTitle());
         existingContent.setHeroSubtitle(content.getHeroSubtitle());
         existingContent.setNewsSection(content.getNewsSection());
         existingContent.setPopupMessage(content.getPopupMessage());
-        existingContent.setShowPopup(content.isShowPopup());
+        existingContent.setShowPopup(showPopupCheckbox != null);
+
         contentService.saveContent(existingContent);
+
         model.addAttribute("message", "Homepage content updated successfully!");
         model.addAttribute("content", existingContent);
         return "admin/content";
