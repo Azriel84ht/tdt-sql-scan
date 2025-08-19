@@ -70,8 +70,8 @@ public class BteqScript {
                 SQLQuery query = ((BteqSqlCommand) command).getQuery();
                 if (query instanceof com.tdtsqlscan.select.SelectQuery) {
                     com.tdtsqlscan.select.SelectQuery q = (com.tdtsqlscan.select.SelectQuery) query;
-                    q.getTables().forEach(t -> tables.add(t.getName()));
-                    q.getJoins().forEach(j -> tables.add(j.getTable().getName()));
+                    q.getTables().forEach(t -> tables.add(t.getExpression()));
+                    q.getJoins().forEach(j -> tables.add(j.getRight().getExpression()));
                 } else if (query instanceof com.tdtsqlscan.dml.UpdateQuery) {
                     com.tdtsqlscan.dml.UpdateQuery q = (com.tdtsqlscan.dml.UpdateQuery) query;
                     tables.addAll(q.getSourceTables());
