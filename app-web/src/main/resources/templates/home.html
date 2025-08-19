@@ -192,11 +192,20 @@
     <script>
       const popupOverlay = document.getElementById('popup-overlay');
       const popupClose = document.getElementById('popup-close');
+      const popupOk = document.getElementById('popup-ok');
+
+      const closePopup = () => {
+        if (popupOverlay) {
+          popupOverlay.style.display = 'none';
+        }
+      };
 
       if (popupClose) {
-        popupClose.addEventListener('click', () => {
-          popupOverlay.style.display = 'none';
-        });
+        popupClose.addEventListener('click', closePopup);
+      }
+
+      if (popupOk) {
+        popupOk.addEventListener('click', closePopup);
       }
     </script>
   </body>
