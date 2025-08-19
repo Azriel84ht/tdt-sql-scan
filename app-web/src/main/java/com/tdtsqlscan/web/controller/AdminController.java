@@ -40,9 +40,15 @@ public class AdminController {
 
     @PostMapping("/content")
     public String saveContent(@ModelAttribute HomepageContent content, Model model) {
-        contentService.saveContent(content);
+        HomepageContent existingContent = contentService.getContent();
+        existingContent.setHeroTitle(content.getHeroTitle());
+        existingContent.setHeroSubtitle(content.getHeroSubtitle());
+        existingContent.setNewsSection(content.getNewsSection());
+        existingContent.setPopupMessage(content.getPopupMessage());
+        existingContent.setShowPopup(content.isShowPopup());
+        contentService.saveContent(existingContent);
         model.addAttribute("message", "Homepage content updated successfully!");
-        model.addAttribute("content", content);
+        model.addAttribute("content", existingContent);
         return "admin/content";
     }
 
