@@ -500,25 +500,29 @@
             if (nodeId) {
                 const clickedNode = nodes.get(nodeId);
                 if (clickedNode && clickedNode.fileName) { // Check if it's a file node
+                    const metadata = fileMetadata[clickedNode.fileName];
                     const table = document.getElementById('metadata-table');
-                    table.innerHTML = `
-                        <tr>
-                            <th>Attribute</th>
-                            <th>Value</th>
-                        </tr>
-                        <tr>
-                            <td>File Name</td>
-                            <td>${clickedNode.fileName}</td>
-                        </tr>
-                        <tr>
-                            <td>File Size</td>
-                            <td>${clickedNode.fileSize} bytes</td>
-                        </tr>
-                        <tr>
-                            <td>Encoding</td>
-                            <td>${clickedNode.fileEncoding}</td>
-                        </tr>
+                    let tableHtml = `
+                        <tr><th>Attribute</th><th>Value</th></tr>
+                        <tr><td>File Name</td><td>${clickedNode.fileName}</td></tr>
+                        <tr><td>File Size</td><td>${clickedNode.fileSize} bytes</td></tr>
+                        <tr><td>Encoding</td><td>${clickedNode.fileEncoding}</td></tr>
                     `;
+
+                    if (metadata) {
+                        tableHtml += `
+                            <tr><td>Transactions</td><td>${metadata.transactions}</td></tr>
+                            <tr>
+                                <td>Input Tables</td>
+                                <td>${metadata.inputTables && metadata.inputTables.length > 0 ? metadata.inputTables.join('<br>') : '-'}</td>
+                            </tr>
+                            <tr>
+                                <td>Output Tables</td>
+                                <td>${metadata.outputTables && metadata.outputTables.length > 0 ? metadata.outputTables.join('<br>') : '-'}</td>
+                            </tr>
+                        `;
+                    }
+                    table.innerHTML = tableHtml;
                 }
             }
         });
