@@ -5,6 +5,7 @@ import com.tdtsqlscan.graph.Graph;
 import com.tdtsqlscan.graph.Node;
 import com.tdtsqlscan.graph.Edge;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
