@@ -77,17 +77,18 @@ body {
 }
 
 /* Style the buttons inside the tab */
-.tab button {
+.tab .tablinks {
     background-color: #34495e;
     color: #ecf0f1;
+    border: none;
 }
 
 /* Change background color of buttons on hover */
-.tab button:hover {
+.tab .tablinks:hover {
     background-color: #4a4a4a;
 }
 
 /* Create an active/current tablink class */
-.tab button.active {
+.tab .tablinks.active {
     background-color: #4a4a4a;
 }
