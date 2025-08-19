@@ -169,6 +169,11 @@
 
     darkModeToggle.addEventListener('change', () => {
         const isDarkMode = darkModeToggle.checked;
+        if (isDarkMode) {
+            document.body.classList.add('dark-mode');
+        } else {
+            document.body.classList.remove('dark-mode');
+        }
         darkModeStylesheet.disabled = !isDarkMode;
 
         const fontOptions = isDarkMode
