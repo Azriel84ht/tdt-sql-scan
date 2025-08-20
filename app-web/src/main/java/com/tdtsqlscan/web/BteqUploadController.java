@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tdtsqlscan.core.SQLQuery;
 import com.tdtsqlscan.core.SQLTableRef;
 import com.tdtsqlscan.ddl.CreateTableQuery;
+import com.tdtsqlscan.ddl.DropTableQuery;
 import com.tdtsqlscan.dml.DeleteQuery;
 import com.tdtsqlscan.dml.InsertQuery;
 import com.tdtsqlscan.dml.UpdateQuery;
@@ -36,7 +37,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -109,8 +112,12 @@ public class BteqUploadController {
 
         Map<String, FileMetadata> fileMetadataMap = new LinkedHashMap<>();
         for (BteqScript script : scripts) {
-            FileMetadata metadata = new FileMetadata();
+            Set<String> createdTables = new HashSet<>();
+            Set<String> droppedTables = new HashSet<>();
+            Set<String> readTables = new HashSet<>();
+            Set<String> writtenTables = new HashSet<>();
             int transactionCount = 0;
+
             for (BteqCommand command : script.getCommands()) {
                 if (command instanceof BteqSqlCommand) {
                     transactionCount++;
@@ -118,31 +125,51 @@ public class BteqUploadController {
                     if (query instanceof SelectQuery) {
                         SelectQuery selectQuery = (SelectQuery) query;
                         for (SQLTableRef tableRef : selectQuery.getTables()) {
-    String tableName = tableRef.getExpression().split(" ")[0];
-    metadata.addInputTable(tableName);
+                            readTables.add(tableRef.getExpression().split(" ")[0].toUpperCase());
                         }
                     } else if (query instanceof InsertQuery) {
                         InsertQuery insertQuery = (InsertQuery) query;
-                        metadata.addOutputTable(insertQuery.getTableName());
+                        writtenTables.add(insertQuery.getTableName().toUpperCase());
                         if (insertQuery.getSourceTableName() != null) {
-                            metadata.addInputTable(insertQuery.getSourceTableName());
+                            readTables.add(insertQuery.getSourceTableName().toUpperCase());
                         }
                     } else if (query instanceof UpdateQuery) {
                         UpdateQuery updateQuery = (UpdateQuery) query;
-                        metadata.addOutputTable(updateQuery.getTargetTable());
+                        writtenTables.add(updateQuery.getTargetTable().toUpperCase());
                         for (String sourceTable : updateQuery.getSourceTables()) {
-                            metadata.addInputTable(sourceTable);
+                            readTables.add(sourceTable.toUpperCase());
                         }
                     } else if (query instanceof DeleteQuery) {
                         DeleteQuery deleteQuery = (DeleteQuery) query;
-                        metadata.addOutputTable(deleteQuery.getTable());
+                        writtenTables.add(deleteQuery.getTable().toUpperCase());
                     } else if (query instanceof CreateTableQuery) {
                         CreateTableQuery createTableQuery = (CreateTableQuery) query;
-                        metadata.addOutputTable(createTableQuery.getTableName());
+                        String tableName = createTableQuery.getTableName().toUpperCase();
+                        createdTables.add(tableName);
+                        writtenTables.add(tableName);
+                    } else if (query instanceof DropTableQuery) {
+                        DropTableQuery dropTableQuery = (DropTableQuery) query;
+                        droppedTables.add(dropTableQuery.getTableName().toUpperCase());
                     }
                 }
             }
+
+            FileMetadata metadata = new FileMetadata();
             metadata.setTransactions(transactionCount);
+
+            Set<String> finalInputTables = new HashSet<>(readTables);
+            finalInputTables.removeAll(createdTables);
+
+            Set<String> finalOutputTables = new HashSet<>(writtenTables);
+            finalOutputTables.removeAll(droppedTables);
+
+            for (String table : finalInputTables) {
+                metadata.addInputTable(table);
+            }
+            for (String table : finalOutputTables) {
+                metadata.addOutputTable(table);
+            }
+
             fileMetadataMap.put(script.getScriptName(), metadata);
         }
 
