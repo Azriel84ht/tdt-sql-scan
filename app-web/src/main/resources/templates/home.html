@@ -1,4 +1,4 @@
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
   <head>
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
     <link
@@ -9,7 +9,7 @@
     />
 
     <title>Data Flow Visualizer</title>
-    <link rel="icon" type="image/png" href="/main-images/icon_mini_100x100.png" />
+    <link rel="icon" type="image/png" th:href="@{/main-images/icon_mini_100x100.png}" />
     <meta name="description" content="Data Flow Visualizer is a tool to visualize complex data flows from Teradata BTEQ scripts. Understand dependencies and optimize your processes effortlessly." />
     <meta name="keywords" content="Data Flow, Visualizer, Teradata, BTEQ, SQL, ETL, Data Lineage, Stitch Design" />
 
@@ -121,7 +121,7 @@
       <div class="layout-container flex h-full grow flex-col">
         <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#f0f3f4] px-10 py-3">
           <div class="flex items-center gap-4 text-[#111618]">
-            <img src="/main-images/icon_full_200x200.png" alt="Data Flow Visualizer Logo" class="h-8 w-8">
+            <img th:src="@{/main-images/icon_full_200x200.png}" alt="Data Flow Visualizer Logo" class="h-8 w-8">
             <h2 class="text-[#111618] text-lg font-bold leading-tight tracking-[-0.015em]">Data Flow Visualizer</h2>
           </div>
           <div class="flex gap-2">
