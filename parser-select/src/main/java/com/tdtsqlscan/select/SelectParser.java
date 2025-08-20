@@ -32,10 +32,21 @@ public class SelectParser implements QueryParser {
         }
 
         // FROM and JOINs
-        String fromClause = SQLParserUtils.extractBetweenKeywords(sql, "FROM", "WHERE");
-        if (fromClause == null) fromClause = SQLParserUtils.extractBetweenKeywords(sql, "FROM", "GROUP BY");
-        if (fromClause == null) fromClause = SQLParserUtils.extractBetweenKeywords(sql, "FROM", "ORDER BY");
-        if (fromClause == null) fromClause = SQLParserUtils.extractAfterKeyword(sql, "FROM", null);
+        int fromIndex = SQLParserUtils.findTopLevelKeyword(sql, "FROM", 0);
+        String fromClause = null;
+        if (fromIndex != -1) {
+            fromIndex += "FROM".length();
+            int whereIndex = SQLParserUtils.findTopLevelKeyword(sql, "WHERE", fromIndex);
+            int groupByIndex = SQLParserUtils.findTopLevelKeyword(sql, "GROUP BY", fromIndex);
+            int orderByIndex = SQLParserUtils.findTopLevelKeyword(sql, "ORDER BY", fromIndex);
+
+            int endIndex = sql.length();
+            if (whereIndex != -1) endIndex = Math.min(endIndex, whereIndex);
+            if (groupByIndex != -1) endIndex = Math.min(endIndex, groupByIndex);
+            if (orderByIndex != -1) endIndex = Math.min(endIndex, orderByIndex);
+
+            fromClause = sql.substring(fromIndex, endIndex).trim();
+        }
 
         if (fromClause != null) {
             List<String> tablesAndJoins = SQLParserUtils.splitTopLevel(fromClause, "JOIN");

@@ -118,7 +118,8 @@ public class BteqUploadController {
                     if (query instanceof SelectQuery) {
                         SelectQuery selectQuery = (SelectQuery) query;
                         for (SQLTableRef tableRef : selectQuery.getTables()) {
-                            metadata.addInputTable(tableRef.getExpression());
+    String tableName = tableRef.getExpression().split(" ")[0];
+    metadata.addInputTable(tableName);
                         }
                     } else if (query instanceof InsertQuery) {
                         InsertQuery insertQuery = (InsertQuery) query;

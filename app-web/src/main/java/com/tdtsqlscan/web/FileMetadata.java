@@ -20,13 +20,13 @@ public class FileMetadata {
 
     public void addInputTable(String table) {
         if (table != null && !table.isEmpty()) {
-            this.inputTables.add(table);
+        this.inputTables.add(table.toUpperCase());
         }
     }
 
     public void addOutputTable(String table) {
         if (table != null && !table.isEmpty()) {
-            this.outputTables.add(table);
+        this.outputTables.add(table.toUpperCase());
         }
     }
 
