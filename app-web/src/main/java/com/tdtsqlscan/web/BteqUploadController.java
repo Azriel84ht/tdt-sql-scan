@@ -11,8 +11,17 @@ import com.tdtsqlscan.etl.BteqScript;
 import com.tdtsqlscan.etl.BteqScriptParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tdtsqlscan.core.SQLQuery;
+import com.tdtsqlscan.core.SQLTableRef;
+import com.tdtsqlscan.ddl.CreateTableQuery;
+import com.tdtsqlscan.dml.DeleteQuery;
+import com.tdtsqlscan.dml.InsertQuery;
+import com.tdtsqlscan.dml.UpdateQuery;
+import com.tdtsqlscan.etl.BteqCommand;
+import com.tdtsqlscan.etl.BteqSqlCommand;
 import com.tdtsqlscan.graph.Graph;
 import com.tdtsqlscan.select.SelectParser;
+import com.tdtsqlscan.select.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -42,6 +51,7 @@ public class BteqUploadController {
     public static class GraphResponse {
         public Graph chainFlow;
         public Map<String, Graph> bteqFlows;
+        public Map<String, FileMetadata> fileMetadata;
     }
 
     public BteqUploadController() {
@@ -97,9 +107,48 @@ public class BteqUploadController {
                     script.getScriptName(), bteqFlowGraph.getNodes().size(), bteqFlowGraph.getEdges().size());
         }
 
+        Map<String, FileMetadata> fileMetadataMap = new LinkedHashMap<>();
+        for (BteqScript script : scripts) {
+            FileMetadata metadata = new FileMetadata();
+            int transactionCount = 0;
+            for (BteqCommand command : script.getCommands()) {
+                if (command instanceof BteqSqlCommand) {
+                    transactionCount++;
+                    SQLQuery query = ((BteqSqlCommand) command).getQuery();
+                    if (query instanceof SelectQuery) {
+                        SelectQuery selectQuery = (SelectQuery) query;
+                        for (SQLTableRef tableRef : selectQuery.getTables()) {
+                            metadata.addInputTable(tableRef.getExpression());
+                        }
+                    } else if (query instanceof InsertQuery) {
+                        InsertQuery insertQuery = (InsertQuery) query;
+                        metadata.addOutputTable(insertQuery.getTableName());
+                        if (insertQuery.getSourceTableName() != null) {
+                            metadata.addInputTable(insertQuery.getSourceTableName());
+                        }
+                    } else if (query instanceof UpdateQuery) {
+                        UpdateQuery updateQuery = (UpdateQuery) query;
+                        metadata.addOutputTable(updateQuery.getTargetTable());
+                        for (String sourceTable : updateQuery.getSourceTables()) {
+                            metadata.addInputTable(sourceTable);
+                        }
+                    } else if (query instanceof DeleteQuery) {
+                        DeleteQuery deleteQuery = (DeleteQuery) query;
+                        metadata.addOutputTable(deleteQuery.getTable());
+                    } else if (query instanceof CreateTableQuery) {
+                        CreateTableQuery createTableQuery = (CreateTableQuery) query;
+                        metadata.addOutputTable(createTableQuery.getTableName());
+                    }
+                }
+            }
+            metadata.setTransactions(transactionCount);
+            fileMetadataMap.put(script.getScriptName(), metadata);
+        }
+
         GraphResponse response = new GraphResponse();
         response.chainFlow = chainFlowGraph;
         response.bteqFlows = bteqFlows;
+        response.fileMetadata = fileMetadataMap;
 
         return response;
     }
