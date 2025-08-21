@@ -117,31 +117,9 @@
         </div>
     </div>
 
-    <div class="relative flex size-full min-h-screen flex-col bg-white group/design-root overflow-x-hidden" style='font-family: Inter, "Noto Sans", sans-serif;'>
+    <div class="relative flex size-full min-h-screen flex-col bg-white group/design-root overflow-x-hidden dark:bg-gray-900" style='font-family: Inter, "Noto Sans", sans-serif;'>
       <div class="layout-container flex h-full grow flex-col">
-        <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#f0f3f4] px-10 py-3">
-          <div class="flex items-center gap-4 text-[#111618]">
-            <img th:src="@{/main-images/icon_full_200x200.png}" alt="Data Flow Visualizer Logo" class="h-8 w-8">
-            <h2 class="text-[#111618] text-lg font-bold leading-tight tracking-[-0.015em]">Data Flow Visualizer</h2>
-          </div>
-          <div class="flex gap-2">
-            <a th:href="@{/register}"
-              class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#21bded] text-[#111618] text-sm font-bold leading-normal tracking-[0.015em]"
-            >
-              <span class="truncate">Register</span>
-            </a>
-            <a th:href="@{/login}"
-              class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#f0f3f4] text-[#111618] text-sm font-bold leading-normal tracking-[0.015em]"
-            >
-              <span class="truncate">Login</span>
-            </a>
-            <a th:href="@{/blog}"
-              class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#f0f3f4] text-[#111618] text-sm font-bold leading-normal tracking-[0.015em]"
-            >
-              <span class="truncate">Blog</span>
-            </a>
-          </div>
-        </header>
+        <div th:replace="~{fragments/header :: header}"></div>
         <div class="px-40 flex flex-1 justify-center py-5">
           <div class="layout-content-container flex flex-col max-w-[1280px] flex-1">
             <div class="@container">
@@ -203,5 +181,6 @@
         popupOk.addEventListener('click', closePopup);
       }
     </script>
+    <script th:src="@{/js/theme.js}"></script>
   </body>
 </html>
