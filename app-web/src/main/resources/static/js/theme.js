@@ -2,11 +2,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const themeToggle = document.getElementById('theme-toggle');
     const htmlElement = document.documentElement;
 
-    // On page load, apply the saved theme or the system preference
-    const savedTheme = localStorage.getItem('theme');
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-    if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+    // On page load, apply the saved theme. Default to light mode.
+    if (localStorage.getItem('theme') === 'dark') {
         htmlElement.classList.add('dark');
         if (themeToggle) {
             themeToggle.checked = true;

@@ -397,7 +397,6 @@
         };
         const network = new vis.Network(container, networkData, options);
         networks[container.id] = network; // Store the network instance
-
         network.on('beforeDrawing', function(ctx) {
             const canvasWidth = container.clientWidth;
             const canvasHeight = container.clientHeight;
