@@ -10,8 +10,10 @@
     </script>
     <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
     <style>
-        .container { max-width: 400px; margin: 50px auto; padding: 20px; border: 1px solid #ddd; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        html.dark .container { background-color: #1f2937; border-color: #374151; }
+        body { font-family: sans-serif; }
+        html:not(.dark) body { background-color: #f4f4f4; }
+        .container { max-width: 400px; margin: 50px auto; padding: 20px; background-color: #fff; border: 1px solid #ddd; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        html.dark .container { background-color: #1f2937; border-color: #374151; color: #e5e7eb; }
         .alert { padding: 15px; margin-bottom: 20px; border: 1px solid transparent; border-radius: 4px; }
         .alert-danger { color: #a94442; background-color: #f2dede; border-color: #ebccd1; }
         .alert-success { color: #3c763d; background-color: #dff0d8; border-color: #d6e9c6; }
@@ -20,12 +22,13 @@
         html.dark input[type=text], html.dark input[type=password] { background-color: #374151; border-color: #4b5563; color: white; }
         input[type=submit] { width: 100%; background-color: #4CAF50; color: white; padding: 14px 20px; margin: 8px 0; border: none; border-radius: 4px; cursor: pointer; }
         input[type=submit]:hover { background-color: #45a049; }
+        html.dark a { color: #38bdf8; }
     </style>
 </head>
 <body class="bg-white dark:bg-gray-900">
     <div th:replace="~{fragments/header :: header}"></div>
     <div class="container">
-        <h2 class="dark:text-white">Login</h2>
+        <h2>Login</h2>
         <div th:if="${param.error}" class="alert alert-danger">
             Invalid username or password.
         </div>
@@ -52,10 +55,10 @@
             </div>
         </form>
         <p>
-            No account yet? <a th:href="@{/register}" class="dark:text-sky-400">Create an account</a>
+            No account yet? <a th:href="@{/register}">Create an account</a>
         </p>
         <p>
-            <a th:href="@{/forgot-password}" class="dark:text-sky-400">Forgot Password?</a>
+            <a th:href="@{/forgot-password}">Forgot Password?</a>
         </p>
     </div>
     <script th:src="@{/js/theme.js}"></script>
