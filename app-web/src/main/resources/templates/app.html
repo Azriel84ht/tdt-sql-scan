@@ -109,8 +109,14 @@
     let graphData = {}; // Store original graph data for re-rendering
     const bteqIcon = new Image();
     bteqIcon.src = '/images/bteq_script.png';
+    bteqIcon.onload = () => {
+        Object.values(networks).forEach(network => network.redraw());
+    };
     const arrowIcon = new Image();
     arrowIcon.src = '/images/right_arrow.png';
+    arrowIcon.onload = () => {
+        Object.values(networks).forEach(network => network.redraw());
+    };
 
     span.onclick = function() {
         modal.style.display = "none";
@@ -386,6 +392,13 @@
                             ctx.textAlign = 'center';
                             ctx.fillText(label, x, y + nodeHeight / 2 - fontSize);
                         }
+
+                        return {
+                            nodeDimensions: {
+                                width: nodeWidth,
+                                height: nodeHeight
+                            }
+                        };
                     };
                 } else if (isDarkMode) {
                     nodeData.font.color = '#d1d5db'; // Light gray for text
