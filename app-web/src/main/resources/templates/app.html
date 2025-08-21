@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <title>Data Flow Visualizer</title>
+    <title>The App | Data Flow Visualizer</title>
     <link rel="icon" type="image/png" th:href="@{/main-images/icon_mini_100x100.png}" />
-    <meta name="description" content="The application part of Data Flow Visualizer, a tool to visualize complex data flows from Teradata BTEQ scripts." />
+    <meta name="description" content="The application part of Data Flow Visualizer, a tool to visualize complex data flows from Teradata BTEQ scripts. Upload your files and see the magic." />
     <meta name="keywords" content="Data Flow, Visualizer, Teradata, BTEQ, SQL, ETL, Data Lineage, Application" />
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
@@ -80,7 +80,7 @@
 
 <nav class="navbar">
     <div class="logo" style="display: flex; align-items: center;">
-        <img th:src="@{/main-images/icon_full_200x200.png}" alt="Data Flow Visualizer Logo" style="height: 40px; margin-right: 10px;" />
+        <img th:src="@{/main-images/icon_full_200x200.png}" alt="Data Flow Visualizer App Logo" style="height: 40px; margin-right: 10px;" />
         <span>Data Flow Visualizer</span>
     </div>
     <div class="nav-links">
