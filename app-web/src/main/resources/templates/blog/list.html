@@ -25,15 +25,15 @@
 
             <main class="flex-1 justify-center py-5 px-4 sm:px-6 lg:px-8">
                 <div class="max-w-4xl mx-auto">
-                    <h1 class="text-4xl font-bold text-center text-gray-800 mb-10">Our Blog</h1>
+                    <h1 class="text-4xl font-bold text-center text-gray-800 dark:text-white mb-10">Our Blog</h1>
 
                     <div class="space-y-12">
-                        <div th:each="post : ${posts}" class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                        <div th:each="post : ${posts}" class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
                             <div class="p-6">
-                                <h2 class="text-2xl font-bold text-gray-800 mb-2">
+                                <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">
                                     <a th:href="@{/blog/{slug}(slug=${post.slug})}" th:text="${post.title}" class="hover:text-[#21bded] transition-colors duration-300">Post Title</a>
                                 </h2>
-                                <div class="text-sm text-gray-500 mb-4">
+                                <div class="text-sm text-gray-500 dark:text-gray-400 mb-4">
                                     <span>By <span th:text="${post.author}">Author</span></span> |
                                     <span>Published on <span th:text="${#temporals.format(post.createdAt, 'MMMM dd, yyyy')}">Date</span></span>
                                 </div>
@@ -43,7 +43,7 @@
                         </div>
 
                         <div th:if="${posts.isEmpty()}" class="text-center py-10">
-                            <p class="text-gray-500">No blog posts have been published yet. Check back soon!</p>
+                            <p class="text-gray-500 dark:text-gray-400">No blog posts have been published yet. Check back soon!</p>
                         </div>
                     </div>
                 </div>

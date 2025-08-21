@@ -25,15 +25,15 @@
 
             <main class="flex-1 justify-center py-5 px-4 sm:px-6 lg:px-8">
                 <div class="max-w-4xl mx-auto">
-                    <article class="bg-white rounded-lg shadow-md overflow-hidden p-6">
-                        <header class="border-b pb-4 mb-4">
-                            <h1 class="text-4xl font-bold text-gray-800" th:text="${post.title}">Post Title</h1>
-                            <div class="text-sm text-gray-500 mt-2">
+                    <article class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden p-6">
+                        <header class="border-b dark:border-gray-700 pb-4 mb-4">
+                            <h1 class="text-4xl font-bold text-gray-800 dark:text-gray-100" th:text="${post.title}">Post Title</h1>
+                            <div class="text-sm text-gray-500 dark:text-gray-400 mt-2">
                                 <span>By <span th:text="${post.author}">Author</span></span> |
                                 <span>Published on <span th:text="${#temporals.format(post.createdAt, 'MMMM dd, yyyy')}">Date</span></span>
                             </div>
                         </header>
-                        <section class="prose max-w-none" th:utext="${post.content}">
+                        <section class="prose max-w-none dark:prose-invert" th:utext="${post.content}">
                             <!-- Post content will be rendered here -->
                         </section>
                     </article>
