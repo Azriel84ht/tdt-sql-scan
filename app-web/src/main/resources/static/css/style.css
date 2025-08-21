@@ -144,3 +144,55 @@ input[type=submit] {
 input[type=submit]:hover {
     background-color: #45a049; /* A darker green on hover */
 }
+
+/* Styles from app.html */
+#mynetwork { width: 100%; height: 800px; border: 1px solid lightgray; }
+.modal { display: none; position: fixed; z-index: 2; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); }
+.modal-content { background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; }
+.close { color: #aaa; float: right; font-size: 28px; font-weight: bold; }
+.close:hover, .close:focus { color: black; text-decoration: none; cursor: pointer; }
+#context-menu { display: none; position: absolute; z-index: 3; background-color: #f9f9f9; min-width: 160px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); padding: 0; margin: 0; border: 1px solid #ccc; border-radius: 5px; }
+#context-menu a { color: black; padding: 12px 16px; text-decoration: none; display: block; }
+#context-menu a:hover { background-color: #f1f1f1; }
+.main-content { padding: 20px; }
+#upload-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; }
+.drop-zone { border: 2px dashed #ccc; border-radius: 10px; padding: 40px 20px; text-align: center; cursor: pointer; margin-bottom: 20px; width: 60%; max-width: 500px; height: 150px; display: flex; align-items: center; justify-content: center;}
+.drop-zone.dragover { border-color: #007bff; }
+#file-list-container { margin-top: 20px; width: 60%; max-width: 500px; }
+#file-list { list-style: none; padding: 0; }
+#file-list li { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 10px; background-color: #f9f9f9; border-radius: 5px; }
+#file-list li span { flex-grow: 1; }
+#file-list li input { width: 60px; margin-left: 10px; text-align: center; }
+.tab { overflow: hidden; border: 1px solid #ccc; background-color: #f1f1f1; }
+.tab button { background-color: inherit; float: left; border: none; outline: none; cursor: pointer; padding: 14px 16px; transition: 0.3s; }
+.tab button:hover { background-color: #ddd; }
+.tab button.active { background-color: #ccc; }
+.tabcontent { display: none; padding: 6px 12px; border: 1px solid #ccc; border-top: none; }
+#chain-flow-network, #mynetwork { height: 800px; }
+#flow-container { display: flex; flex-direction: row; }
+#flow-main { width: 75%; }
+#metadata-sidebar { width: 25%; padding-left: 20px; }
+#metadata-table { width: 100%; border-collapse: collapse; }
+#metadata-table th, #metadata-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+#metadata-table th { background-color: #f2f2f2; }
+
+/* Dark mode styles for app.html */
+html.dark .main-content { color: #d1d5db; }
+html.dark .drop-zone { border-color: #4b5563; color: #d1d5db; }
+html.dark .drop-zone p { color: #d1d5db; }
+html.dark #file-list li { background-color: #374151; border-color: #4b5563; color: #d1d5db; }
+html.dark #file-list li input { background-color: #4b5563; border-color: #6b7280; color: white; }
+html.dark .tab { border-color: #4b5563; background-color: #1f2937; }
+html.dark .tab button { color: #d1d5db; }
+html.dark .tab button:hover { background-color: #374151; }
+html.dark .tab button.active { background-color: #4b5563; }
+html.dark .tabcontent { border-color: #4b5563; }
+html.dark #mynetwork, html.dark #chain-flow-network { border-color: #4b5563; }
+html.dark #metadata-table th, html.dark #metadata-table td { border-color: #4b5563; }
+html.dark #metadata-table th { background-color: #374151; }
+html.dark .modal-content { background-color: #1f2937; border-color: #4b5563; color: #d1d5db; }
+html.dark .close { color: #9ca3af; }
+html.dark .close:hover, html.dark .close:focus { color: white; }
+html.dark #context-menu { background-color: #1f2937; border-color: #4b5563; }
+html.dark #context-menu a { color: #d1d5db; }
+html.dark #context-menu a:hover { background-color: #374151; }
