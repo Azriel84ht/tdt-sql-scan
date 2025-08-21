@@ -4,6 +4,11 @@
     <title th:text="${post.title} + ' | Data Flow Visualizer Blog'"></title>
     <meta name="description" th:attr="content=${#strings.abbreviate(post.content, 155)}" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
     <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
     <link
