@@ -14,14 +14,9 @@
     </div>
     <div class="flex items-center gap-4">
         <!-- Theme Switcher -->
-        <div class="theme-switch-wrapper">
-            <span class="icon"><i class="fas fa-sun"></i></span>
-            <label class="theme-switch" for="theme-toggle">
-                <input type="checkbox" id="theme-toggle" />
-                <span class="slider"></span>
-            </label>
-            <span class="icon"><i class="fas fa-moon"></i></span>
-        </div>
+        <button id="theme-toggle" class="p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
+            <i class="fas fa-moon text-xl"></i>
+        </button>
 
         <!-- Dynamic Nav Links -->
         <div sec:authorize="isAuthenticated()" class="flex items-center gap-4">
