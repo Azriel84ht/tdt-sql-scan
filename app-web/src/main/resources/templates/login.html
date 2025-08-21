@@ -2,21 +2,25 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Login</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
     <style>
-        body { font-family: sans-serif; background-color: #f4f4f4; }
-        .container { max-width: 400px; margin: 50px auto; padding: 20px; background-color: #fff; border: 1px solid #ddd; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .container { max-width: 400px; margin: 50px auto; padding: 20px; border: 1px solid #ddd; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        html.dark .container { background-color: #1f2937; border-color: #374151; }
         .alert { padding: 15px; margin-bottom: 20px; border: 1px solid transparent; border-radius: 4px; }
         .alert-danger { color: #a94442; background-color: #f2dede; border-color: #ebccd1; }
         .alert-success { color: #3c763d; background-color: #dff0d8; border-color: #d6e9c6; }
         .alert-info { color: #31708f; background-color: #d9edf7; border-color: #bce8f1; }
         input[type=text], input[type=password] { width: 100%; padding: 10px; margin: 8px 0; display: inline-block; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        html.dark input[type=text], html.dark input[type=password] { background-color: #374151; border-color: #4b5563; color: white; }
         input[type=submit] { width: 100%; background-color: #4CAF50; color: white; padding: 14px 20px; margin: 8px 0; border: none; border-radius: 4px; cursor: pointer; }
         input[type=submit]:hover { background-color: #45a049; }
     </style>
 </head>
-<body>
+<body class="bg-white dark:bg-gray-900">
+    <div th:replace="~{fragments/header :: header}"></div>
     <div class="container">
-        <h2>Login</h2>
+        <h2 class="dark:text-white">Login</h2>
         <div th:if="${param.error}" class="alert alert-danger">
             Invalid username or password.
         </div>
@@ -46,8 +50,9 @@
             No account yet? <a th:href="@{/register}">Create an account</a>
         </p>
         <p>
-            <a th:href="@{/forgot-password}">Forgot Password?</a>
+            <a th:href="@{/forgot-password}" class="dark:text-sky-400">Forgot Password?</a>
         </p>
     </div>
+    <script th:src="@{/js/theme.js}"></script>
 </body>
 </html>

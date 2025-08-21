@@ -8,14 +8,10 @@
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
     <style type="text/css">
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
-        .navbar { background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
-        .navbar .logo { font-size: 1.5rem; font-weight: bold; color: #4a4a4a; }
-        .navbar .nav-links { display: flex; align-items: center; }
-        .navbar .nav-links span { margin-right: 15px; font-weight: bold; }
-        .navbar .nav-links a, .navbar .nav-links button { color: #5a5a5a; text-decoration: none; margin-left: 20px; font-weight: 500; background: none; border: none; cursor: pointer; font-size: 1rem; padding: 0; }
-        .navbar .nav-links a:hover, .navbar .nav-links button:hover { color: #007bff; }
         #mynetwork { width: 100%; height: 800px; border: 1px solid lightgray; }
         .modal { display: none; position: fixed; z-index: 2; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); }
         .modal-content { background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; }
@@ -75,22 +71,9 @@
         #metadata-table th { background-color: #f2f2f2; }
     </style>
 </head>
-<body>
+<body class="dark:bg-gray-900">
 
-<nav class="navbar">
-    <div class="logo" style="display: flex; align-items: center;">
-        <img th:src="@{/main-images/icon_full_200x200.png}" alt="Data Flow Visualizer App Logo" style="height: 40px; margin-right: 10px;" />
-        <span>Data Flow Visualizer</span>
-    </div>
-    <div class="nav-links">
-        <span>Welcome, <span sec:authentication="name">User</span>!</span>
-        <a th:href="@{/suggestions}">Suggestions</a>
-        <a sec:authorize="hasAuthority('ROLE_ADMIN')" th:href="@{/admin}">Admin Panel</a>
-        <form th:action="@{/logout}" method="post" style="display: inline;">
-            <button type="submit">Logout</button>
-        </form>
-    </div>
-</nav>
+<div th:replace="~{fragments/header :: header}"></div>
 
 <div class="main-content">
     <h1>Data Flow Visualizer for your Scripts</h1>
@@ -162,7 +145,6 @@
     let activeNode = null;
     let fileMetadata = {};
     let networks = {}; // Store network instances
-
 
     span.onclick = function() {
         modal.style.display = "none";
@@ -413,7 +395,6 @@
         };
         const network = new vis.Network(container, networkData, options);
         networks[container.id] = network; // Store the network instance
-
         network.on('beforeDrawing', function(ctx) {
             const canvasWidth = container.clientWidth;
             const canvasHeight = container.clientHeight;
@@ -499,6 +480,6 @@
     }
     /*]]>*/
 </script>
-
+<script th:src="@{/js/theme.js}"></script>
 </body>
 </html>
