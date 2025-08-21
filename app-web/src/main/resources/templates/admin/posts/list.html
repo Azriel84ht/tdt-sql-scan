@@ -2,30 +2,16 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Admin - Blog Management</title>
-    <style>
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: #f8f9fa; }
-        .admin-wrapper { display: flex; }
-        .sidebar { width: 250px; background-color: #343a40; color: white; min-height: 100vh; }
-        .sidebar h2 { text-align: center; padding: 20px 0; margin: 0; background-color: #454d55; }
-        .sidebar ul { list-style-type: none; padding: 0; margin: 0; }
-        .sidebar ul li a { display: block; color: #adb5bd; padding: 15px 20px; text-decoration: none; }
-        .sidebar ul li a:hover, .sidebar ul li a.active { background-color: #495057; color: white; }
-        .main-content { flex-grow: 1; padding: 40px; }
-        .main-content h1 { border-bottom: 2px solid #dee2e6; padding-bottom: 10px; }
-        .data-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        .data-table th, .data-table td { border: 1px solid #dee2e6; padding: 12px; text-align: left; }
-        .data-table th { background-color: #e9ecef; font-weight: 600; }
-        .data-table tbody tr:nth-child(odd) { background-color: #f8f9fa; }
-        .data-table tbody tr:hover { background-color: #e2e6ea; }
-        .btn { padding: 8px 12px; text-decoration: none; border-radius: 4px; color: white; }
-        .btn-primary { background-color: #007bff; }
-        .btn-danger { background-color: #dc3545; }
-        .btn-sm { font-size: 0.875rem; padding: 5px 10px; }
-        .action-links a { margin-right: 10px; }
-        .header-actions { display: flex; justify-content: space-between; align-items: center; }
-    </style>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
 </head>
-<body>
+<body class="bg-white dark:bg-gray-900">
+<div th:replace="~{fragments/header :: header}"></div>
 <div class="admin-wrapper">
     <nav class="sidebar">
         <h2>Admin Panel</h2>
@@ -78,5 +64,6 @@
         </table>
     </main>
 </div>
+<script th:src="@{/js/theme.js}"></script>
 </body>
 </html>

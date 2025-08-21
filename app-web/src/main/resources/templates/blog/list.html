@@ -4,6 +4,12 @@
     <title>Blog | Data Flow Visualizer</title>
     <meta name="description" content="Articles and updates on data engineering, Business Intelligence, Teradata, and the evolution of the Data Flow Visualizer tool." />
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
     <link
       rel="stylesheet"
@@ -12,30 +18,10 @@
       href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900"
     />
 </head>
-<body class="bg-white" style='font-family: Inter, "Noto Sans", sans-serif;'>
+<body class="bg-white dark:bg-gray-900" style='font-family: Inter, "Noto Sans", sans-serif;'>
     <div class="relative flex size-full min-h-screen flex-col group/design-root overflow-x-hidden">
         <div class="layout-container flex h-full grow flex-col">
-            <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#f0f3f4] px-10 py-3">
-                <div class="flex items-center gap-4 text-[#111618]">
-                    <div class="size-4">
-                        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M24 45.8096C19.6865 45.8096 15.4698 44.5305 11.8832 42.134C8.29667 39.7376 5.50128 36.3314 3.85056 32.3462C2.19985 28.361 1.76794 23.9758 2.60947 19.7452C3.451 15.5145 5.52816 11.6284 8.57829 8.5783C11.6284 5.52817 15.5145 3.45101 19.7452 2.60948C23.9758 1.76795 28.361 2.19986 32.3462 3.85057C36.3314 5.50129 39.7376 8.29668 42.134 11.8833C44.5305 15.4698 45.8096 19.6865 45.8096 24L24 24L24 45.8096Z" fill="currentColor"></path>
-                        </svg>
-                    </div>
-                    <h2 class="text-[#111618] text-lg font-bold leading-tight tracking-[-0.015em]">Data Flow Visualizer</h2>
-                </div>
-                <div class="flex gap-2">
-                    <a th:href="@{/register}" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#21bded] text-[#111618] text-sm font-bold leading-normal tracking-[0.015em]">
-                        <span class="truncate">Register</span>
-                    </a>
-                    <a th:href="@{/login}" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#f0f3f4] text-[#111618] text-sm font-bold leading-normal tracking-[0.015em]">
-                        <span class="truncate">Login</span>
-                    </a>
-                    <a th:href="@{/}" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#f0f3f4] text-[#111618] text-sm font-bold leading-normal tracking-[0.015em]">
-                        <span class="truncate">Home</span>
-                    </a>
-                </div>
-            </header>
+            <div th:replace="~{fragments/header :: header}"></div>
 
             <main class="flex-1 justify-center py-5 px-4 sm:px-6 lg:px-8">
                 <div class="max-w-4xl mx-auto">
@@ -66,11 +52,12 @@
             <footer class="flex justify-center mt-10">
                 <div class="flex max-w-[960px] flex-1 flex-col">
                     <footer class="flex flex-col gap-6 px-5 py-10 text-center @container">
-                        <p class="text-[#618089] text-base font-normal leading-normal">© 2025 azprojs.net. All rights reserved.</p>
+                        <p class="text-[#618089] dark:text-gray-400 text-base font-normal leading-normal">© 2025 azprojs.net. All rights reserved.</p>
                     </footer>
                 </div>
             </footer>
         </div>
     </div>
+    <script th:src="@{/js/theme.js}"></script>
 </body>
 </html>
