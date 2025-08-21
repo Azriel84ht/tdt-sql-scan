@@ -74,6 +74,22 @@
 
 <script type="text/javascript" th:inline="javascript">
     /*<![CDATA[*/
+    // Polyfill for roundRect
+    if (typeof CanvasRenderingContext2D.prototype.roundRect === 'undefined') {
+        CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
+            if (w < 2 * r) r = w / 2;
+            if (h < 2 * r) r = h / 2;
+            this.beginPath();
+            this.moveTo(x+r, y);
+            this.arcTo(x+w, y,   x+w, y+h, r);
+            this.arcTo(x+w, y+h, x,   y+h, r);
+            this.arcTo(x,   y+h, x,   y,   r);
+            this.arcTo(x,   y,   x+w, y,   r);
+            this.closePath();
+            return this;
+        }
+    }
+
     const dropZone = document.getElementById('drop-zone');
     const fileInput = document.getElementById('file-input');
     const uploadContainer = document.getElementById('upload-container');
@@ -91,6 +107,10 @@
     let fileMetadata = {};
     let networks = {}; // Store network instances
     let graphData = {}; // Store original graph data for re-rendering
+    const bteqIcon = new Image();
+    bteqIcon.src = '/images/bteq_script.png';
+    const arrowIcon = new Image();
+    arrowIcon.src = '/images/right_arrow.png';
 
     span.onclick = function() {
         modal.style.display = "none";
@@ -324,7 +344,50 @@
                     font: node.properties.font || {} // Ensure font object exists
                 };
 
-                if (isDarkMode) {
+                if (nodeData.shape === 'custom') {
+                    nodeData.ctxRenderer = ({ ctx, id, x, y, state: { selected, hover }, style, label }) => {
+                        const size = style.size || 25;
+                        const isDarkMode = document.documentElement.classList.contains('dark');
+                        const backgroundColor = isDarkMode ? '#1f2937' : '#ffffff';
+                        const borderColor = isDarkMode ? '#4b5563' : '#dee2e6';
+                        const textColor = isDarkMode ? '#d1d5db' : '#343434';
+                        const nodeWidth = size * 2.5;
+                        const nodeHeight = size * 1.5;
+
+                        // Draw the background rectangle
+                        ctx.beginPath();
+                        ctx.fillStyle = backgroundColor;
+                        ctx.strokeStyle = borderColor;
+                        ctx.lineWidth = 1;
+                        ctx.roundRect(x - nodeWidth / 2, y - nodeHeight / 2, nodeWidth, nodeHeight, 5);
+                        ctx.fill();
+                        ctx.stroke();
+
+                        // Draw the image
+                        const imgSize = size * 0.6;
+                        let icon;
+                        if (nodeData.image && nodeData.image.includes('bteq_script')) {
+                            icon = bteqIcon;
+                        } else if (nodeData.image && nodeData.image.includes('right_arrow')) {
+                            icon = arrowIcon;
+                        }
+
+                        if (icon && icon.complete) {
+                             ctx.drawImage(icon, x - imgSize / 2, y - nodeHeight / 2 + 5, imgSize, imgSize);
+                        }
+
+
+                        // Draw the label
+                        if (label) {
+                            const fontSize = style.font?.size || 12;
+                            const fontFace = style.font?.face || 'Arial';
+                            ctx.font = `${fontSize}px ${fontFace}`;
+                            ctx.fillStyle = textColor;
+                            ctx.textAlign = 'center';
+                            ctx.fillText(label, x, y + nodeHeight / 2 - fontSize);
+                        }
+                    };
+                } else if (isDarkMode) {
                     nodeData.font.color = '#d1d5db'; // Light gray for text
                     if (nodeData.shape !== 'image' && nodeData.shape !== 'circularImage') {
                         nodeData.color = {

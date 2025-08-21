@@ -45,8 +45,13 @@ public class ChainFlowGraphConverter {
                                 int y = (i * y_gap) - yOffset + max_y_offset;
                                 node.getProperties().put("x", String.valueOf(x));
                                 node.getProperties().put("y", String.valueOf(y));
-                                node.getProperties().put("shape", "box");
+                                node.getProperties().put("shape", "custom");
+                                node.getProperties().put("image", "/images/bteq_script.png");
                                 node.getProperties().put("size", "50");
+
+                                Map<String, Object> font = new java.util.HashMap<>();
+                                font.put("color", "black");
+                                node.getProperties().put("font", font);
 
                                 BteqScript originalScript = scriptsByName.get(script.getScriptName());
                                 if (originalScript != null) {
