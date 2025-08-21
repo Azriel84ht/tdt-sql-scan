@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <title>Data Flow Visualizer</title>
+    <title>The App | Data Flow Visualizer</title>
     <link rel="icon" type="image/png" th:href="@{/main-images/icon_mini_100x100.png}" />
-    <meta name="description" content="The application part of Data Flow Visualizer, a tool to visualize complex data flows from Teradata BTEQ scripts." />
-    <meta name="keywords" content="Data Flow, Visualizer, Teradata, BTEQ, SQL, ETL, Data Lineage, Application" />
+    <meta name="description" content="The application part of Data Flow Visualizer, a tool to visualize complex data flows from Teradata BTEQ scripts. Upload your files and see the magic." />
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>

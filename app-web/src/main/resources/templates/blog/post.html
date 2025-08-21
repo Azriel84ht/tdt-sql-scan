@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title th:text="${post.title} + ' | Data Flow Visualizer'">Blog Post</title>
+    <title th:text="${post.title} + ' | Data Flow Visualizer Blog'"></title>
+    <meta name="description" th:attr="content=${#strings.abbreviate(post.content, 155)}" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
     <link
