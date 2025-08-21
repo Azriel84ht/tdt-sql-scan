@@ -55,3 +55,92 @@ input:checked + .slider:before {
     transform: translateX(24px);
     content: "\f186"; /* Font Awesome sun icon */
 }
+
+/* Universal Form Container */
+.form-container {
+    max-width: 500px;
+    margin: 50px auto;
+    padding: 2rem;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+html.dark .form-container {
+    background-color: #1f2937; /* A slightly lighter shade of gray for the form */
+    border-color: #374151; /* A medium gray for borders */
+    color: #d1d5db; /* A light gray for text */
+}
+
+/* General body and link styles */
+body {
+    font-family: sans-serif;
+}
+
+html:not(.dark) body {
+    background-color: #f4f4f4; /* Light gray for light mode background */
+}
+
+html.dark a {
+    color: #38bdf8; /* A bright blue for links in dark mode */
+}
+
+/* Alert box styles */
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+
+.alert-danger {
+    color: #a94442;
+    background-color: #f2dede;
+    border-color: #ebccd1;
+}
+
+.alert-success {
+    color: #3c763d;
+    background-color: #dff0d8;
+    border-color: #d6e9c6;
+}
+
+.alert-info {
+    color: #31708f;
+    background-color: #d9edf7;
+    border-color: #bce8f1;
+}
+
+/* Form input and button styles */
+input[type=text], input[type=password], input[type=email] {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+html.dark input[type=text], html.dark input[type=password], html.dark input[type=email] {
+    background-color: #374151; /* Dark gray for input backgrounds */
+    border-color: #4b5563; /* Medium gray for input borders */
+    color: white;
+}
+
+input[type=submit] {
+    width: 100%;
+    background-color: #4CAF50; /* A green for the submit button */
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+input[type=submit]:hover {
+    background-color: #45a049; /* A darker green on hover */
+}
