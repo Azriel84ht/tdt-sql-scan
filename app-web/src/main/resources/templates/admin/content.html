@@ -2,26 +2,16 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Admin - Manage Homepage</title>
-    <style>
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: #f8f9fa; }
-        .admin-wrapper { display: flex; }
-        .sidebar { width: 250px; background-color: #343a40; color: white; min-height: 100vh; }
-        .sidebar h2 { text-align: center; padding: 20px 0; margin: 0; background-color: #454d55; }
-        .sidebar ul { list-style-type: none; padding: 0; margin: 0; }
-        .sidebar ul li a { display: block; color: #adb5bd; padding: 15px 20px; text-decoration: none; }
-        .sidebar ul li a:hover, .sidebar ul li a.active { background-color: #495057; color: white; }
-        .main-content { flex-grow: 1; padding: 40px; }
-        .main-content h1 { border-bottom: 2px solid #dee2e6; padding-bottom: 10px; }
-        .form-group { margin-bottom: 1rem; }
-        .form-group label { display: block; margin-bottom: .5rem; font-weight: bold; }
-        .form-group input[type=text], .form-group textarea { width: 100%; padding: .5rem; border: 1px solid #ced4da; border-radius: .25rem; box-sizing: border-box; }
-        .form-group textarea { min-height: 150px; }
-        .btn-primary { background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem; }
-        .btn-primary:hover { background-color: #0056b3; }
-        .alert-success { color: #155724; background-color: #d4edda; border-color: #c3e6cb; padding: 1rem; margin-bottom: 1rem; border-radius: .25rem; }
-    </style>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
 </head>
-<body>
+<body class="bg-white dark:bg-gray-900">
+    <div th:replace="~{fragments/header :: header}"></div>
     <div class="admin-wrapper">
         <nav class="sidebar">
             <h2>Admin Panel</h2>
@@ -67,5 +57,6 @@
             </form>
         </main>
     </div>
+    <script th:src="@{/js/theme.js}"></script>
 </body>
 </html>

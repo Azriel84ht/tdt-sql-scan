@@ -196,3 +196,67 @@ html.dark .close:hover, html.dark .close:focus { color: white; }
 html.dark #context-menu { background-color: #1f2937; border-color: #4b5563; }
 html.dark #context-menu a { color: #d1d5db; }
 html.dark #context-menu a:hover { background-color: #374151; }
+
+/* Admin Panel Styles */
+.admin-wrapper { display: flex; }
+.sidebar { width: 250px; background-color: #343a40; color: white; min-height: 100vh; }
+.sidebar h2 { text-align: center; padding: 20px 0; margin: 0; background-color: #454d55; }
+.sidebar ul { list-style-type: none; padding: 0; margin: 0; }
+.sidebar ul li a { display: block; color: #adb5bd; padding: 15px 20px; text-decoration: none; }
+.sidebar ul li a:hover, .sidebar ul li a.active { background-color: #495057; color: white; }
+.main-content { flex-grow: 1; padding: 40px; }
+.main-content h1 { border-bottom: 2px solid #dee2e6; padding-bottom: 10px; }
+
+/* Dark mode for admin panel */
+html.dark .sidebar { background-color: #1f2937; border-right: 1px solid #374151; }
+html.dark .sidebar h2 { background-color: #374151; }
+html.dark .sidebar ul li a { color: #9ca3af; }
+html.dark .sidebar ul li a:hover, html.dark .sidebar ul li a.active { background-color: #374151; color: white; }
+html.dark .main-content { background-color: #111827; color: #d1d5db; }
+html.dark .main-content h1 { border-bottom-color: #374151; }
+
+/* Admin Form Styles */
+.form-group { margin-bottom: 1rem; }
+.form-group label { display: block; margin-bottom: .5rem; font-weight: bold; }
+.form-group input[type=text], .form-group textarea, .form-control { width: 100%; padding: .5rem; border: 1px solid #ced4da; border-radius: .25rem; box-sizing: border-box; }
+.form-group textarea { min-height: 150px; }
+.btn-primary { background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem; }
+.btn-primary:hover { background-color: #0056b3; }
+.btn-secondary { background-color: #6c757d; color: white; }
+
+/* Dark mode for admin forms */
+html.dark .form-group label { color: #d1d5db; }
+html.dark .form-group input[type=text], html.dark .form-group textarea, html.dark .form-control { background-color: #374151; border-color: #4b5563; color: white; }
+html.dark .alert-success { color: #a3e635; background-color: #27272a; border-color: #3f3f46; }
+html.dark .btn-secondary { background-color: #4b5563; }
+
+/* Admin Suggestions Styles */
+.suggestion-card { background-color: #fff; border: 1px solid #dee2e6; border-radius: 5px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+.suggestion-meta { font-size: 0.9rem; color: #6c757d; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+.suggestion-text { white-space: pre-wrap; }
+.delete-btn { background-color: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; font-size: 0.8rem; }
+.delete-btn:hover { background-color: #c82333; }
+
+/* Dark mode for admin suggestions */
+html.dark .suggestion-card { background-color: #374151; border-color: #4b5563; }
+html.dark .suggestion-meta { color: #9ca3af; border-bottom-color: #4b5563; }
+html.dark .suggestion-text { color: #d1d5db; }
+
+/* Admin Data Table Styles */
+.user-table, .data-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+.user-table th, .user-table td, .data-table th, .data-table td { border: 1px solid #dee2e6; padding: 12px; text-align: left; }
+.user-table th, .data-table th { background-color: #e9ecef; font-weight: 600; }
+.user-table tbody tr:nth-child(odd), .data-table tbody tr:nth-child(odd) { background-color: #f8f9fa; }
+.user-table tbody tr:hover, .data-table tbody tr:hover { background-color: #e2e6ea; }
+.btn { padding: 8px 12px; text-decoration: none; border-radius: 4px; color: white; }
+.btn-primary { background-color: #007bff; }
+.btn-danger { background-color: #dc3545; }
+.btn-sm { font-size: 0.875rem; padding: 5px 10px; }
+.action-links a { margin-right: 10px; }
+.header-actions { display: flex; justify-content: space-between; align-items: center; }
+
+/* Dark mode for admin data table */
+html.dark .user-table th, html.dark .user-table td, html.dark .data-table th, html.dark .data-table td { border-color: #4b5563; }
+html.dark .user-table th, html.dark .data-table th { background-color: #374151; }
+html.dark .user-table tbody tr:nth-child(odd), html.dark .data-table tbody tr:nth-child(odd) { background-color: #1f2937; }
+html.dark .user-table tbody tr:hover, html.dark .data-table tbody tr:hover { background-color: #374151; }
