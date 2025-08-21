@@ -1,16 +1,28 @@
 # Maven
 target/
-
-# IDEs
-.vscode/
-.idea/
-
-# Compilados
-**/*.class
-
-# Maven Wrapper
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
 .mvn/wrapper/maven-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+*.iws
+.vscode/
+
+# Logs and databases
+*.log
+*.db
+data/
 
 # OS
 .DS_Store
 Thumbs.db
+
+# Compiled files
+**/*.class
