@@ -402,22 +402,26 @@
         const network = new vis.Network(container, networkData, options);
         networks[container.id] = network; // Store the network instance
 
-        // Focus on the first node to center the view
-        setTimeout(function() {
+        // Center the view on the first node once the network is stabilized
+        network.on('stabilized', function () {
+            console.log('Network stabilized.');
             let firstNodeId = 'cmd-0';
             if (!nodes.get(firstNodeId)) {
                 firstNodeId = 'cmd-group-0';
             }
+            console.log('First node ID to focus on:', firstNodeId);
 
             if (nodes.get(firstNodeId)) {
+                console.log('Focusing on node:', firstNodeId);
                 network.focus(firstNodeId, {
                     scale: 1.0,
                     animation: false
                 });
             } else {
+                console.log('First node not found, fitting to view.');
                 network.fit();
             }
-        }, 100);
+        });
         network.on('beforeDrawing', function(ctx) {
             const canvasWidth = container.clientWidth;
             const canvasHeight = container.clientHeight;
