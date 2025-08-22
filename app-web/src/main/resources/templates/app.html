@@ -273,10 +273,9 @@
                 }
             }
 
-            // 3. Open the first BTEQ tab by default if it exists
-            if (firstBteqTabButton) {
-                firstBteqTabButton.click();
-            }
+            // 3. Open the chain flow tab by default.
+            openTab(null, 'chain-flow');
+            document.getElementById('defaultOpen').classList.add('active');
         })
         .catch(error => {
             console.error('Error:', error);
@@ -402,6 +401,9 @@
         };
         const network = new vis.Network(container, networkData, options);
         networks[container.id] = network; // Store the network instance
+
+        // Center the view to fit all nodes
+        network.fit();
         network.on('beforeDrawing', function(ctx) {
             const canvasWidth = container.clientWidth;
             const canvasHeight = container.clientHeight;
