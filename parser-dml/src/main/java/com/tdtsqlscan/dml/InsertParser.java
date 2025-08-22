@@ -24,7 +24,11 @@ public class InsertParser implements QueryParser {
 
         int intoPos = s.toUpperCase().indexOf("INTO") + 4;
         String afterInto = s.substring(intoPos).trim();
-        String tableName = SQLParserUtils.getFirstWord(afterInto).toUpperCase();
+        String tableName = SQLParserUtils.getFirstWord(afterInto);
+        if (tableName == null || tableName.isEmpty()) {
+            throw new SQLParseException("Could not find table name in INSERT statement: " + sql);
+        }
+        tableName = tableName.toUpperCase();
 
         String sourceTableName = null;
         List<String> columns = new ArrayList<>();
