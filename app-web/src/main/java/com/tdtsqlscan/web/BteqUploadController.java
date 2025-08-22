@@ -122,6 +122,7 @@ public class BteqUploadController {
                 if (command instanceof BteqSqlCommand) {
                     transactionCount++;
                     SQLQuery query = ((BteqSqlCommand) command).getQuery();
+                    logger.info("Processing query: {}", command.getRawText());
                     if (query instanceof SelectQuery) {
                         SelectQuery selectQuery = (SelectQuery) query;
                         for (SQLTableRef tableRef : selectQuery.getTables()) {
@@ -129,7 +130,11 @@ public class BteqUploadController {
                         }
                     } else if (query instanceof InsertQuery) {
                         InsertQuery insertQuery = (InsertQuery) query;
-                        writtenTables.add(insertQuery.getTableName().toUpperCase());
+                        if (insertQuery.getTableName() != null) {
+                            writtenTables.add(insertQuery.getTableName().toUpperCase());
+                        } else {
+                            logger.warn("Found InsertQuery with null table name: {}", command.getRawText());
+                        }
                         if (insertQuery.getSourceTableName() != null) {
                             readTables.add(insertQuery.getSourceTableName().toUpperCase());
                         }
