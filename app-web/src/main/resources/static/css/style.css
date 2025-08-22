@@ -306,3 +306,20 @@ html.dark .news-section pre {
     white-space: pre-wrap;
     word-wrap: break-word;
 }
+
+/* Overriding dark mode styles for user-generated content */
+html.dark .prose p,
+html.dark .prose ul,
+html.dark .prose li,
+html.dark .prose em {
+    color: #d1d5db !important;
+}
+
+html.dark .prose blockquote {
+    color: #9ca3af !important;
+    border-left-color: #38bdf8 !important;
+}
+
+html.dark .prose hr {
+    border-top-color: #374151 !important;
+}
