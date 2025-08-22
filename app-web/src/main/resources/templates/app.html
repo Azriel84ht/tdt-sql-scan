@@ -163,10 +163,36 @@
         for (i = 0; i < tablinks.length; i++) {
             tablinks[i].className = tablinks[i].className.replace(" active", "");
         }
-        document.getElementById(tabName).style.display = "block";
+        const tabToShow = document.getElementById(tabName);
+        tabToShow.style.display = "block";
         if (evt) {
             evt.currentTarget.className += " active";
         }
+
+        // Center the graph in the newly opened tab
+        const graphContainer = tabToShow.querySelector('div[id^="bteq-graph-container-"], div[id="chain-flow-network"]');
+        if (graphContainer) {
+            const network = networks[graphContainer.id];
+            if (network) {
+                setTimeout(function() {
+                    if (graphContainer.id.startsWith('bteq-graph-container-')) {
+                        const nodes = new vis.DataSet(graphData[graphContainer.id].nodes);
+                        let firstNodeId = 'cmd-0';
+                        if (!nodes.get(firstNodeId)) {
+                            firstNodeId = 'cmd-group-0';
+                        }
+                        if (nodes.get(firstNodeId)) {
+                            network.focus(firstNodeId, { scale: 1.0, animation: false });
+                        } else {
+                            network.fit();
+                        }
+                    } else {
+                        network.fit();
+                    }
+                }, 100);
+            }
+        }
+
 
         const table = document.getElementById('metadata-table');
         table.innerHTML = "";
@@ -273,10 +299,9 @@
                 }
             }
 
-            // 3. Open the first BTEQ tab by default if it exists
-            if (firstBteqTabButton) {
-                firstBteqTabButton.click();
-            }
+            // 3. Open the chain flow tab by default.
+            openTab(null, 'chain-flow');
+            document.getElementById('defaultOpen').classList.add('active');
         })
         .catch(error => {
             console.error('Error:', error);
@@ -402,6 +427,7 @@
         };
         const network = new vis.Network(container, networkData, options);
         networks[container.id] = network; // Store the network instance
+
         network.on('beforeDrawing', function(ctx) {
             const canvasWidth = container.clientWidth;
             const canvasHeight = container.clientHeight;

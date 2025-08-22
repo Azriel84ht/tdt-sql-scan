@@ -18,7 +18,8 @@ public class DataFlowGraphConverter {
     private static final int BTEQ_LANE_Y = 0;
     private static final int DATA_LANE_START_Y = 150;
     private static final int LANE_HEIGHT = 120;
-    private static final int X_OFFSET_STEP = 180;
+    private static final int X_OFFSET_STEP_SQL = 180;
+    private static final int X_OFFSET_STEP_CONTROL = 45;
 
     private Graph graph;
     private Map<String, Node> tableNodes;
@@ -102,7 +103,7 @@ public class DataFlowGraphConverter {
 
         if (command instanceof BteqSqlCommand) {
             // For SQL commands, center them between potential source/target tables
-            commandNode.addProperty("x", currentX + X_OFFSET_STEP / 2);
+            commandNode.addProperty("x", currentX + X_OFFSET_STEP_SQL / 2);
             handleDataFlow(commandNode, (BteqSqlCommand) command, yPos, currentX);
         } else {
             // For non-SQL commands, place them at the start of the block
@@ -119,7 +120,11 @@ public class DataFlowGraphConverter {
             graph.addEdge(logicEdge);
         }
 
-        xOffset += X_OFFSET_STEP;
+        if (command instanceof BteqControlCommand || command instanceof BteqConfigurationCommand) {
+            xOffset += X_OFFSET_STEP_CONTROL;
+        } else {
+            xOffset += X_OFFSET_STEP_SQL;
+        }
         return commandNode;
     }
 
@@ -171,7 +176,7 @@ public class DataFlowGraphConverter {
         int yPos = DATA_LANE_START_Y + (lane * LANE_HEIGHT);
         int currentX = xOffset;
 
-        commandNode.addProperty("x", currentX + X_OFFSET_STEP / 2);
+        commandNode.addProperty("x", currentX + X_OFFSET_STEP_SQL / 2);
         commandNode.addProperty("y", yPos);
         graph.addNode(commandNode);
 
@@ -186,7 +191,7 @@ public class DataFlowGraphConverter {
             graph.addEdge(logicEdge);
         }
 
-        xOffset += X_OFFSET_STEP;
+        xOffset += X_OFFSET_STEP_SQL;
         return commandNode;
     }
 

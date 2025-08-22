@@ -28,7 +28,8 @@ public class BteqScriptParser {
                 continue;
             }
 
-            if (trimmedLine.startsWith(".SET") || trimmedLine.startsWith(".LOGON") || trimmedLine.startsWith(".DECLARE")) {
+            if (trimmedLine.startsWith(".SET") || trimmedLine.startsWith(".LOGON") || trimmedLine.startsWith(".DECLARE")
+                    || trimmedLine.startsWith(".DATABASE")) {
                 configCommands.add(parseBteqControlCommand(trimmedLine));
                 continue;
             }

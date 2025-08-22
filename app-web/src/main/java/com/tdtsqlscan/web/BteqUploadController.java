@@ -121,35 +121,50 @@ public class BteqUploadController {
             for (BteqCommand command : script.getCommands()) {
                 if (command instanceof BteqSqlCommand) {
                     transactionCount++;
-                    SQLQuery query = ((BteqSqlCommand) command).getQuery();
-                    if (query instanceof SelectQuery) {
-                        SelectQuery selectQuery = (SelectQuery) query;
-                        for (SQLTableRef tableRef : selectQuery.getTables()) {
-                            readTables.add(tableRef.getExpression().split(" ")[0].toUpperCase());
+                    try {
+                        SQLQuery query = ((BteqSqlCommand) command).getQuery();
+                        logger.info("Processing query: {}", command.getRawText());
+                        if (query == null) {
+                            logger.warn("Query object is null for command: {}", command.getRawText());
+                            continue;
                         }
-                    } else if (query instanceof InsertQuery) {
-                        InsertQuery insertQuery = (InsertQuery) query;
-                        writtenTables.add(insertQuery.getTableName().toUpperCase());
-                        if (insertQuery.getSourceTableName() != null) {
-                            readTables.add(insertQuery.getSourceTableName().toUpperCase());
+                        logger.info("Query class: {}", query.getClass().getName());
+
+                        if (query instanceof SelectQuery) {
+                            SelectQuery selectQuery = (SelectQuery) query;
+                            for (SQLTableRef tableRef : selectQuery.getTables()) {
+                                readTables.add(tableRef.getExpression().split(" ")[0].toUpperCase());
+                            }
+                        } else if (query instanceof InsertQuery) {
+                            InsertQuery insertQuery = (InsertQuery) query;
+                            if (insertQuery.getTableName() != null) {
+                                writtenTables.add(insertQuery.getTableName().toUpperCase());
+                            } else {
+                                logger.warn("Found InsertQuery with null table name: {}", command.getRawText());
+                            }
+                            if (insertQuery.getSourceTableName() != null) {
+                                readTables.add(insertQuery.getSourceTableName().toUpperCase());
+                            }
+                        } else if (query instanceof UpdateQuery) {
+                            UpdateQuery updateQuery = (UpdateQuery) query;
+                            writtenTables.add(updateQuery.getTargetTable().toUpperCase());
+                            for (String sourceTable : updateQuery.getSourceTables()) {
+                                readTables.add(sourceTable.toUpperCase());
+                            }
+                        } else if (query instanceof DeleteQuery) {
+                            DeleteQuery deleteQuery = (DeleteQuery) query;
+                            writtenTables.add(deleteQuery.getTable().toUpperCase());
+                        } else if (query instanceof CreateTableQuery) {
+                            CreateTableQuery createTableQuery = (CreateTableQuery) query;
+                            String tableName = createTableQuery.getTableName().toUpperCase();
+                            createdTables.add(tableName);
+                            writtenTables.add(tableName);
+                        } else if (query instanceof DropTableQuery) {
+                            DropTableQuery dropTableQuery = (DropTableQuery) query;
+                            droppedTables.add(dropTableQuery.getTableName().toUpperCase());
                         }
-                    } else if (query instanceof UpdateQuery) {
-                        UpdateQuery updateQuery = (UpdateQuery) query;
-                        writtenTables.add(updateQuery.getTargetTable().toUpperCase());
-                        for (String sourceTable : updateQuery.getSourceTables()) {
-                            readTables.add(sourceTable.toUpperCase());
-                        }
-                    } else if (query instanceof DeleteQuery) {
-                        DeleteQuery deleteQuery = (DeleteQuery) query;
-                        writtenTables.add(deleteQuery.getTable().toUpperCase());
-                    } else if (query instanceof CreateTableQuery) {
-                        CreateTableQuery createTableQuery = (CreateTableQuery) query;
-                        String tableName = createTableQuery.getTableName().toUpperCase();
-                        createdTables.add(tableName);
-                        writtenTables.add(tableName);
-                    } else if (query instanceof DropTableQuery) {
-                        DropTableQuery dropTableQuery = (DropTableQuery) query;
-                        droppedTables.add(dropTableQuery.getTableName().toUpperCase());
+                    } catch (Exception e) {
+                        logger.error("Error processing command: " + command.getRawText(), e);
                     }
                 }
             }
