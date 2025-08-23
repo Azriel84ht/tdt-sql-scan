@@ -31,6 +31,8 @@ public class SitemapController {
         addUrl(stringWriter, baseUrl, "/login");
         addUrl(stringWriter, baseUrl, "/register");
         addUrl(stringWriter, baseUrl, "/blog");
+        addUrl(stringWriter, baseUrl, "/faq");
+        addUrl(stringWriter, baseUrl, "/whats-new");
 
         // URLs dinámicas del blog
         List<Post> posts = postService.findAll();
