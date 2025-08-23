@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>FAQ | Data Flow Visualizer</title>
+    <meta name="description" content="Frequently Asked Questions about the Data Flow Visualizer tool." />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
+    <link
+      rel="stylesheet"
+      as="style"
+      onload="this.rel='stylesheet'"
+      href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900"
+    />
+    <style>
+        .faq-item {
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+        .faq-question {
+            width: 100%;
+            text-align: left;
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .faq-answer {
+            padding: 1rem 1.5rem;
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-white dark:bg-gray-900" style='font-family: Inter, "Noto Sans", sans-serif;'>
+    <div class="relative flex size-full min-h-screen flex-col group/design-root overflow-x-hidden">
+        <div class="layout-container flex h-full grow flex-col">
+            <div th:replace="~{fragments/header :: header}"></div>
+
+            <main class="flex-1 justify-center py-5 px-4 sm:px-6 lg:px-8">
+                <div class="max-w-4xl mx-auto">
+                    <h1 class="text-4xl font-bold text-center text-gray-800 dark:text-white mb-10">Frequently Asked Questions</h1>
+
+                    <div class="space-y-4">
+                        <div th:each="faq : ${faqs}" class="faq-item bg-white dark:bg-gray-800 rounded-lg shadow-md">
+                            <button class="faq-question text-gray-800 dark:text-gray-100">
+                                <span th:text="${faq.question}"></span>
+                                <span>&#9660;</span>
+                            </button>
+                            <div class="faq-answer text-gray-600 dark:text-gray-300" th:utext="${faq.answer}">
+                            </div>
+                        </div>
+
+                        <div th:if="${faqs.isEmpty()}" class="text-center py-10">
+                            <p class="text-gray-500 dark:text-gray-400">No FAQs have been published yet. Check back soon!</p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <div th:replace="~{fragments/footer :: footer}"></div>
+        </div>
+    </div>
+    <script th:src="@{/js/theme.js}"></script>
+    <script>
+        document.querySelectorAll('.faq-question').forEach(button => {
+            button.addEventListener('click', () => {
+                const answer = button.nextElementSibling;
+                answer.style.display = answer.style.display === 'block' ? 'none' : 'block';
+            });
+        });
+    </script>
+</body>
+</html>
