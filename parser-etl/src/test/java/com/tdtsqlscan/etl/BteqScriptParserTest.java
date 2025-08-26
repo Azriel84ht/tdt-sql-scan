@@ -44,19 +44,16 @@ public class BteqScriptParserTest {
         BteqScript script = parser.parse(scriptText, "test.bteq");
         List<BteqCommand> commands = script.getCommands();
 
-        assertEquals(4, commands.size());
+        assertEquals(3, commands.size());
 
-        BteqControlCommand logon = assertInstanceOf(BteqControlCommand.class, commands.get(0));
-        assertEquals(BteqCommandType.LOGON, logon.getType());
+        BteqConfigurationCommand config = assertInstanceOf(BteqConfigurationCommand.class, commands.get(0));
+        assertEquals(2, config.getCommands().size());
 
-        BteqControlCommand set = assertInstanceOf(BteqControlCommand.class, commands.get(1));
-        assertEquals(BteqCommandType.SET, set.getType());
-
-        BteqSqlCommand sqlCommand = assertInstanceOf(BteqSqlCommand.class, commands.get(2));
+        BteqSqlCommand sqlCommand = assertInstanceOf(BteqSqlCommand.class, commands.get(1));
         assertEquals("SELECT * FROM my_table WHERE id = 1", sqlCommand.getRawText().replaceAll("\\s+", " "));
         assertEquals(mockQuery, sqlCommand.getQuery());
 
-        BteqControlCommand logoff = assertInstanceOf(BteqControlCommand.class, commands.get(3));
+        BteqControlCommand logoff = assertInstanceOf(BteqControlCommand.class, commands.get(2));
         assertEquals(BteqCommandType.LOGOFF, logoff.getType());
     }
 }
