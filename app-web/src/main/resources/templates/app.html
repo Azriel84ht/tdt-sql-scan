@@ -68,7 +68,8 @@
 </div>
 
 <div id="context-menu">
-    <a href="#" id="view-text">View Text</a><br>
+    <a href="#" id="show-schema">Show schema</a>
+    <a href="#" id="view-text">View Text</a>
     <a href="#" id="copy-code">Copy Code</a>
 </div>
 
@@ -89,6 +90,7 @@
     const contextMenu = document.getElementById('context-menu');
     let activeNode = null;
     let fileMetadata = {};
+    let bteqFlowsData = {};
     let networks = {}; // Store network instances
     let graphData = {}; // Store original graph data for re-rendering
 
@@ -114,6 +116,85 @@
         if (activeNode && activeNode.fullText) {
             navigator.clipboard.writeText(activeNode.fullText);
         }
+    };
+
+    document.getElementById('show-schema').onclick = () => {
+        if (!activeNode || !activeNode.fileName) return;
+
+        const scriptName = activeNode.fileName;
+        const safeId = scriptName.replace(/[^a-zA-Z0-9]/g, '_');
+        const tabId = `bteq-tab-content-${safeId}`;
+        const tabButtonId = `bteq-tab-button-${safeId}`;
+
+        // If tab already exists, just open it.
+        if (document.getElementById(tabId)) {
+            document.getElementById(tabButtonId).click();
+            return;
+        }
+
+        const currentGraphData = bteqFlowsData[scriptName];
+        if (!currentGraphData) {
+            console.error('No graph data found for script:', scriptName);
+            return;
+        }
+
+        const containerId = `bteq-graph-container-${safeId}`;
+        graphData[containerId] = currentGraphData; // Store original data
+
+        // --- Create Tab Button ---
+        const tabButton = document.createElement('button');
+        tabButton.id = tabButtonId;
+        tabButton.className = 'tablinks bteq-tab';
+        tabButton.onclick = (event) => openTab(event, tabId);
+
+        const tabTitle = document.createElement('span');
+        tabTitle.textContent = scriptName;
+        tabButton.appendChild(tabTitle);
+
+        const closeButton = document.createElement('span');
+        closeButton.className = 'close-tab';
+        closeButton.innerHTML = '&times;';
+        closeButton.onclick = (event) => {
+            event.stopPropagation(); // Prevent the tab-opening click event
+
+            const tabContent = document.getElementById(tabId);
+            if (tabContent) {
+                tabContent.remove();
+            }
+            tabButton.remove();
+
+            // Clean up stored data to prevent memory leaks
+            const containerId = `bteq-graph-container-${safeId}`;
+            delete networks[containerId];
+            delete graphData[containerId];
+
+            // If the closed tab was active, switch to the default tab
+            if (tabButton.classList.contains('active')) {
+                document.getElementById('defaultOpen').click();
+            }
+        };
+
+        tabButton.appendChild(closeButton);
+        tabContainer.appendChild(tabButton);
+
+        // --- Create Tab Content ---
+        const flowMainContainer = document.getElementById('flow-main');
+        const tabContent = document.createElement('div');
+        tabContent.id = tabId;
+        tabContent.className = 'tabcontent bteq-tab-content';
+
+        const graphContainer = document.createElement('div');
+        graphContainer.id = containerId;
+        graphContainer.style.height = '800px'; // Or make this dynamic
+
+        tabContent.appendChild(graphContainer);
+        flowMainContainer.appendChild(tabContent);
+
+        // Render the graph
+        renderGraph(currentGraphData, graphContainer, true);
+
+        // Open the newly created tab
+        tabButton.click();
     };
 
     let selectedFiles = [];
@@ -246,58 +327,15 @@
 
             // Render Chain Flow graph
             const chainFlowContainer = document.getElementById('chain-flow-network');
-            renderGraph(data.chainFlow, chainFlowContainer, false); // No context menu for chain flow
+            renderGraph(data.chainFlow, chainFlowContainer, true); // Enable context menu for chain flow
 
-            // --- Render BTEQ Flow Graphs ---
+            // Store BTEQ flows data to be used on demand
+            bteqFlowsData = data.bteqFlows;
 
-            // 1. Clear previous BTEQ tabs and content
+            // Clear any existing BTEQ tabs from previous uploads
             const tabContainer = document.querySelector('.tab');
             document.querySelectorAll('.bteq-tab').forEach(tab => tab.remove());
             document.querySelectorAll('.bteq-tab-content').forEach(content => content.remove());
-
-            // 2. Dynamically create tabs and containers for each BTEQ script
-            const bteqFlows = data.bteqFlows;
-            const flowMainContainer = document.getElementById('flow-main');
-            let firstBteqTabButton = null;
-
-            for (const scriptName in bteqFlows) {
-                if (Object.hasOwnProperty.call(bteqFlows, scriptName)) {
-                    const currentGraphData = bteqFlows[scriptName];
-
-                    const safeId = scriptName.replace(/[^a-zA-Z0-9]/g, '_');
-                    const tabId = `bteq-tab-content-${safeId}`;
-                    const containerId = `bteq-graph-container-${safeId}`;
-
-                    graphData[containerId] = currentGraphData; // Store original data
-
-                    // Create the tab button
-                    const tabButton = document.createElement('button');
-                    tabButton.className = 'tablinks bteq-tab';
-                    tabButton.textContent = scriptName;
-                    tabButton.onclick = (event) => openTab(event, tabId);
-                    tabContainer.appendChild(tabButton);
-
-                    // Create the tab content pane
-                    const tabContent = document.createElement('div');
-                    tabContent.id = tabId;
-                    tabContent.className = 'tabcontent bteq-tab-content';
-
-                    // Create the actual div that will hold the graph
-                    const graphContainer = document.createElement('div');
-                    graphContainer.id = containerId;
-                    graphContainer.style.height = '800px';
-
-                    tabContent.appendChild(graphContainer);
-                    flowMainContainer.appendChild(tabContent);
-
-                    // Render the graph in the new container
-                    renderGraph(currentGraphData, graphContainer, true); // Enable context menu for BTEQ flows
-
-                    if (!firstBteqTabButton) {
-                        firstBteqTabButton = tabButton;
-                    }
-                }
-            }
 
             // 3. Open the chain flow tab by default.
             openTab(null, 'chain-flow');
@@ -466,11 +504,38 @@
             network.on("oncontext", function (params) {
                 params.event.preventDefault();
                 const nodeId = network.getNodeAt(params.pointer.DOM);
+
                 if (nodeId) {
                     activeNode = nodes.get(nodeId);
-                    contextMenu.style.left = params.event.pageX + 'px';
-                    contextMenu.style.top = params.event.pageY + 'px';
-                    contextMenu.style.display = 'block';
+                    const showSchemaLink = document.getElementById('show-schema');
+                    const viewTextLink = document.getElementById('view-text');
+                    const copyCodeLink = document.getElementById('copy-code');
+
+                    // Hide all by default
+                    showSchemaLink.style.display = 'none';
+                    viewTextLink.style.display = 'none';
+                    copyCodeLink.style.display = 'none';
+
+                    let menuHasItems = false;
+
+                    // Logic for BTEQ script nodes in Chain Flow
+                    if (activeNode.image && activeNode.image.includes('bteq_script') && activeNode.fileName) {
+                        showSchemaLink.style.display = 'block';
+                        menuHasItems = true;
+                    }
+
+                    // Logic for nodes with text content (inside BTEQ graphs)
+                    if (activeNode.fullText) {
+                        viewTextLink.style.display = 'block';
+                        copyCodeLink.style.display = 'block';
+                        menuHasItems = true;
+                    }
+
+                    if (menuHasItems) {
+                        contextMenu.style.left = params.event.pageX + 'px';
+                        contextMenu.style.top = params.event.pageY + 'px';
+                        contextMenu.style.display = 'block';
+                    }
                 }
             });
         }

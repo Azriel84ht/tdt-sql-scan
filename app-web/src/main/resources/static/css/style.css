@@ -323,3 +323,31 @@ html.dark .prose blockquote {
 html.dark .prose hr {
     border-top-color: #374151 !important;
 }
+
+/* Styles for closable tabs */
+.tab .bteq-tab {
+    position: relative;
+    padding-right: 30px; /* Make space for the close button */
+}
+
+.close-tab {
+    position: absolute;
+    top: 50%;
+    right: 5px;
+    transform: translateY(-50%);
+    padding: 5px;
+    line-height: 0.8;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+    border-radius: 50%;
+}
+
+.close-tab:hover {
+    background-color: #e6e6e6;
+}
+
+html.dark .close-tab:hover {
+    background-color: #5a636e;
+}

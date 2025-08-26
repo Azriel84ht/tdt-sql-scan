@@ -95,18 +95,32 @@ public class SelectParser implements QueryParser {
     }
 
     private SQLTableRef parseTableRef(String expr) {
-        String[] parts = expr.trim().split("\\s+");
+        String trimmedExpr = expr.trim();
+        String[] parts = trimmedExpr.split("\\s+");
+        String table;
+        String alias = null;
+
         if (parts.length == 1) {
-            return new SQLTableRef(parts[0], null);
-        } else if (parts.length >= 2) {
-            String alias = parts[parts.length - 1];
-            String table = expr.substring(0, expr.length() - alias.length()).trim();
-            if (parts[parts.length - 2].equalsIgnoreCase("AS")) {
-                table = table.substring(0, table.length() - 3).trim();
+            table = parts[0];
+        } else {
+            alias = parts[parts.length - 1];
+            String tablePart = trimmedExpr.substring(0, trimmedExpr.lastIndexOf(alias)).trim();
+            if (tablePart.toUpperCase().endsWith("AS")) {
+                tablePart = tablePart.substring(0, tablePart.length() - 2).trim();
             }
-            return new SQLTableRef(table, alias);
+            table = tablePart;
         }
-        return null;
+
+        // Remove surrounding parentheses from the table name
+        if (table.startsWith("(") && table.endsWith(")")) {
+            table = table.substring(1, table.length() - 1).trim();
+        }
+
+        if (table.isEmpty()) {
+            return null;
+        }
+
+        return new SQLTableRef(table, alias);
     }
 
     private SQLJoin parseJoin(String clause) {
