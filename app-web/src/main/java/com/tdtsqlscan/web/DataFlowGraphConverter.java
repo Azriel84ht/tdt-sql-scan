@@ -25,6 +25,7 @@ public class DataFlowGraphConverter {
     private Map<String, Node> tableNodes;
     private LaneManager laneManager;
     private int xOffset;
+    private boolean firstConfigProcessed;
 
     private static class LaneManager {
         private final Map<String, Integer> tableToLane = new HashMap<>();
@@ -55,6 +56,7 @@ public class DataFlowGraphConverter {
         this.tableNodes = new HashMap<>();
         this.laneManager = new LaneManager();
         this.xOffset = 0;
+        this.firstConfigProcessed = false;
         Node lastCommandNode = null;
 
         int i = 0;
@@ -243,9 +245,15 @@ public class DataFlowGraphConverter {
         String image = null;
 
         if (command instanceof BteqConfigurationCommand) {
-            label = "START";
-            shape = "image";
-            image = "images/bteq_start.png";
+            if (!firstConfigProcessed) {
+                label = "START";
+                shape = "image";
+                image = "images/bteq_start.png";
+                firstConfigProcessed = true;
+            } else {
+                label = command.getRawText();
+                shape = "ellipse";
+            }
         } else if (command instanceof BteqControlCommand) {
             BteqControlCommand controlCommand = (BteqControlCommand) command;
             label = "." + controlCommand.getType().toString();
@@ -295,7 +303,7 @@ public class DataFlowGraphConverter {
         }
         node.addProperty("fullText", command.getRawText());
         node.addProperty("fixed", true);
-        if (command instanceof BteqConfigurationCommand) {
+        if (command instanceof BteqConfigurationCommand && "START".equals(node.getLabel())) {
             node.addProperty("noContextMenu", true);
         }
         return node;
