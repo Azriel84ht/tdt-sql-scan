@@ -86,7 +86,7 @@ public class DataFlowGraphConverter {
         int yPos;
         int currentX = xOffset;
 
-        if (command instanceof BteqControlCommand ||
+        if (command instanceof BteqControlCommand || command instanceof BteqConfigurationCommand ||
             (command instanceof BteqSqlCommand && ((BteqSqlCommand) command).getQuery() instanceof com.tdtsqlscan.select.SelectQuery)) {
             yPos = BTEQ_LANE_Y;
             if (command instanceof BteqControlCommand && ((BteqControlCommand) command).getType() == BteqCommandType.LABEL) {
@@ -99,7 +99,7 @@ public class DataFlowGraphConverter {
             yPos = DATA_LANE_START_Y + (lane * LANE_HEIGHT);
         }
 
-        Node commandNode = createCommandNode(command, commandNodeId, index);
+        Node commandNode = createCommandNode(command, commandNodeId);
 
         if (command instanceof BteqSqlCommand) {
             // For SQL commands, center them between potential source/target tables
@@ -120,7 +120,7 @@ public class DataFlowGraphConverter {
             graph.addEdge(logicEdge);
         }
 
-        if (command instanceof BteqControlCommand) {
+        if (command instanceof BteqControlCommand || command instanceof BteqConfigurationCommand) {
             xOffset += X_OFFSET_STEP_CONTROL;
         } else {
             xOffset += X_OFFSET_STEP_SQL;
@@ -237,12 +237,12 @@ public class DataFlowGraphConverter {
         return tables;
     }
 
-    private Node createCommandNode(BteqCommand command, String id, int index) {
+    private Node createCommandNode(BteqCommand command, String id) {
         String label = "UNKNOWN";
         String shape = "box";
         String image = null;
 
-        if (index == 0 && command instanceof BteqControlCommand && ((BteqControlCommand) command).getType() == BteqCommandType.LOGON) {
+        if (command instanceof BteqConfigurationCommand) {
             label = "START";
             shape = "image";
             image = "images/bteq_start.png";
@@ -304,7 +304,7 @@ public class DataFlowGraphConverter {
         }
         node.addProperty("fullText", command.getRawText());
         node.addProperty("fixed", true);
-        if ("START".equals(label)) {
+        if (command instanceof BteqConfigurationCommand) {
             node.addProperty("noContextMenu", true);
         }
         return node;
