@@ -2,6 +2,7 @@ package com.tdtsqlscan.etl;
 
 public enum BteqCommandType {
     LOGON,
+    SET,
     LOGOFF,
     ACTIVITYCOUNT,
     ERRORCODE,

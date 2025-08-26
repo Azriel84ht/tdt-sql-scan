@@ -384,6 +384,7 @@
                     fileName: node.properties.fileName,
                     fileSize: node.properties.fileSize,
                     fileEncoding: node.properties.fileEncoding,
+                    noContextMenu: node.properties.noContextMenu,
                     font: node.properties.font || {} // Ensure font object exists
                 };
 
@@ -507,6 +508,11 @@
 
                 if (nodeId) {
                     activeNode = nodes.get(nodeId);
+
+                    if (activeNode.noContextMenu) {
+                        return;
+                    }
+
                     const showSchemaLink = document.getElementById('show-schema');
                     const viewTextLink = document.getElementById('view-text');
                     const copyCodeLink = document.getElementById('copy-code');
@@ -544,9 +550,11 @@
             if (params.nodes.length > 0) {
                 const nodeId = params.nodes[0];
                 const clickedNode = nodes.get(nodeId);
-                if (clickedNode && clickedNode.fileName) { // Check if it's a file node
+                const table = document.getElementById('metadata-table');
+                table.innerHTML = ""; // Clear previous metadata
+
+                if (clickedNode && clickedNode.fileName) { // Check if it's a file node from the chain flow
                     const metadata = fileMetadata[clickedNode.fileName];
-                    const table = document.getElementById('metadata-table');
                     let tableHtml = `
                         <tr><th>Attribute</th><th>Value</th></tr>
                         <tr><td>File Name</td><td>${clickedNode.fileName}</td></tr>
@@ -568,6 +576,11 @@
                         `;
                     }
                     table.innerHTML = tableHtml;
+                } else if (clickedNode && clickedNode.fullText) { // It's a command node in a BTEQ flow
+                    table.innerHTML = `
+                        <tr><th>Attribute</th><th>Value</th></tr>
+                        <tr><td>Full Text</td><td><pre style="white-space: pre-wrap; word-wrap: break-word;">${clickedNode.fullText}</pre></td></tr>
+                    `;
                 }
             }
         });

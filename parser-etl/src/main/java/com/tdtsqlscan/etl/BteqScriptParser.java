@@ -18,7 +18,7 @@ public class BteqScriptParser {
         BteqScript script = new BteqScript(scriptName);
         StringBuilder sqlBuffer = new StringBuilder();
         boolean inSql = false;
-
+        boolean initialConfigBlockProcessed = false;
         List<BteqCommand> configCommands = new ArrayList<>();
 
         String[] lines = scriptWithoutComments.split("\\r?\\n");
@@ -28,17 +28,22 @@ public class BteqScriptParser {
                 continue;
             }
 
-            if (trimmedLine.startsWith(".SET") || trimmedLine.startsWith(".LOGON") || trimmedLine.startsWith(".DECLARE")
-                    || trimmedLine.startsWith(".DATABASE")) {
+            // Group initial config commands
+            if (!initialConfigBlockProcessed &&
+                (trimmedLine.startsWith(".SET") || trimmedLine.startsWith(".LOGON") || trimmedLine.startsWith(".DECLARE")
+                    || trimmedLine.startsWith(".DATABASE"))) {
                 configCommands.add(parseBteqControlCommand(trimmedLine));
                 continue;
             }
 
+            // End of initial config block. Dump collected commands.
             if (!configCommands.isEmpty()) {
-                script.addCommand(new BteqConfigurationCommand(configCommands));
-                configCommands = new ArrayList<>();
+                script.addCommand(new BteqConfigurationCommand(new ArrayList<>(configCommands)));
+                configCommands.clear();
+                initialConfigBlockProcessed = true;
             }
 
+            // Process current line
             if (trimmedLine.startsWith(".")) {
                 if(inSql) { // If we encounter a BTEQ command, the previous SQL buffer is implicitly ended
                     String sql = sqlBuffer.toString().trim();
@@ -73,6 +78,7 @@ public class BteqScriptParser {
             }
         }
 
+        // Dump any remaining config commands if the script ends with them
         if (!configCommands.isEmpty()) {
             script.addCommand(new BteqConfigurationCommand(configCommands));
         }

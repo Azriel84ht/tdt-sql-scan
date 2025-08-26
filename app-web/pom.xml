@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.tdtsqlscan</groupId>
         <artifactId>tdt-sql-scan</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>0.4.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -63,27 +63,27 @@
         <dependency>
             <groupId>com.tdtsqlscan</groupId>
             <artifactId>parser-etl</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>0.4.1</version>
         </dependency>
         <dependency>
             <groupId>com.tdtsqlscan</groupId>
             <artifactId>parser-ddl</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>0.4.1</version>
         </dependency>
         <dependency>
             <groupId>com.tdtsqlscan</groupId>
             <artifactId>parser-dml</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>0.4.1</version>
         </dependency>
         <dependency>
             <groupId>com.tdtsqlscan</groupId>
             <artifactId>graph</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>0.4.1</version>
         </dependency>
         <dependency>
             <groupId>com.tdtsqlscan</groupId>
             <artifactId>parser-select</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>0.4.1</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

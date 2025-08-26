@@ -243,13 +243,31 @@ public class DataFlowGraphConverter {
         String image = null;
 
         if (command instanceof BteqConfigurationCommand) {
-            label = "CONFIG";
-            shape = "ellipse";
+            label = "START";
+            shape = "image";
+            image = "images/bteq_start.png";
         } else if (command instanceof BteqControlCommand) {
             BteqControlCommand controlCommand = (BteqControlCommand) command;
-            label = "." + controlCommand.getType().toString();
-            shape = "ellipse";
-            if (controlCommand.getType() == BteqCommandType.EXIT) {
+            BteqCommandType type = controlCommand.getType();
+
+            if (type == BteqCommandType.SET || type == BteqCommandType.DECLARE) {
+                shape = "image";
+                image = "images/bteq_config.png";
+                label = ""; // The icon is the representation
+            } else if (type == BteqCommandType.OTHER) {
+                String rawText = controlCommand.getRawText().trim();
+                if (rawText.startsWith(".")) {
+                    label = rawText.split("\\s+")[0];
+                } else {
+                    label = ".OTHER";
+                }
+                shape = "ellipse";
+            } else {
+                label = "." + type.toString();
+                shape = "ellipse";
+            }
+
+            if (type == BteqCommandType.EXIT) {
                 shape = "star";
             }
         } else if (command instanceof BteqSqlCommand) {
@@ -273,7 +291,7 @@ public class DataFlowGraphConverter {
                 image = "images/select.png";
             } else if (query instanceof UpdateQuery) {
                 label = "UPDATE";
-                shape = "box"; // Revert to box for non-imaged SQL
+                image = "images/update.png";
             } else if (query instanceof DropTableQuery) {
                 label = "DROP TABLE";
                 image = "images/drop_table.png";
@@ -294,6 +312,9 @@ public class DataFlowGraphConverter {
         }
         node.addProperty("fullText", command.getRawText());
         node.addProperty("fixed", true);
+        if (command instanceof BteqConfigurationCommand) {
+            node.addProperty("noContextMenu", true);
+        }
         return node;
     }
 
