@@ -244,7 +244,8 @@ public class DataFlowGraphConverter {
 
         if (command instanceof BteqConfigurationCommand) {
             label = "CONFIG";
-            shape = "ellipse";
+            shape = "image";
+            image = "images/bteq_start.png";
         } else if (command instanceof BteqControlCommand) {
             BteqControlCommand controlCommand = (BteqControlCommand) command;
             label = "." + controlCommand.getType().toString();
@@ -294,6 +295,9 @@ public class DataFlowGraphConverter {
         }
         node.addProperty("fullText", command.getRawText());
         node.addProperty("fixed", true);
+        if (command instanceof BteqConfigurationCommand) {
+            node.addProperty("noContextMenu", true);
+        }
         return node;
     }
 
