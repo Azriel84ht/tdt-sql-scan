@@ -248,18 +248,26 @@ public class DataFlowGraphConverter {
             image = "images/bteq_start.png";
         } else if (command instanceof BteqControlCommand) {
             BteqControlCommand controlCommand = (BteqControlCommand) command;
-            if (controlCommand.getType() == BteqCommandType.OTHER) {
+            BteqCommandType type = controlCommand.getType();
+
+            if (type == BteqCommandType.SET || type == BteqCommandType.DECLARE) {
+                shape = "image";
+                image = "images/bteq_config.png";
+                label = ""; // The icon is the representation
+            } else if (type == BteqCommandType.OTHER) {
                 String rawText = controlCommand.getRawText().trim();
                 if (rawText.startsWith(".")) {
                     label = rawText.split("\\s+")[0];
                 } else {
                     label = ".OTHER";
                 }
+                shape = "ellipse";
             } else {
-                label = "." + controlCommand.getType().toString();
+                label = "." + type.toString();
+                shape = "ellipse";
             }
-            shape = "ellipse";
-            if (controlCommand.getType() == BteqCommandType.EXIT) {
+
+            if (type == BteqCommandType.EXIT) {
                 shape = "star";
             }
         } else if (command instanceof BteqSqlCommand) {
