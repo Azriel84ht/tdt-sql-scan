@@ -256,7 +256,16 @@ public class DataFlowGraphConverter {
             }
         } else if (command instanceof BteqControlCommand) {
             BteqControlCommand controlCommand = (BteqControlCommand) command;
-            label = "." + controlCommand.getType().toString();
+            if (controlCommand.getType() == BteqCommandType.OTHER) {
+                String rawText = controlCommand.getRawText().trim();
+                if (rawText.startsWith(".")) {
+                    label = rawText.split("\\s+")[0];
+                } else {
+                    label = ".OTHER";
+                }
+            } else {
+                label = "." + controlCommand.getType().toString();
+            }
             shape = "ellipse";
             if (controlCommand.getType() == BteqCommandType.EXIT) {
                 shape = "star";
