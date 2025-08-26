@@ -273,7 +273,7 @@ public class DataFlowGraphConverter {
                 image = "images/select.png";
             } else if (query instanceof UpdateQuery) {
                 label = "UPDATE";
-                shape = "box"; // Revert to box for non-imaged SQL
+                image = "images/update.png";
             } else if (query instanceof DropTableQuery) {
                 label = "DROP TABLE";
                 image = "images/drop_table.png";
