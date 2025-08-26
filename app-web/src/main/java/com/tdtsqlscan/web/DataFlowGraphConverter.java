@@ -243,7 +243,7 @@ public class DataFlowGraphConverter {
         String image = null;
 
         if (command instanceof BteqConfigurationCommand) {
-            label = "CONFIG";
+            label = "START";
             shape = "image";
             image = "images/bteq_start.png";
         } else if (command instanceof BteqControlCommand) {
