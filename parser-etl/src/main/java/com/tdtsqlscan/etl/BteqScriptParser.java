@@ -19,24 +19,11 @@ public class BteqScriptParser {
         StringBuilder sqlBuffer = new StringBuilder();
         boolean inSql = false;
 
-        List<BteqCommand> configCommands = new ArrayList<>();
-
         String[] lines = scriptWithoutComments.split("\\r?\\n");
         for (String line : lines) {
             String trimmedLine = line.trim();
             if (trimmedLine.isEmpty()) {
                 continue;
-            }
-
-            if (trimmedLine.startsWith(".SET") || trimmedLine.startsWith(".LOGON") || trimmedLine.startsWith(".DECLARE")
-                    || trimmedLine.startsWith(".DATABASE")) {
-                configCommands.add(parseBteqControlCommand(trimmedLine));
-                continue;
-            }
-
-            if (!configCommands.isEmpty()) {
-                script.addCommand(new BteqConfigurationCommand(configCommands));
-                configCommands = new ArrayList<>();
             }
 
             if (trimmedLine.startsWith(".")) {
@@ -71,10 +58,6 @@ public class BteqScriptParser {
                 sqlBuffer.setLength(0);
                 inSql = false;
             }
-        }
-
-        if (!configCommands.isEmpty()) {
-            script.addCommand(new BteqConfigurationCommand(configCommands));
         }
 
         return script;
