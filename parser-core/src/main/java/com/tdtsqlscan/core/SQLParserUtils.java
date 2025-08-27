@@ -59,9 +59,31 @@ public class SQLParserUtils {
     public static String getFirstWord(String s) {
         String[] words = s.trim().split("\\s+");
         if (words.length > 0) {
-            return words[0];
+            String word = words[0];
+            // Clean trailing characters that are not part of the name
+            while (word.length() > 0 && (word.endsWith(")") || word.endsWith(",") || word.endsWith(";"))) {
+                word = word.substring(0, word.length() - 1);
+            }
+            return word;
         }
         return "";
+    }
+
+    public static String extractTableFromExpression(String expression) {
+        String table = expression.trim();
+
+        // Split by space to separate table name from alias
+        String[] parts = table.split("\\s+");
+        if (parts.length == 0) {
+            return "";
+        }
+        String baseName = parts[0];
+
+        // Clean trailing characters that are not part of the name
+        while (baseName.length() > 0 && (baseName.endsWith(")") || baseName.endsWith(",") || baseName.endsWith(";"))) {
+            baseName = baseName.substring(0, baseName.length() - 1);
+        }
+        return baseName;
     }
 
     public static String extractTableName(String sql, String keyword) {

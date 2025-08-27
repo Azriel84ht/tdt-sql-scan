@@ -1,16 +1,17 @@
 package com.tdtsqlscan.dml;
 
 import com.tdtsqlscan.core.QueryParser;
-import com.tdtsqlscan.core.SQLAssignment;
-import com.tdtsqlscan.core.SQLCondition;
 import com.tdtsqlscan.core.SQLParseException;
 import com.tdtsqlscan.core.SQLParserUtils;
 import com.tdtsqlscan.core.SQLQuery;
-
-import java.util.List;
+import com.tdtsqlscan.core.SQLTableRef;
+import com.tdtsqlscan.select.SelectParser;
+import com.tdtsqlscan.select.SelectQuery;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class UpdateParser implements QueryParser {
 
@@ -22,20 +23,37 @@ public class UpdateParser implements QueryParser {
     @Override
     public SQLQuery parse(String sql) throws SQLParseException {
         String upperSql = sql.toUpperCase();
-        // Use extractBetweenKeywords for more robustness, as the table is between UPDATE and SET.
         String targetTable = SQLParserUtils.extractBetweenKeywords(upperSql, "UPDATE", "SET");
         if (targetTable != null) {
-            // The result might include an alias, get the first word.
             targetTable = SQLParserUtils.getFirstWord(targetTable);
         }
 
-        List<String> sourceTables = null;
+        List<String> sourceTables = new ArrayList<>();
+
+        // Extract tables from FROM clause if it exists
         if (upperSql.contains(" FROM ")) {
             String fromClause = SQLParserUtils.extractAfterKeyword(upperSql, "FROM", "WHERE");
             if (fromClause != null && !fromClause.isEmpty()) {
                 // This is a simplistic implementation. A real one would need to handle joins, aliases etc.
                 String sourceTable = SQLParserUtils.getFirstWord(fromClause.trim());
-                sourceTables = Collections.singletonList(sourceTable);
+                sourceTables.add(sourceTable);
+            }
+        }
+
+        // Extract tables from subqueries in SET clause
+        String setClause = SQLParserUtils.extractBetweenKeywords(sql, "SET", "WHERE");
+        if (setClause == null) {
+            setClause = SQLParserUtils.extractAfterKeyword(sql, "SET", null);
+        }
+
+        if (setClause != null) {
+            // Use regex to find all subqueries in the SET clause.
+            // This regex looks for patterns like (SELECT ... FROM table ...)
+            // It captures the table name, which might be followed by an alias.
+            Pattern pattern = Pattern.compile("FROM\\s+([\\w\\.]+)", Pattern.CASE_INSENSITIVE);
+            Matcher matcher = pattern.matcher(setClause);
+            while (matcher.find()) {
+                sourceTables.add(SQLParserUtils.getFirstWord(matcher.group(1)));
             }
         }
 
