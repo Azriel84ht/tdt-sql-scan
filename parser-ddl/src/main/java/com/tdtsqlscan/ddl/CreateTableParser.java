@@ -57,10 +57,12 @@ public class CreateTableParser implements QueryParser {
             }
         } else {
             // This is a standard CREATE TABLE with column definitions.
-            String colsInside = SQLParserUtils.extractBetweenKeywords(sql, "(", ")");
-            List<String> colDefs = SQLParserUtils.splitTopLevel(colsInside, ",");
-            for (String col : colDefs) {
-                columns.add(ColumnDefinition.from(col.trim()));
+            String colsInside = SQLParserUtils.extractBalancedParentheses(sql);
+            if (colsInside != null) {
+                List<String> colDefs = SQLParserUtils.splitTopLevel(colsInside, ",");
+                for (String col : colDefs) {
+                    columns.add(ColumnDefinition.from(col.trim()));
+                }
             }
         }
 
