@@ -9,6 +9,7 @@ import com.tdtsqlscan.etl.*;
 import com.tdtsqlscan.graph.Edge;
 import com.tdtsqlscan.graph.Graph;
 import com.tdtsqlscan.graph.Node;
+import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 
 import java.util.*;
 
@@ -296,6 +297,7 @@ public class DataFlowGraphConverter {
         String label = "UNKNOWN";
         String shape = "box";
         String image = null;
+        String fullText = command.getRawText(); // Default to raw
         Node node = new Node(id, ""); // Create node with empty label initially
 
         if (command instanceof BteqConfigurationCommand) {
@@ -357,6 +359,7 @@ public class DataFlowGraphConverter {
 
             if (query instanceof CreateTableQuery) {
                 CreateTableQuery createTableQuery = (CreateTableQuery) query;
+                fullText = new BasicFormatterImpl().format(command.getRawText());
 
                 // Add metadata for empty structure CREATE TABLE
                 if (createTableQuery.getSourceTables().isEmpty()) {
@@ -425,7 +428,7 @@ public class DataFlowGraphConverter {
             node.addProperty("image", image);
             node.addProperty("size", 30);
         }
-        node.addProperty("fullText", command.getRawText());
+        node.addProperty("fullText", fullText);
         node.addProperty("fixed", true);
         if (command instanceof BteqConfigurationCommand) {
             node.addProperty("noContextMenu", true);
