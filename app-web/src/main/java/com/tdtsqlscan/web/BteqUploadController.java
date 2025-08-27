@@ -11,6 +11,7 @@ import com.tdtsqlscan.etl.BteqScript;
 import com.tdtsqlscan.etl.BteqScriptParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tdtsqlscan.core.SQLParserUtils;
 import com.tdtsqlscan.core.SQLQuery;
 import com.tdtsqlscan.core.SQLTableRef;
 import com.tdtsqlscan.ddl.CreateTableQuery;
@@ -133,7 +134,7 @@ public class BteqUploadController {
                         if (query instanceof SelectQuery) {
                             SelectQuery selectQuery = (SelectQuery) query;
                             for (SQLTableRef tableRef : selectQuery.getTables()) {
-                                readTables.add(tableRef.getExpression().split(" ")[0].toUpperCase());
+                                readTables.add(SQLParserUtils.extractTableFromExpression(tableRef.getExpression()).toUpperCase());
                             }
                         } else if (query instanceof InsertQuery) {
                             InsertQuery insertQuery = (InsertQuery) query;
