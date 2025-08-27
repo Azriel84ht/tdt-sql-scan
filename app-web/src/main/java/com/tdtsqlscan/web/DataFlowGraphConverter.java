@@ -9,7 +9,7 @@ import com.tdtsqlscan.etl.*;
 import com.tdtsqlscan.graph.Edge;
 import com.tdtsqlscan.graph.Graph;
 import com.tdtsqlscan.graph.Node;
-import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
+import com.tdtsqlscan.core.SQLParserUtils;
 
 import java.util.*;
 
@@ -359,7 +359,7 @@ public class DataFlowGraphConverter {
 
             if (query instanceof CreateTableQuery) {
                 CreateTableQuery createTableQuery = (CreateTableQuery) query;
-                fullText = new BasicFormatterImpl().format(command.getRawText());
+                fullText = formatCreateTableSql(command.getRawText());
 
                 // Add metadata for empty structure CREATE TABLE
                 if (createTableQuery.getSourceTables().isEmpty()) {
@@ -455,5 +455,53 @@ public class DataFlowGraphConverter {
             // DO NOT add the node to the graph.
         }
         return tableNode;
+    }
+
+    private String formatCreateTableSql(String sql) {
+        String upperSql = sql.toUpperCase();
+        int openParenIndex = upperSql.indexOf('(');
+        // Find the matching closing parenthesis for the column definitions
+        if (openParenIndex == -1) {
+            return sql;
+        }
+
+        int balance = 1;
+        int closeParenIndex = -1;
+        for (int i = openParenIndex + 1; i < sql.length(); i++) {
+            if (sql.charAt(i) == '(') {
+                balance++;
+            } else if (sql.charAt(i) == ')') {
+                balance--;
+                if (balance == 0) {
+                    closeParenIndex = i;
+                    break;
+                }
+            }
+        }
+
+        if (closeParenIndex == -1) {
+            return sql; // Not a format we can handle
+        }
+
+        String preColumns = sql.substring(0, openParenIndex + 1);
+        String columnsPart = sql.substring(openParenIndex + 1, closeParenIndex);
+        String postColumns = sql.substring(closeParenIndex);
+
+        StringBuilder formattedSql = new StringBuilder();
+        formattedSql.append(preColumns).append("\n");
+
+        List<String> columnDefs = SQLParserUtils.splitTopLevel(columnsPart, ",");
+
+        for (int i = 0; i < columnDefs.size(); i++) {
+            formattedSql.append("    ").append(columnDefs.get(i).trim());
+            if (i < columnDefs.size() - 1) {
+                formattedSql.append(",");
+            }
+            formattedSql.append("\n");
+        }
+
+        formattedSql.append(postColumns);
+
+        return formattedSql.toString();
     }
 }
