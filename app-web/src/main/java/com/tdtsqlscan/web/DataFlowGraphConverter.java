@@ -20,6 +20,7 @@ public class DataFlowGraphConverter {
     private static final int LANE_HEIGHT = 120;
     private static final int X_OFFSET_STEP_SQL = 180;
     private static final int X_OFFSET_STEP_CONTROL = 75;
+    private static final int X_OFFSET_STEP_LANE_CHANGE = 50;
 
     private Graph graph;
     private Map<String, Node> tableNodes;
@@ -57,19 +58,57 @@ public class DataFlowGraphConverter {
         this.xOffset = 0;
         Node lastCommandNode = null;
 
+        // Pre-calculate lane numbers for all commands to detect lane changes
+        Map<BteqCommand, Integer> commandToLane = new HashMap<>();
+        LaneManager laneNumberer = new LaneManager();
+        for (BteqCommand command : script.getCommands()) {
+            commandToLane.put(command, getLaneNumber(command, laneNumberer));
+        }
+
         int i = 0;
         while (i < script.getCommands().size()) {
             BteqCommand command = script.getCommands().get(i);
+            int xStep;
 
             // Check if the command is a candidate for grouping
             if (isGroupableInsert(command)) {
                 List<BteqCommand> group = findInsertGroup(script.getCommands(), i);
                 lastCommandNode = processInsertGroup(group, i, lastCommandNode);
-                i += group.size(); // Skip past the commands that were just grouped
+
+                int groupSize = group.size();
+                int currentLane = commandToLane.get(command);
+                int nextLane = -2; // Use a value that is different from any possible lane number
+                if (i + groupSize < script.getCommands().size()) {
+                    nextLane = commandToLane.get(script.getCommands().get(i + groupSize));
+                }
+
+                if (nextLane != -2 && currentLane != nextLane) {
+                    xStep = X_OFFSET_STEP_LANE_CHANGE;
+                } else {
+                    xStep = X_OFFSET_STEP_SQL;
+                }
+                i += groupSize; // Skip past the commands that were just grouped
             } else {
                 lastCommandNode = processCommand(command, i, lastCommandNode);
+
+                int currentLane = commandToLane.get(command);
+                int nextLane = -2;
+                if (i + 1 < script.getCommands().size()) {
+                    nextLane = commandToLane.get(script.getCommands().get(i + 1));
+                }
+
+                if (nextLane != -2 && currentLane != nextLane) {
+                    xStep = X_OFFSET_STEP_LANE_CHANGE;
+                } else {
+                    if (command instanceof BteqControlCommand || command instanceof BteqConfigurationCommand) {
+                        xStep = X_OFFSET_STEP_CONTROL;
+                    } else {
+                        xStep = X_OFFSET_STEP_SQL;
+                    }
+                }
                 i++;
             }
+            xOffset += xStep;
         }
 
         // After processing all commands, populate the guide line coordinates
@@ -120,12 +159,17 @@ public class DataFlowGraphConverter {
             graph.addEdge(logicEdge);
         }
 
-        if (command instanceof BteqControlCommand || command instanceof BteqConfigurationCommand) {
-            xOffset += X_OFFSET_STEP_CONTROL;
-        } else {
-            xOffset += X_OFFSET_STEP_SQL;
-        }
         return commandNode;
+    }
+
+    private int getLaneNumber(BteqCommand command, LaneManager laneManager) {
+        if (command instanceof BteqControlCommand || command instanceof BteqConfigurationCommand ||
+                (command instanceof BteqSqlCommand && ((BteqSqlCommand) command).getQuery() instanceof com.tdtsqlscan.select.SelectQuery)) {
+            return -1; // Special value for the BTEQ lane
+        } else {
+            String targetTable = getTargetTable(command);
+            return laneManager.getLaneForTable(targetTable);
+        }
     }
 
     private String getTargetTable(BteqCommand command) {
@@ -191,7 +235,6 @@ public class DataFlowGraphConverter {
             graph.addEdge(logicEdge);
         }
 
-        xOffset += X_OFFSET_STEP_SQL;
         return commandNode;
     }
 
