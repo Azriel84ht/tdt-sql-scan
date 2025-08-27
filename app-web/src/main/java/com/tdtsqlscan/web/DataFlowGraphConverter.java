@@ -245,15 +245,31 @@ public class DataFlowGraphConverter {
         if (command instanceof BteqConfigurationCommand) {
             label = "START";
             shape = "image";
-            image = "images/bteq_start.png";
+            image = "images/bteq_commands/start.png";
         } else if (command instanceof BteqControlCommand) {
             BteqControlCommand controlCommand = (BteqControlCommand) command;
             BteqCommandType type = controlCommand.getType();
 
             if (type == BteqCommandType.SET || type == BteqCommandType.DECLARE) {
                 shape = "image";
-                image = "images/bteq_config.png";
+                image = "images/bteq_commands/config.png";
                 label = ""; // The icon is the representation
+            } else if (type == BteqCommandType.EXPORT) {
+                shape = "image";
+                image = "images/bteq_commands/export.png";
+                label = "";
+            } else if (type == BteqCommandType.LABEL) {
+                shape = "image";
+                image = "images/bteq_commands/label.png";
+                label = "";
+            } else if (type == BteqCommandType.GOTO) {
+                shape = "image";
+                image = "images/bteq_commands/goto.png";
+                label = "";
+            } else if (type == BteqCommandType.IF) {
+                shape = "image";
+                image = "images/bteq_commands/if.png";
+                label = "";
             } else if (type == BteqCommandType.OTHER) {
                 String rawText = controlCommand.getRawText().trim();
                 if (rawText.startsWith(".")) {
