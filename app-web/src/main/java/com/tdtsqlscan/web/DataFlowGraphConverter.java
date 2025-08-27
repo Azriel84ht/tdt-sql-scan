@@ -9,6 +9,7 @@ import com.tdtsqlscan.etl.*;
 import com.tdtsqlscan.graph.Edge;
 import com.tdtsqlscan.graph.Graph;
 import com.tdtsqlscan.graph.Node;
+import com.tdtsqlscan.core.SQLParserUtils;
 
 import java.util.*;
 
@@ -18,13 +19,14 @@ public class DataFlowGraphConverter {
     private static final int BTEQ_LANE_Y = 0;
     private static final int DATA_LANE_START_Y = 150;
     private static final int LANE_HEIGHT = 120;
-    private static final int X_OFFSET_STEP_SQL = 180;
-    private static final int X_OFFSET_STEP_CONTROL = 75;
+    private static final int X_OFFSET_STEP_STANDARD = 120;
+    private static final int X_OFFSET_STEP_LANE_CHANGE = 50;
 
     private Graph graph;
     private Map<String, Node> tableNodes;
     private LaneManager laneManager;
     private int xOffset;
+    private String currentDatabase = null;
 
     private static class LaneManager {
         private final Map<String, Integer> tableToLane = new HashMap<>();
@@ -57,19 +59,64 @@ public class DataFlowGraphConverter {
         this.xOffset = 0;
         Node lastCommandNode = null;
 
+        // Pre-calculate lane numbers for all commands to detect lane changes
+        Map<BteqCommand, Integer> commandToLane = new HashMap<>();
+        LaneManager laneNumberer = new LaneManager();
+        for (BteqCommand command : script.getCommands()) {
+            commandToLane.put(command, getLaneNumber(command, laneNumberer));
+        }
+
         int i = 0;
         while (i < script.getCommands().size()) {
             BteqCommand command = script.getCommands().get(i);
+
+            if (command instanceof BteqControlCommand && ((BteqControlCommand) command).getType() == BteqCommandType.DATABASE) {
+                String[] parts = command.getRawText().trim().split("\\s+");
+                if (parts.length > 1) {
+                    String dbName = parts[1];
+                    if (dbName.endsWith(";")) {
+                        dbName = dbName.substring(0, dbName.length() - 1);
+                    }
+                    this.currentDatabase = dbName;
+                }
+            }
+            int xStep;
 
             // Check if the command is a candidate for grouping
             if (isGroupableInsert(command)) {
                 List<BteqCommand> group = findInsertGroup(script.getCommands(), i);
                 lastCommandNode = processInsertGroup(group, i, lastCommandNode);
-                i += group.size(); // Skip past the commands that were just grouped
+
+                int groupSize = group.size();
+                int currentLane = commandToLane.get(command);
+                int nextLane = -2; // Use a value that is different from any possible lane number
+                if (i + groupSize < script.getCommands().size()) {
+                    nextLane = commandToLane.get(script.getCommands().get(i + groupSize));
+                }
+
+                if (nextLane != -2 && currentLane != nextLane) {
+                    xStep = X_OFFSET_STEP_LANE_CHANGE;
+                } else {
+                    xStep = X_OFFSET_STEP_STANDARD;
+                }
+                i += groupSize; // Skip past the commands that were just grouped
             } else {
                 lastCommandNode = processCommand(command, i, lastCommandNode);
+
+                int currentLane = commandToLane.get(command);
+                int nextLane = -2;
+                if (i + 1 < script.getCommands().size()) {
+                    nextLane = commandToLane.get(script.getCommands().get(i + 1));
+                }
+
+                if (nextLane != -2 && currentLane != nextLane) {
+                    xStep = X_OFFSET_STEP_LANE_CHANGE;
+                } else {
+                    xStep = X_OFFSET_STEP_STANDARD;
+                }
                 i++;
             }
+            xOffset += xStep;
         }
 
         // After processing all commands, populate the guide line coordinates
@@ -101,13 +148,10 @@ public class DataFlowGraphConverter {
 
         Node commandNode = createCommandNode(command, commandNodeId);
 
+        // For SQL commands, center them between potential source/target tables
+        commandNode.addProperty("x", currentX);
         if (command instanceof BteqSqlCommand) {
-            // For SQL commands, center them between potential source/target tables
-            commandNode.addProperty("x", currentX + X_OFFSET_STEP_SQL / 2);
             handleDataFlow(commandNode, (BteqSqlCommand) command, yPos, currentX);
-        } else {
-            // For non-SQL commands, place them at the start of the block
-            commandNode.addProperty("x", currentX);
         }
 
         commandNode.addProperty("y", yPos);
@@ -120,12 +164,17 @@ public class DataFlowGraphConverter {
             graph.addEdge(logicEdge);
         }
 
-        if (command instanceof BteqControlCommand || command instanceof BteqConfigurationCommand) {
-            xOffset += X_OFFSET_STEP_CONTROL;
-        } else {
-            xOffset += X_OFFSET_STEP_SQL;
-        }
         return commandNode;
+    }
+
+    private int getLaneNumber(BteqCommand command, LaneManager laneManager) {
+        if (command instanceof BteqControlCommand || command instanceof BteqConfigurationCommand ||
+                (command instanceof BteqSqlCommand && ((BteqSqlCommand) command).getQuery() instanceof com.tdtsqlscan.select.SelectQuery)) {
+            return -1; // Special value for the BTEQ lane
+        } else {
+            String targetTable = getTargetTable(command);
+            return laneManager.getLaneForTable(targetTable);
+        }
     }
 
     private String getTargetTable(BteqCommand command) {
@@ -176,7 +225,7 @@ public class DataFlowGraphConverter {
         int yPos = DATA_LANE_START_Y + (lane * LANE_HEIGHT);
         int currentX = xOffset;
 
-        commandNode.addProperty("x", currentX + X_OFFSET_STEP_SQL / 2);
+        commandNode.addProperty("x", currentX);
         commandNode.addProperty("y", yPos);
         graph.addNode(commandNode);
 
@@ -191,7 +240,6 @@ public class DataFlowGraphConverter {
             graph.addEdge(logicEdge);
         }
 
-        xOffset += X_OFFSET_STEP_SQL;
         return commandNode;
     }
 
@@ -241,19 +289,46 @@ public class DataFlowGraphConverter {
         String label = "UNKNOWN";
         String shape = "box";
         String image = null;
+        String fullText = command.getRawText(); // Default to raw
+        Node node = new Node(id, ""); // Create node with empty label initially
 
         if (command instanceof BteqConfigurationCommand) {
             label = "START";
             shape = "image";
-            image = "images/bteq_start.png";
+            image = "images/bteq_commands/start.png";
         } else if (command instanceof BteqControlCommand) {
             BteqControlCommand controlCommand = (BteqControlCommand) command;
             BteqCommandType type = controlCommand.getType();
 
             if (type == BteqCommandType.SET || type == BteqCommandType.DECLARE) {
                 shape = "image";
-                image = "images/bteq_config.png";
+                image = "images/bteq_commands/config.png";
                 label = ""; // The icon is the representation
+            } else if (type == BteqCommandType.EXPORT) {
+                shape = "image";
+                image = "images/bteq_commands/export.png";
+                label = "";
+            } else if (type == BteqCommandType.LABEL) {
+                shape = "image";
+                image = "images/bteq_commands/label.png";
+                String rawText = controlCommand.getRawText().trim();
+                String[] parts = rawText.split("\\s+");
+                if (parts.length > 1) {
+                    label = parts[1];
+                    if (label.endsWith(";")) {
+                        label = label.substring(0, label.length() - 1);
+                    }
+                } else {
+                    label = "";
+                }
+            } else if (type == BteqCommandType.GOTO) {
+                shape = "image";
+                image = "images/bteq_commands/goto.png";
+                label = "";
+            } else if (type == BteqCommandType.IF) {
+                shape = "image";
+                image = "images/bteq_commands/if.png";
+                label = "";
             } else if (type == BteqCommandType.OTHER) {
                 String rawText = controlCommand.getRawText().trim();
                 if (rawText.startsWith(".")) {
@@ -276,6 +351,41 @@ public class DataFlowGraphConverter {
 
             if (query instanceof CreateTableQuery) {
                 CreateTableQuery createTableQuery = (CreateTableQuery) query;
+                fullText = formatCreateTableSql(command.getRawText());
+
+                // Add metadata for empty structure CREATE TABLE
+                if (createTableQuery.getSourceTables().isEmpty()) {
+                    node.addProperty("metadataType", "CREATE_TABLE_STRUCTURE");
+                    String fullTableName = createTableQuery.getTableName();
+                    String dbName = null;
+                    String tableName = fullTableName;
+                    boolean fromContext = false;
+
+                    if (fullTableName.contains(".")) {
+                        String[] parts = fullTableName.split("\\.");
+                        dbName = parts[0];
+                        tableName = parts[1];
+                    } else if (this.currentDatabase != null) {
+                        dbName = this.currentDatabase;
+                        fromContext = true;
+                    } else {
+                        dbName = "[Default Database]";
+                    }
+
+                    node.addProperty("Tablename", tableName);
+                    node.addProperty("Databasename", dbName);
+                    node.addProperty("isDatabaseFromContext", fromContext);
+
+                    List<Map<String, String>> columns = new ArrayList<>();
+                    for (com.tdtsqlscan.ddl.ColumnDefinition col : createTableQuery.getColumns()) {
+                        Map<String, String> colData = new HashMap<>();
+                        colData.put("name", col.getName());
+                        colData.put("type", col.getType());
+                        columns.add(colData);
+                    }
+                    node.addProperty("columns", columns);
+                }
+
                 if (createTableQuery.isVolatile()) {
                     label = "CREATE VOLATILE TABLE";
                     image = "images/create_volatile_table.png";
@@ -304,13 +414,13 @@ public class DataFlowGraphConverter {
             }
         }
 
-        Node node = new Node(id, label);
+        node.setLabel(label);
         node.addProperty("shape", shape);
         if (image != null) {
             node.addProperty("image", image);
             node.addProperty("size", 30);
         }
-        node.addProperty("fullText", command.getRawText());
+        node.addProperty("fullText", fullText);
         node.addProperty("fixed", true);
         if (command instanceof BteqConfigurationCommand) {
             node.addProperty("noContextMenu", true);
@@ -337,5 +447,53 @@ public class DataFlowGraphConverter {
             // DO NOT add the node to the graph.
         }
         return tableNode;
+    }
+
+    private String formatCreateTableSql(String sql) {
+        String upperSql = sql.toUpperCase();
+        int openParenIndex = upperSql.indexOf('(');
+        // Find the matching closing parenthesis for the column definitions
+        if (openParenIndex == -1) {
+            return sql;
+        }
+
+        int balance = 1;
+        int closeParenIndex = -1;
+        for (int i = openParenIndex + 1; i < sql.length(); i++) {
+            if (sql.charAt(i) == '(') {
+                balance++;
+            } else if (sql.charAt(i) == ')') {
+                balance--;
+                if (balance == 0) {
+                    closeParenIndex = i;
+                    break;
+                }
+            }
+        }
+
+        if (closeParenIndex == -1) {
+            return sql; // Not a format we can handle
+        }
+
+        String preColumns = sql.substring(0, openParenIndex + 1);
+        String columnsPart = sql.substring(openParenIndex + 1, closeParenIndex);
+        String postColumns = sql.substring(closeParenIndex);
+
+        StringBuilder formattedSql = new StringBuilder();
+        formattedSql.append(preColumns).append("\n");
+
+        List<String> columnDefs = SQLParserUtils.splitTopLevel(columnsPart, ",");
+
+        for (int i = 0; i < columnDefs.size(); i++) {
+            formattedSql.append("    ").append(columnDefs.get(i).trim());
+            if (i < columnDefs.size() - 1) {
+                formattedSql.append(",");
+            }
+            formattedSql.append("\n");
+        }
+
+        formattedSql.append(postColumns);
+
+        return formattedSql.toString();
     }
 }

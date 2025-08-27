@@ -385,6 +385,11 @@
                     fileSize: node.properties.fileSize,
                     fileEncoding: node.properties.fileEncoding,
                     noContextMenu: node.properties.noContextMenu,
+                    metadataType: node.properties.metadataType,
+                    Tablename: node.properties.Tablename,
+                    Databasename: node.properties.Databasename,
+                    isDatabaseFromContext: node.properties.isDatabaseFromContext,
+                    columns: node.properties.columns,
                     font: node.properties.font || {} // Ensure font object exists
                 };
 
@@ -575,6 +580,30 @@
                             </tr>
                         `;
                     }
+                    table.innerHTML = tableHtml;
+                } else if (clickedNode && clickedNode.metadataType === 'CREATE_TABLE_STRUCTURE') {
+                    let dbNameHtml = clickedNode.isDatabaseFromContext
+                        ? `<i>${clickedNode.Databasename}</i>`
+                        : clickedNode.Databasename;
+
+                    let tableHtml = `
+                        <tr><th>Attribute</th><th>Value</th></tr>
+                        <tr><td>Tablename</td><td>${clickedNode.Tablename}</td></tr>
+                        <tr><td>Databasename</td><td>${dbNameHtml}</td></tr>
+                    `;
+
+                    if (clickedNode.columns && clickedNode.columns.length > 0) {
+                        tableHtml += '<tr><td colspan="2" class="font-bold pt-4">Columns</td></tr>';
+                        tableHtml += '<tr><th>Name</th><th>Type</th></tr>';
+                        clickedNode.columns.forEach(col => {
+                            tableHtml += `<tr><td>${col.name}</td><td>${col.type}</td></tr>`;
+                        });
+                    }
+
+                    tableHtml += `
+                        <tr><td colspan="2" class="font-bold pt-4">Full Text</td></tr>
+                        <tr><td colspan="2"><pre style="white-space: pre-wrap; word-wrap: break-word;">${clickedNode.fullText}</pre></td></tr>
+                    `;
                     table.innerHTML = tableHtml;
                 } else if (clickedNode && clickedNode.fullText) { // It's a command node in a BTEQ flow
                     table.innerHTML = `
