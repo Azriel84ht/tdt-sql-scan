@@ -304,7 +304,13 @@ public class DataFlowGraphConverter {
             } else if (type == BteqCommandType.LABEL) {
                 shape = "image";
                 image = "images/bteq_commands/label.png";
-                label = "";
+                String rawText = controlCommand.getRawText().trim();
+                String[] parts = rawText.split("\\s+");
+                if (parts.length > 1) {
+                    label = parts[1];
+                } else {
+                    label = "";
+                }
             } else if (type == BteqCommandType.GOTO) {
                 shape = "image";
                 image = "images/bteq_commands/goto.png";
