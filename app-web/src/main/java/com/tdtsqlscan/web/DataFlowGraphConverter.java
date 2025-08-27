@@ -19,8 +19,7 @@ public class DataFlowGraphConverter {
     private static final int BTEQ_LANE_Y = 0;
     private static final int DATA_LANE_START_Y = 150;
     private static final int LANE_HEIGHT = 120;
-    private static final int X_OFFSET_STEP_SQL = 180;
-    private static final int X_OFFSET_STEP_CONTROL = 75;
+    private static final int X_OFFSET_STEP_STANDARD = 120;
     private static final int X_OFFSET_STEP_LANE_CHANGE = 50;
 
     private Graph graph;
@@ -98,7 +97,7 @@ public class DataFlowGraphConverter {
                 if (nextLane != -2 && currentLane != nextLane) {
                     xStep = X_OFFSET_STEP_LANE_CHANGE;
                 } else {
-                    xStep = X_OFFSET_STEP_SQL;
+                    xStep = X_OFFSET_STEP_STANDARD;
                 }
                 i += groupSize; // Skip past the commands that were just grouped
             } else {
@@ -113,11 +112,7 @@ public class DataFlowGraphConverter {
                 if (nextLane != -2 && currentLane != nextLane) {
                     xStep = X_OFFSET_STEP_LANE_CHANGE;
                 } else {
-                    if (command instanceof BteqControlCommand || command instanceof BteqConfigurationCommand) {
-                        xStep = X_OFFSET_STEP_CONTROL;
-                    } else {
-                        xStep = X_OFFSET_STEP_SQL;
-                    }
+                    xStep = X_OFFSET_STEP_STANDARD;
                 }
                 i++;
             }
@@ -153,13 +148,10 @@ public class DataFlowGraphConverter {
 
         Node commandNode = createCommandNode(command, commandNodeId);
 
+        // For SQL commands, center them between potential source/target tables
+        commandNode.addProperty("x", currentX);
         if (command instanceof BteqSqlCommand) {
-            // For SQL commands, center them between potential source/target tables
-            commandNode.addProperty("x", currentX + X_OFFSET_STEP_SQL / 2);
             handleDataFlow(commandNode, (BteqSqlCommand) command, yPos, currentX);
-        } else {
-            // For non-SQL commands, place them at the start of the block
-            commandNode.addProperty("x", currentX);
         }
 
         commandNode.addProperty("y", yPos);
@@ -233,7 +225,7 @@ public class DataFlowGraphConverter {
         int yPos = DATA_LANE_START_Y + (lane * LANE_HEIGHT);
         int currentX = xOffset;
 
-        commandNode.addProperty("x", currentX + X_OFFSET_STEP_SQL / 2);
+        commandNode.addProperty("x", currentX);
         commandNode.addProperty("y", yPos);
         graph.addNode(commandNode);
 
