@@ -380,6 +380,15 @@ public class DataFlowGraphConverter {
                     node.addProperty("Tablename", tableName);
                     node.addProperty("Databasename", dbName);
                     node.addProperty("isDatabaseFromContext", fromContext);
+
+                    List<Map<String, String>> columns = new ArrayList<>();
+                    for (com.tdtsqlscan.ddl.ColumnDefinition col : createTableQuery.getColumns()) {
+                        Map<String, String> colData = new HashMap<>();
+                        colData.put("name", col.getName());
+                        colData.put("type", col.getType());
+                        columns.add(colData);
+                    }
+                    node.addProperty("columns", columns);
                 }
 
                 if (createTableQuery.isVolatile()) {
