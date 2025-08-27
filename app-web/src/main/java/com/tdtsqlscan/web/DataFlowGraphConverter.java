@@ -26,6 +26,7 @@ public class DataFlowGraphConverter {
     private Map<String, Node> tableNodes;
     private LaneManager laneManager;
     private int xOffset;
+    private String currentDatabase = null;
 
     private static class LaneManager {
         private final Map<String, Integer> tableToLane = new HashMap<>();
@@ -68,6 +69,17 @@ public class DataFlowGraphConverter {
         int i = 0;
         while (i < script.getCommands().size()) {
             BteqCommand command = script.getCommands().get(i);
+
+            if (command instanceof BteqControlCommand && ((BteqControlCommand) command).getType() == BteqCommandType.DATABASE) {
+                String[] parts = command.getRawText().trim().split("\\s+");
+                if (parts.length > 1) {
+                    String dbName = parts[1];
+                    if (dbName.endsWith(";")) {
+                        dbName = dbName.substring(0, dbName.length() - 1);
+                    }
+                    this.currentDatabase = dbName;
+                }
+            }
             int xStep;
 
             // Check if the command is a candidate for grouping
@@ -284,6 +296,7 @@ public class DataFlowGraphConverter {
         String label = "UNKNOWN";
         String shape = "box";
         String image = null;
+        Node node = new Node(id, ""); // Create node with empty label initially
 
         if (command instanceof BteqConfigurationCommand) {
             label = "START";
@@ -308,6 +321,9 @@ public class DataFlowGraphConverter {
                 String[] parts = rawText.split("\\s+");
                 if (parts.length > 1) {
                     label = parts[1];
+                    if (label.endsWith(";")) {
+                        label = label.substring(0, label.length() - 1);
+                    }
                 } else {
                     label = "";
                 }
@@ -341,6 +357,31 @@ public class DataFlowGraphConverter {
 
             if (query instanceof CreateTableQuery) {
                 CreateTableQuery createTableQuery = (CreateTableQuery) query;
+
+                // Add metadata for empty structure CREATE TABLE
+                if (createTableQuery.getSourceTables().isEmpty()) {
+                    node.addProperty("metadataType", "CREATE_TABLE_STRUCTURE");
+                    String fullTableName = createTableQuery.getTableName();
+                    String dbName = null;
+                    String tableName = fullTableName;
+                    boolean fromContext = false;
+
+                    if (fullTableName.contains(".")) {
+                        String[] parts = fullTableName.split("\\.");
+                        dbName = parts[0];
+                        tableName = parts[1];
+                    } else if (this.currentDatabase != null) {
+                        dbName = this.currentDatabase;
+                        fromContext = true;
+                    } else {
+                        dbName = "[Default Database]";
+                    }
+
+                    node.addProperty("Tablename", tableName);
+                    node.addProperty("Databasename", dbName);
+                    node.addProperty("isDatabaseFromContext", fromContext);
+                }
+
                 if (createTableQuery.isVolatile()) {
                     label = "CREATE VOLATILE TABLE";
                     image = "images/create_volatile_table.png";
@@ -369,7 +410,7 @@ public class DataFlowGraphConverter {
             }
         }
 
-        Node node = new Node(id, label);
+        node.setLabel(label);
         node.addProperty("shape", shape);
         if (image != null) {
             node.addProperty("image", image);

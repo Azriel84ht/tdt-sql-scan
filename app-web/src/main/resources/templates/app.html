@@ -385,6 +385,10 @@
                     fileSize: node.properties.fileSize,
                     fileEncoding: node.properties.fileEncoding,
                     noContextMenu: node.properties.noContextMenu,
+                    metadataType: node.properties.metadataType,
+                    Tablename: node.properties.Tablename,
+                    Databasename: node.properties.Databasename,
+                    isDatabaseFromContext: node.properties.isDatabaseFromContext,
                     font: node.properties.font || {} // Ensure font object exists
                 };
 
@@ -576,6 +580,17 @@
                         `;
                     }
                     table.innerHTML = tableHtml;
+                } else if (clickedNode && clickedNode.metadataType === 'CREATE_TABLE_STRUCTURE') {
+                    let dbNameHtml = clickedNode.isDatabaseFromContext
+                        ? `<i>${clickedNode.Databasename}</i>`
+                        : clickedNode.Databasename;
+
+                    table.innerHTML = `
+                        <tr><th>Attribute</th><th>Value</th></tr>
+                        <tr><td>Tablename</td><td>${clickedNode.Tablename}</td></tr>
+                        <tr><td>Databasename</td><td>${dbNameHtml}</td></tr>
+                        <tr><td>Full Text</td><td><pre style="white-space: pre-wrap; word-wrap: break-word;">${clickedNode.fullText}</pre></td></tr>
+                    `;
                 } else if (clickedNode && clickedNode.fullText) { // It's a command node in a BTEQ flow
                     table.innerHTML = `
                         <tr><th>Attribute</th><th>Value</th></tr>
