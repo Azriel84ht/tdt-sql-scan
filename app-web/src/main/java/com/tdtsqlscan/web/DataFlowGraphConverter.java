@@ -20,11 +20,13 @@ public class DataFlowGraphConverter {
     private static final int LANE_HEIGHT = 120;
     private static final int X_OFFSET_STEP_SQL = 180;
     private static final int X_OFFSET_STEP_CONTROL = 75;
+    private static final int X_OFFSET_STEP_LANE_CHANGE = 50;
 
     private Graph graph;
     private Map<String, Node> tableNodes;
     private LaneManager laneManager;
     private int xOffset;
+    private String currentDatabase = null;
 
     private static class LaneManager {
         private final Map<String, Integer> tableToLane = new HashMap<>();
@@ -57,19 +59,68 @@ public class DataFlowGraphConverter {
         this.xOffset = 0;
         Node lastCommandNode = null;
 
+        // Pre-calculate lane numbers for all commands to detect lane changes
+        Map<BteqCommand, Integer> commandToLane = new HashMap<>();
+        LaneManager laneNumberer = new LaneManager();
+        for (BteqCommand command : script.getCommands()) {
+            commandToLane.put(command, getLaneNumber(command, laneNumberer));
+        }
+
         int i = 0;
         while (i < script.getCommands().size()) {
             BteqCommand command = script.getCommands().get(i);
+
+            if (command instanceof BteqControlCommand && ((BteqControlCommand) command).getType() == BteqCommandType.DATABASE) {
+                String[] parts = command.getRawText().trim().split("\\s+");
+                if (parts.length > 1) {
+                    String dbName = parts[1];
+                    if (dbName.endsWith(";")) {
+                        dbName = dbName.substring(0, dbName.length() - 1);
+                    }
+                    this.currentDatabase = dbName;
+                }
+            }
+            int xStep;
 
             // Check if the command is a candidate for grouping
             if (isGroupableInsert(command)) {
                 List<BteqCommand> group = findInsertGroup(script.getCommands(), i);
                 lastCommandNode = processInsertGroup(group, i, lastCommandNode);
-                i += group.size(); // Skip past the commands that were just grouped
+
+                int groupSize = group.size();
+                int currentLane = commandToLane.get(command);
+                int nextLane = -2; // Use a value that is different from any possible lane number
+                if (i + groupSize < script.getCommands().size()) {
+                    nextLane = commandToLane.get(script.getCommands().get(i + groupSize));
+                }
+
+                if (nextLane != -2 && currentLane != nextLane) {
+                    xStep = X_OFFSET_STEP_LANE_CHANGE;
+                } else {
+                    xStep = X_OFFSET_STEP_SQL;
+                }
+                i += groupSize; // Skip past the commands that were just grouped
             } else {
                 lastCommandNode = processCommand(command, i, lastCommandNode);
+
+                int currentLane = commandToLane.get(command);
+                int nextLane = -2;
+                if (i + 1 < script.getCommands().size()) {
+                    nextLane = commandToLane.get(script.getCommands().get(i + 1));
+                }
+
+                if (nextLane != -2 && currentLane != nextLane) {
+                    xStep = X_OFFSET_STEP_LANE_CHANGE;
+                } else {
+                    if (command instanceof BteqControlCommand || command instanceof BteqConfigurationCommand) {
+                        xStep = X_OFFSET_STEP_CONTROL;
+                    } else {
+                        xStep = X_OFFSET_STEP_SQL;
+                    }
+                }
                 i++;
             }
+            xOffset += xStep;
         }
 
         // After processing all commands, populate the guide line coordinates
@@ -120,12 +171,17 @@ public class DataFlowGraphConverter {
             graph.addEdge(logicEdge);
         }
 
-        if (command instanceof BteqControlCommand || command instanceof BteqConfigurationCommand) {
-            xOffset += X_OFFSET_STEP_CONTROL;
-        } else {
-            xOffset += X_OFFSET_STEP_SQL;
-        }
         return commandNode;
+    }
+
+    private int getLaneNumber(BteqCommand command, LaneManager laneManager) {
+        if (command instanceof BteqControlCommand || command instanceof BteqConfigurationCommand ||
+                (command instanceof BteqSqlCommand && ((BteqSqlCommand) command).getQuery() instanceof com.tdtsqlscan.select.SelectQuery)) {
+            return -1; // Special value for the BTEQ lane
+        } else {
+            String targetTable = getTargetTable(command);
+            return laneManager.getLaneForTable(targetTable);
+        }
     }
 
     private String getTargetTable(BteqCommand command) {
@@ -191,7 +247,6 @@ public class DataFlowGraphConverter {
             graph.addEdge(logicEdge);
         }
 
-        xOffset += X_OFFSET_STEP_SQL;
         return commandNode;
     }
 
@@ -245,15 +300,40 @@ public class DataFlowGraphConverter {
         if (command instanceof BteqConfigurationCommand) {
             label = "START";
             shape = "image";
-            image = "images/bteq_start.png";
+            image = "images/bteq_commands/start.png";
         } else if (command instanceof BteqControlCommand) {
             BteqControlCommand controlCommand = (BteqControlCommand) command;
             BteqCommandType type = controlCommand.getType();
 
             if (type == BteqCommandType.SET || type == BteqCommandType.DECLARE) {
                 shape = "image";
-                image = "images/bteq_config.png";
+                image = "images/bteq_commands/config.png";
                 label = ""; // The icon is the representation
+            } else if (type == BteqCommandType.EXPORT) {
+                shape = "image";
+                image = "images/bteq_commands/export.png";
+                label = "";
+            } else if (type == BteqCommandType.LABEL) {
+                shape = "image";
+                image = "images/bteq_commands/label.png";
+                String rawText = controlCommand.getRawText().trim();
+                String[] parts = rawText.split("\\s+");
+                if (parts.length > 1) {
+                    label = parts[1];
+                    if (label.endsWith(";")) {
+                        label = label.substring(0, label.length() - 1);
+                    }
+                } else {
+                    label = "";
+                }
+            } else if (type == BteqCommandType.GOTO) {
+                shape = "image";
+                image = "images/bteq_commands/goto.png";
+                label = "";
+            } else if (type == BteqCommandType.IF) {
+                shape = "image";
+                image = "images/bteq_commands/if.png";
+                label = "";
             } else if (type == BteqCommandType.OTHER) {
                 String rawText = controlCommand.getRawText().trim();
                 if (rawText.startsWith(".")) {
