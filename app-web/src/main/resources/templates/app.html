@@ -15,38 +15,6 @@
       }
     </script>
     <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
-    <style>
-        .navigation-controls {
-            padding: 10px;
-            background-color: #f1f1f1;
-            border-bottom: 1px solid #ccc;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .navigation-controls button {
-            padding: 5px 10px;
-            border: 1px solid #ccc;
-            background-color: #fff;
-            cursor: pointer;
-        }
-        .navigation-controls button:disabled {
-            cursor: not-allowed;
-            opacity: 0.5;
-        }
-        .navigation-controls #current-view-title {
-            font-weight: bold;
-        }
-        .dark .navigation-controls {
-            background-color: #1f2937;
-            border-bottom-color: #4b5563;
-        }
-        .dark .navigation-controls button {
-            background-color: #374151;
-            border-color: #4b5563;
-            color: #d1d5db;
-        }
-    </style>
 </head>
 <body class="dark:bg-gray-900">
 
@@ -71,10 +39,8 @@
 
     <div id="flow-container" style="display: none;">
         <div id="flow-main">
-            <div id="navigation-controls" class="navigation-controls">
-                <button id="home-button" disabled>Inicio</button>
-                <button id="back-button" disabled>Atrás</button>
-                <span id="current-view-title">Flujo de cadena</span>
+            <div class="tab">
+                <button class="tablinks" onclick="openTab(event, 'chain-flow')" id="defaultOpen">Flujo de cadena</button>
             </div>
 
             <div id="chain-flow" class="tabcontent">
@@ -116,6 +82,8 @@
     const fileList = document.getElementById('file-list');
     const fileOrderForm = document.getElementById('file-order-form');
     const flowContainer = document.getElementById('flow-container');
+    const tabContainer = document.querySelector('.tab');
+    const container = document.getElementById('mynetwork');
     const modal = document.getElementById("myModal");
     const modalText = document.getElementById("modal-text");
     const span = document.getElementsByClassName("close")[0];
@@ -125,34 +93,6 @@
     let bteqFlowsData = {};
     let networks = {}; // Store network instances
     let graphData = {}; // Store original graph data for re-rendering
-    let navigationStack = [];
-
-    function navigateTo(viewId, viewTitle) {
-        // Hide all views
-        const allViews = document.querySelectorAll('.tabcontent');
-        allViews.forEach(view => view.style.display = 'none');
-
-        // Show the target view
-        const targetView = document.getElementById(viewId);
-        if (targetView) {
-            targetView.style.display = 'block';
-        }
-
-        // Update title
-        document.getElementById('current-view-title').textContent = viewTitle;
-
-        // Update button states
-        const homeButton = document.getElementById('home-button');
-        const backButton = document.getElementById('back-button');
-
-        if (navigationStack.length <= 1) {
-            homeButton.disabled = true;
-            backButton.disabled = true;
-        } else {
-            homeButton.disabled = false;
-            backButton.disabled = false;
-        }
-    }
 
     span.onclick = function() {
         modal.style.display = "none";
@@ -183,54 +123,78 @@
 
         const scriptName = activeNode.fileName;
         const safeId = scriptName.replace(/[^a-zA-Z0-9]/g, '_');
-        const viewId = `bteq-view-${safeId}`;
-        const newView = { id: viewId, title: scriptName };
+        const tabId = `bteq-tab-content-${safeId}`;
+        const tabButtonId = `bteq-tab-button-${safeId}`;
 
-        // Push to stack first
-        navigationStack.push(newView);
-
-        // Make the view visible BEFORE rendering
-        navigateTo(newView.id, newView.title);
-
-        // If view already exists, we are done.
-        if (document.getElementById(viewId)) {
-            // The view and its graph already exist, but we might need to re-fit the camera.
-            const network = networks[`bteq-graph-container-${safeId}`];
-            if (network) {
-                network.fit(); // Simple fit, no animation needed on re-navigation
-            }
+        // If tab already exists, just open it.
+        if (document.getElementById(tabId)) {
+            document.getElementById(tabButtonId).click();
             return;
         }
 
-        // Create the view if it doesn't exist
         const currentGraphData = bteqFlowsData[scriptName];
         if (!currentGraphData) {
             console.error('No graph data found for script:', scriptName);
-            navigationStack.pop(); // Rollback stack change
-            navigateTo(navigationStack[navigationStack.length-1].id, navigationStack[navigationStack.length-1].title);
             return;
         }
 
         const containerId = `bteq-graph-container-${safeId}`;
-        graphData[containerId] = currentGraphData;
+        graphData[containerId] = currentGraphData; // Store original data
 
+        // --- Create Tab Button ---
+        const tabButton = document.createElement('button');
+        tabButton.id = tabButtonId;
+        tabButton.className = 'tablinks bteq-tab';
+        tabButton.onclick = (event) => openTab(event, tabId);
+
+        const tabTitle = document.createElement('span');
+        tabTitle.textContent = scriptName;
+        tabButton.appendChild(tabTitle);
+
+        const closeButton = document.createElement('span');
+        closeButton.className = 'close-tab';
+        closeButton.innerHTML = '&times;';
+        closeButton.onclick = (event) => {
+            event.stopPropagation(); // Prevent the tab-opening click event
+
+            const tabContent = document.getElementById(tabId);
+            if (tabContent) {
+                tabContent.remove();
+            }
+            tabButton.remove();
+
+            // Clean up stored data to prevent memory leaks
+            const containerId = `bteq-graph-container-${safeId}`;
+            delete networks[containerId];
+            delete graphData[containerId];
+
+            // If the closed tab was active, switch to the default tab
+            if (tabButton.classList.contains('active')) {
+                document.getElementById('defaultOpen').click();
+            }
+        };
+
+        tabButton.appendChild(closeButton);
+        tabContainer.appendChild(tabButton);
+
+        // --- Create Tab Content ---
         const flowMainContainer = document.getElementById('flow-main');
-        const viewContent = document.createElement('div');
-        viewContent.id = viewId;
-        viewContent.className = 'tabcontent bteq-view'; // Use tabcontent class for consistent styling/hiding
-
-        // The navigateTo function has already set the correct display property
-        // so we don't need to hide it here.
+        const tabContent = document.createElement('div');
+        tabContent.id = tabId;
+        tabContent.className = 'tabcontent bteq-tab-content';
 
         const graphContainer = document.createElement('div');
         graphContainer.id = containerId;
-        graphContainer.style.height = '800px';
+        graphContainer.style.height = '800px'; // Or make this dynamic
 
-        viewContent.appendChild(graphContainer);
-        flowMainContainer.appendChild(viewContent);
+        tabContent.appendChild(graphContainer);
+        flowMainContainer.appendChild(tabContent);
 
-        // Render the graph in the now-visible container
+        // Render the graph
         renderGraph(currentGraphData, graphContainer, true);
+
+        // Open the newly created tab
+        tabButton.click();
     };
 
     let selectedFiles = [];
@@ -270,24 +234,54 @@
         fileListContainer.style.display = selectedFiles.length > 0 ? 'block' : 'none';
     }
 
+    function openTab(evt, tabName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        const tabToShow = document.getElementById(tabName);
+        tabToShow.style.display = "block";
+        if (evt) {
+            evt.currentTarget.className += " active";
+        }
+
+        // Center the graph in the newly opened tab
+        const graphContainer = tabToShow.querySelector('div[id^="bteq-graph-container-"], div[id="chain-flow-network"]');
+        if (graphContainer) {
+            const network = networks[graphContainer.id];
+            if (network) {
+                setTimeout(function() {
+                    if (graphContainer.id.startsWith('bteq-graph-container-')) {
+                        const nodes = new vis.DataSet(graphData[graphContainer.id].nodes);
+                        let firstNodeId = 'cmd-0';
+                        if (!nodes.get(firstNodeId)) {
+                            firstNodeId = 'cmd-group-0';
+                        }
+                        if (nodes.get(firstNodeId)) {
+                            network.focus(firstNodeId, { scale: 1.0, animation: false });
+                        } else {
+                            network.fit();
+                        }
+                    } else {
+                        network.fit();
+                    }
+                }, 100);
+            }
+        }
+
+
+        const table = document.getElementById('metadata-table');
+        table.innerHTML = "";
+    }
+
     document.addEventListener("DOMContentLoaded", function() {
-        navigationStack = [{ id: 'chain-flow', title: 'Flujo de cadena' }];
-        navigateTo(navigationStack[0].id, navigationStack[0].title);
-    });
-
-    document.getElementById('home-button').addEventListener('click', () => {
-        if (navigationStack.length > 1) {
-            navigationStack = [{ id: 'chain-flow', title: 'Flujo de cadena' }];
-            navigateTo(navigationStack[0].id, navigationStack[0].title);
-        }
-    });
-
-    document.getElementById('back-button').addEventListener('click', () => {
-        if (navigationStack.length > 1) {
-            navigationStack.pop();
-            const previousView = navigationStack[navigationStack.length - 1];
-            navigateTo(previousView.id, previousView.title);
-        }
+        openTab(null, 'chain-flow');
+        document.querySelector('.tablinks').classList.add('active');
     });
 
     fileOrderForm.addEventListener('submit', (event) => {
@@ -328,23 +322,24 @@
             return response.json();
         })
         .then(data => {
-            // Store data first
-            fileMetadata = data.fileMetadata;
-            graphData['chain-flow-network'] = data.chainFlow;
+            fileMetadata = data.fileMetadata; // Store metadata
+            graphData['chain-flow-network'] = data.chainFlow; // Store original data
+
+            // Render Chain Flow graph
+            const chainFlowContainer = document.getElementById('chain-flow-network');
+            renderGraph(data.chainFlow, chainFlowContainer, true); // Enable context menu for chain flow
+
+            // Store BTEQ flows data to be used on demand
             bteqFlowsData = data.bteqFlows;
 
-            // Clean up old views from previous uploads
-            document.querySelectorAll('.bteq-view').forEach(view => view.remove());
+            // Clear any existing BTEQ tabs from previous uploads
+            const tabContainer = document.querySelector('.tab');
+            document.querySelectorAll('.bteq-tab').forEach(tab => tab.remove());
+            document.querySelectorAll('.bteq-tab-content').forEach(content => content.remove());
 
-            // Set the view to the main chain-flow, which makes its container visible
-            navigationStack = [{ id: 'chain-flow', title: 'Flujo de cadena' }];
-            navigateTo(navigationStack[0].id, navigationStack[0].title);
-
-            // NOW render the graph in the visible container
-            const chainFlowContainer = document.getElementById('chain-flow-network');
-            if (data.chainFlow) {
-                renderGraph(data.chainFlow, chainFlowContainer, true);
-            }
+            // 3. Open the chain flow tab by default.
+            openTab(null, 'chain-flow');
+            document.getElementById('defaultOpen').classList.add('active');
         })
         .catch(error => {
             console.error('Error:', error);
@@ -376,16 +371,21 @@
 
         const nodes = new vis.DataSet(
             data.nodes.map(node => {
+                const finalX = parseInt(node.properties.x);
+                const finalY = parseInt(node.properties.y);
+
                 let nodeData = {
                     id: node.id,
                     label: node.label,
                     shape: node.properties.shape,
                     image: node.properties.image,
                     size: node.properties.size,
-                    x: parseInt(node.properties.x),
-                    y: parseInt(node.properties.y),
+                    x: Math.random() * 200 - 100, // Random start position near center
+                    y: Math.random() * 200 - 100,
+                    finalX: finalX,
+                    finalY: finalY,
                     fullText: node.properties.fullText,
-                    fixed: true,
+                    fixed: false, // Must be false to be animated
                     fileName: node.properties.fileName,
                     fileSize: node.properties.fileSize,
                     fileEncoding: node.properties.fileEncoding,
