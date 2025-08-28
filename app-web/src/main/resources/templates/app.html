@@ -109,7 +109,6 @@
 
 <script type="text/javascript" th:inline="javascript">
     /*<![CDATA[*/
-    alert('DEBUG: Testing latest version');
     const dropZone = document.getElementById('drop-zone');
     const fileInput = document.getElementById('file-input');
     const uploadContainer = document.getElementById('upload-container');
@@ -185,48 +184,44 @@
         const scriptName = activeNode.fileName;
         const safeId = scriptName.replace(/[^a-zA-Z0-9]/g, '_');
         const viewId = `bteq-view-${safeId}`;
-        const newView = { id: viewId, title: scriptName };
-
-        // Push to stack first
-        navigationStack.push(newView);
-
-        // Make the view container visible BEFORE rendering the graph
-        navigateTo(newView.id, newView.title);
-
-        // If the view's div already exists, we don't need to re-render.
-        if (document.getElementById(viewId)) {
-            const network = networks[`bteq-graph-container-${safeId}`];
-            if (network) {
-                network.fit();
-            }
-            return;
-        }
-
-        // If the view doesn't exist, create it and render the graph.
-        const currentGraphData = bteqFlowsData[scriptName];
-        if (!currentGraphData) {
-            console.error('No graph data found for script:', scriptName);
-            navigationStack.pop(); // Rollback stack change if data is missing
-            navigateTo(navigationStack[navigationStack.length-1].id, navigationStack[navigationStack.length-1].title);
-            return;
-        }
-
         const containerId = `bteq-graph-container-${safeId}`;
-        graphData[containerId] = currentGraphData;
 
-        const flowMainContainer = document.getElementById('flow-main');
-        const viewContent = document.createElement('div');
-        viewContent.id = viewId;
-        viewContent.className = 'tabcontent bteq-view';
+        // If the view container doesn't exist, create it.
+        if (!document.getElementById(viewId)) {
+            const flowMainContainer = document.getElementById('flow-main');
+            const viewContent = document.createElement('div');
+            viewContent.id = viewId;
+            viewContent.className = 'tabcontent bteq-view';
+            viewContent.style.display = 'none'; // Create it hidden
 
-        const graphContainer = document.createElement('div');
-        graphContainer.id = containerId;
-        graphContainer.style.height = '800px';
+            const graphContainer = document.createElement('div');
+            graphContainer.id = containerId;
+            graphContainer.style.height = '800px';
 
-        viewContent.appendChild(graphContainer);
-        flowMainContainer.appendChild(viewContent);
+            viewContent.appendChild(graphContainer);
+            flowMainContainer.appendChild(viewContent);
+        }
 
-        renderGraph(currentGraphData, graphContainer, true);
+        // Now that the div is guaranteed to exist, navigate to it.
+        const newView = { id: viewId, title: scriptName };
+        navigationStack.push(newView);
+        navigateTo(newView.id, newView.title); // This makes the div visible.
+
+        // Now that the div is visible, render the graph if it hasn't been rendered before.
+        if (!networks[containerId]) {
+            const currentGraphData = bteqFlowsData[scriptName];
+            if (!currentGraphData) {
+                console.error('No graph data found for script:', scriptName);
+                // Optionally navigate back if data is missing
+                document.getElementById('back-button').click();
+                return;
+            }
+            graphData[containerId] = currentGraphData;
+            // Delay rendering to the next tick to ensure the container is ready
+            setTimeout(() => {
+                renderGraph(currentGraphData, document.getElementById(containerId), true);
+            }, 0);
+        }
     };
 
     let selectedFiles = [];
