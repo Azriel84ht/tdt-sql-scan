@@ -380,7 +380,7 @@
                     x: parseInt(node.properties.x),
                     y: parseInt(node.properties.y),
                     fullText: node.properties.fullText,
-                    fixed: true,
+                    fixed: false, // Let physics move the nodes initially
                     fileName: node.properties.fileName,
                     fileSize: node.properties.fileSize,
                     fileEncoding: node.properties.fileEncoding,
@@ -466,11 +466,25 @@
                 }
             },
             physics: {
-                enabled: false
+                enabled: true,
+                solver: 'barnesHut',
+                barnesHut: {
+                    gravitationalConstant: -8000,
+                    springConstant: 0.04,
+                    springLength: 200
+                }
             }
         };
         const network = new vis.Network(container, networkData, options);
         networks[container.id] = network; // Store the network instance
+
+        // Add a listener to stop the simulation after it stabilizes
+        network.on("stabilizationIterationsDone", function () {
+            network.setOptions( { physics: false } );
+            const allNodeIds = nodes.getIds();
+            const updatedNodes = allNodeIds.map(id => ({ id: id, fixed: true }));
+            nodes.update(updatedNodes);
+        });
 
         network.on('beforeDrawing', function(ctx) {
             const canvasWidth = container.clientWidth;
