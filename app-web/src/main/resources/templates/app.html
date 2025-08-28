@@ -153,23 +153,7 @@
             backButton.disabled = false;
         }
 
-        // This part is from the old openTab, it's important to refit the network
-        if (targetView) {
-            const graphContainer = targetView.querySelector('div[id^="bteq-graph-container-"], div[id="chain-flow-network"]');
-            if (graphContainer) {
-                const network = networks[graphContainer.id];
-                if (network) {
-                    setTimeout(function() {
-                        network.fit({
-                            animation: {
-                                duration: 1500,
-                                easingFunction: 'easeInOutQuad'
-                            }
-                        });
-                    }, 100);
-                }
-            }
-        }
+        // The network will be fitted after its animation is complete.
     }
 
     span.onclick = function() {
@@ -519,6 +503,14 @@
                     finalNodes.push({ id: id, x: node.finalX, y: node.finalY, fixed: true });
                 }
                 nodes.update(finalNodes);
+
+                // Now fit the camera to the settled graph
+                network.fit({
+                    animation: {
+                        duration: 1000,
+                        easingFunction: 'easeInOutQuad'
+                    }
+                });
             }
         }
 
