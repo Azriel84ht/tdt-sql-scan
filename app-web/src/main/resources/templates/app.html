@@ -256,20 +256,12 @@
             const network = networks[graphContainer.id];
             if (network) {
                 setTimeout(function() {
-                    if (graphContainer.id.startsWith('bteq-graph-container-')) {
-                        const nodes = new vis.DataSet(graphData[graphContainer.id].nodes);
-                        let firstNodeId = 'cmd-0';
-                        if (!nodes.get(firstNodeId)) {
-                            firstNodeId = 'cmd-group-0';
+                    network.fit({
+                        animation: {
+                            duration: 1500,
+                            easingFunction: 'easeInOutQuad'
                         }
-                        if (nodes.get(firstNodeId)) {
-                            network.focus(firstNodeId, { scale: 1.0, animation: false });
-                        } else {
-                            network.fit();
-                        }
-                    } else {
-                        network.fit();
-                    }
+                    });
                 }, 100);
             }
         }
@@ -377,17 +369,14 @@
                     shape: node.properties.shape,
                     image: node.properties.image,
                     size: node.properties.size,
+                    x: parseInt(node.properties.x),
+                    y: parseInt(node.properties.y),
                     fullText: node.properties.fullText,
-                    fixed: false, // Let physics move the nodes initially
+                    fixed: false,
                     fileName: node.properties.fileName,
                     fileSize: node.properties.fileSize,
                     fileEncoding: node.properties.fileEncoding,
                     noContextMenu: node.properties.noContextMenu,
-                    metadataType: node.properties.metadataType,
-                    Tablename: node.properties.Tablename,
-                    Databasename: node.properties.Databasename,
-                    isDatabaseFromContext: node.properties.isDatabaseFromContext,
-                    columns: node.properties.columns,
                     font: node.properties.font || {} // Ensure font object exists
                 };
 
@@ -464,13 +453,7 @@
                 }
             },
             physics: {
-                enabled: true,
-                solver: 'barnesHut',
-                barnesHut: {
-                    gravitationalConstant: -8000,
-                    springConstant: 0.04,
-                    springLength: 200
-                }
+                enabled: true
             }
         };
         const network = new vis.Network(container, networkData, options);
@@ -592,30 +575,6 @@
                             </tr>
                         `;
                     }
-                    table.innerHTML = tableHtml;
-                } else if (clickedNode && clickedNode.metadataType === 'CREATE_TABLE_STRUCTURE') {
-                    let dbNameHtml = clickedNode.isDatabaseFromContext
-                        ? `<i>${clickedNode.Databasename}</i>`
-                        : clickedNode.Databasename;
-
-                    let tableHtml = `
-                        <tr><th>Attribute</th><th>Value</th></tr>
-                        <tr><td>Tablename</td><td>${clickedNode.Tablename}</td></tr>
-                        <tr><td>Databasename</td><td>${dbNameHtml}</td></tr>
-                    `;
-
-                    if (clickedNode.columns && clickedNode.columns.length > 0) {
-                        tableHtml += '<tr><td colspan="2" class="font-bold pt-4">Columns</td></tr>';
-                        tableHtml += '<tr><th>Name</th><th>Type</th></tr>';
-                        clickedNode.columns.forEach(col => {
-                            tableHtml += `<tr><td>${col.name}</td><td>${col.type}</td></tr>`;
-                        });
-                    }
-
-                    tableHtml += `
-                        <tr><td colspan="2" class="font-bold pt-4">Full Text</td></tr>
-                        <tr><td colspan="2"><pre style="white-space: pre-wrap; word-wrap: break-word;">${clickedNode.fullText}</pre></td></tr>
-                    `;
                     table.innerHTML = tableHtml;
                 } else if (clickedNode && clickedNode.fullText) { // It's a command node in a BTEQ flow
                     table.innerHTML = `
