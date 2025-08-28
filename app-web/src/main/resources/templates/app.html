@@ -376,21 +376,16 @@
 
         const nodes = new vis.DataSet(
             data.nodes.map(node => {
-                const finalX = parseInt(node.properties.x);
-                const finalY = parseInt(node.properties.y);
-
                 let nodeData = {
                     id: node.id,
                     label: node.label,
                     shape: node.properties.shape,
                     image: node.properties.image,
                     size: node.properties.size,
-                    x: Math.random() * 200 - 100, // Random start position near center
-                    y: Math.random() * 200 - 100,
-                    finalX: finalX,
-                    finalY: finalY,
+                    x: parseInt(node.properties.x),
+                    y: parseInt(node.properties.y),
                     fullText: node.properties.fullText,
-                    fixed: false, // Must be false to be animated
+                    fixed: true,
                     fileName: node.properties.fileName,
                     fileSize: node.properties.fileSize,
                     fileEncoding: node.properties.fileEncoding,
