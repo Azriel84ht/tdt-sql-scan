@@ -5,7 +5,7 @@ import java.util.HashMap;
 
 public class Node {
     private final String id;
-    private String label;
+    private final String label;
     private final Map<String, Object> properties;
 
     public Node(String id, String label) {
@@ -20,10 +20,6 @@ public class Node {
 
     public String getLabel() {
         return label;
-    }
-
-    public void setLabel(String label) {
-        this.label = label;
     }
 
     public Map<String, Object> getProperties() {

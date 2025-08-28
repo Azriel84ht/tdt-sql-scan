@@ -93,23 +93,4 @@ public class SQLParserUtils {
         }
         return null;
     }
-
-    public static String extractBalancedParentheses(String sql) {
-        int firstParen = sql.indexOf('(');
-        if (firstParen == -1) return null;
-
-        int depth = 1;
-        for (int i = firstParen + 1; i < sql.length(); i++) {
-            char c = sql.charAt(i);
-            if (c == '(') {
-                depth++;
-            } else if (c == ')') {
-                depth--;
-                if (depth == 0) {
-                    return sql.substring(firstParen + 1, i);
-                }
-            }
-        }
-        return null; // Unbalanced parentheses
-    }
 }

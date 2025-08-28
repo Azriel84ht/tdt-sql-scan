@@ -152,8 +152,6 @@
             homeButton.disabled = false;
             backButton.disabled = false;
         }
-
-        // The network will be fitted after its animation is complete.
     }
 
     span.onclick = function() {
@@ -186,39 +184,53 @@
         const scriptName = activeNode.fileName;
         const safeId = scriptName.replace(/[^a-zA-Z0-9]/g, '_');
         const viewId = `bteq-view-${safeId}`;
+        const newView = { id: viewId, title: scriptName };
 
-        // If view already exists, just navigate to it.
-        if (!document.getElementById(viewId)) {
-            // Create the view if it doesn't exist
-            const currentGraphData = bteqFlowsData[scriptName];
-            if (!currentGraphData) {
-                console.error('No graph data found for script:', scriptName);
-                return;
+        // Push to stack first
+        navigationStack.push(newView);
+
+        // Make the view visible BEFORE rendering
+        navigateTo(newView.id, newView.title);
+
+        // If view already exists, we are done.
+        if (document.getElementById(viewId)) {
+            // The view and its graph already exist, but we might need to re-fit the camera.
+            const network = networks[`bteq-graph-container-${safeId}`];
+            if (network) {
+                network.fit(); // Simple fit, no animation needed on re-navigation
             }
-
-            const containerId = `bteq-graph-container-${safeId}`;
-            graphData[containerId] = currentGraphData;
-
-            const flowMainContainer = document.getElementById('flow-main');
-            const viewContent = document.createElement('div');
-            viewContent.id = viewId;
-            viewContent.className = 'tabcontent bteq-view'; // Use tabcontent class for consistent styling/hiding
-            viewContent.style.display = 'none'; // Initially hidden
-
-            const graphContainer = document.createElement('div');
-            graphContainer.id = containerId;
-            graphContainer.style.height = '800px';
-
-            viewContent.appendChild(graphContainer);
-            flowMainContainer.appendChild(viewContent);
-
-            renderGraph(currentGraphData, graphContainer, true);
+            return;
         }
 
-        // Navigate to the view
-        const newView = { id: viewId, title: scriptName };
-        navigationStack.push(newView);
-        navigateTo(newView.id, newView.title);
+        // Create the view if it doesn't exist
+        const currentGraphData = bteqFlowsData[scriptName];
+        if (!currentGraphData) {
+            console.error('No graph data found for script:', scriptName);
+            navigationStack.pop(); // Rollback stack change
+            navigateTo(navigationStack[navigationStack.length-1].id, navigationStack[navigationStack.length-1].title);
+            return;
+        }
+
+        const containerId = `bteq-graph-container-${safeId}`;
+        graphData[containerId] = currentGraphData;
+
+        const flowMainContainer = document.getElementById('flow-main');
+        const viewContent = document.createElement('div');
+        viewContent.id = viewId;
+        viewContent.className = 'tabcontent bteq-view'; // Use tabcontent class for consistent styling/hiding
+
+        // The navigateTo function has already set the correct display property
+        // so we don't need to hide it here.
+
+        const graphContainer = document.createElement('div');
+        graphContainer.id = containerId;
+        graphContainer.style.height = '800px';
+
+        viewContent.appendChild(graphContainer);
+        flowMainContainer.appendChild(viewContent);
+
+        // Render the graph in the now-visible container
+        renderGraph(currentGraphData, graphContainer, true);
     };
 
     let selectedFiles = [];
@@ -260,7 +272,7 @@
 
     document.addEventListener("DOMContentLoaded", function() {
         navigationStack = [{ id: 'chain-flow', title: 'Flujo de cadena' }];
-        navigateTo('chain-flow', 'Flujo de cadena');
+        navigateTo(navigationStack[0].id, navigationStack[0].title);
     });
 
     document.getElementById('home-button').addEventListener('click', () => {
@@ -503,14 +515,6 @@
                     finalNodes.push({ id: id, x: node.finalX, y: node.finalY, fixed: true });
                 }
                 nodes.update(finalNodes);
-
-                // Now fit the camera to the settled graph
-                network.fit({
-                    animation: {
-                        duration: 1000,
-                        easingFunction: 'easeInOutQuad'
-                    }
-                });
             }
         }
 
