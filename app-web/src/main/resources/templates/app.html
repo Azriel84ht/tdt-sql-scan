@@ -464,8 +464,8 @@
         const network = new vis.Network(container, networkData, options);
         networks[container.id] = network; // Store the network instance
 
-        // Animate the camera to fit the whole graph once it has been drawn for the first time.
-        network.once('afterDrawing', function() {
+        // Animate the camera to fit the whole graph once the network is stabilized.
+        network.once('stabilized', function() {
             network.fit({
                 animation: {
                     duration: 1500,
