@@ -462,16 +462,15 @@
         const network = new vis.Network(container, networkData, options);
         networks[container.id] = network; // Store the network instance
 
-        // Animate the camera to fit the whole graph, deferred to the next tick
-        setTimeout(() => {
+        // Animate the camera to fit the whole graph once it has been drawn for the first time.
+        network.once('afterDrawing', function() {
             network.fit({
                 animation: {
                     duration: 1500,
                     easingFunction: 'easeInOutQuad'
                 }
             });
-        }, 0);
-
+        });
 
         network.on('beforeDrawing', function(ctx) {
             const canvasWidth = container.clientWidth;
