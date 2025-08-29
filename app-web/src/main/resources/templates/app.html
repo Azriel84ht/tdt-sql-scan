@@ -333,7 +333,9 @@
             // NOW render the graph in the visible container
             const chainFlowContainer = document.getElementById('chain-flow-network');
             if (data.chainFlow) {
-                renderGraph(data.chainFlow, chainFlowContainer, true);
+                setTimeout(() => {
+                    renderGraph(data.chainFlow, chainFlowContainer, true);
+                }, 0);
             }
         })
         .catch(error => {
