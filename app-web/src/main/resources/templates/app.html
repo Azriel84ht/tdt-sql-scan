@@ -328,7 +328,7 @@
 
             // Set the view to the main chain-flow, which makes its container visible
             navigationStack = [{ id: 'chain-flow', title: 'Flujo de cadena' }];
-            navigateTo(navigationStack[0].id, navigationStack[0].title);
+            navigateTo('chain-flow', 'Flujo de cadena');
 
             // NOW render the graph in the visible container
             const chainFlowContainer = document.getElementById('chain-flow-network');
