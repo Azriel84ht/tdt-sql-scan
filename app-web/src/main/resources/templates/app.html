@@ -15,6 +15,38 @@
       }
     </script>
     <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
+    <style>
+        .navigation-controls {
+            padding: 10px;
+            background-color: #f1f1f1;
+            border-bottom: 1px solid #ccc;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .navigation-controls button {
+            padding: 5px 10px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            cursor: pointer;
+        }
+        .navigation-controls button:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        .navigation-controls #current-view-title {
+            font-weight: bold;
+        }
+        .dark .navigation-controls {
+            background-color: #1f2937;
+            border-bottom-color: #4b5563;
+        }
+        .dark .navigation-controls button {
+            background-color: #374151;
+            border-color: #4b5563;
+            color: #d1d5db;
+        }
+    </style>
 </head>
 <body class="dark:bg-gray-900">
 
@@ -39,8 +71,10 @@
 
     <div id="flow-container" style="display: none;">
         <div id="flow-main">
-            <div class="tab">
-                <button class="tablinks" onclick="openTab(event, 'chain-flow')" id="defaultOpen">Flujo de cadena</button>
+            <div id="navigation-controls" class="navigation-controls">
+                <button id="home-button" disabled>Inicio</button>
+                <button id="back-button" disabled>Atrás</button>
+                <span id="current-view-title">Flujo de cadena</span>
             </div>
 
             <div id="chain-flow" class="tabcontent">
@@ -82,8 +116,6 @@
     const fileList = document.getElementById('file-list');
     const fileOrderForm = document.getElementById('file-order-form');
     const flowContainer = document.getElementById('flow-container');
-    const tabContainer = document.querySelector('.tab');
-    const container = document.getElementById('mynetwork');
     const modal = document.getElementById("myModal");
     const modalText = document.getElementById("modal-text");
     const span = document.getElementsByClassName("close")[0];
@@ -93,6 +125,34 @@
     let bteqFlowsData = {};
     let networks = {}; // Store network instances
     let graphData = {}; // Store original graph data for re-rendering
+    let navigationStack = [];
+
+    function navigateTo(viewId, viewTitle) {
+        // Hide all views
+        const allViews = document.querySelectorAll('.tabcontent');
+        allViews.forEach(view => view.style.display = 'none');
+
+        // Show the target view
+        const targetView = document.getElementById(viewId);
+        if (targetView) {
+            targetView.style.display = 'block';
+        }
+
+        // Update title
+        document.getElementById('current-view-title').textContent = viewTitle;
+
+        // Update button states
+        const homeButton = document.getElementById('home-button');
+        const backButton = document.getElementById('back-button');
+
+        if (navigationStack.length <= 1) {
+            homeButton.disabled = true;
+            backButton.disabled = true;
+        } else {
+            homeButton.disabled = false;
+            backButton.disabled = false;
+        }
+    }
 
     span.onclick = function() {
         modal.style.display = "none";
@@ -121,80 +181,62 @@
     document.getElementById('show-schema').onclick = () => {
         if (!activeNode || !activeNode.fileName) return;
 
+        const network = networks['chain-flow-network'];
+        const nodeId = activeNode.id;
         const scriptName = activeNode.fileName;
-        const safeId = scriptName.replace(/[^a-zA-Z0-9]/g, '_');
-        const tabId = `bteq-tab-content-${safeId}`;
-        const tabButtonId = `bteq-tab-button-${safeId}`;
 
-        // If tab already exists, just open it.
-        if (document.getElementById(tabId)) {
-            document.getElementById(tabButtonId).click();
-            return;
-        }
-
-        const currentGraphData = bteqFlowsData[scriptName];
-        if (!currentGraphData) {
-            console.error('No graph data found for script:', scriptName);
-            return;
-        }
-
-        const containerId = `bteq-graph-container-${safeId}`;
-        graphData[containerId] = currentGraphData; // Store original data
-
-        // --- Create Tab Button ---
-        const tabButton = document.createElement('button');
-        tabButton.id = tabButtonId;
-        tabButton.className = 'tablinks bteq-tab';
-        tabButton.onclick = (event) => openTab(event, tabId);
-
-        const tabTitle = document.createElement('span');
-        tabTitle.textContent = scriptName;
-        tabButton.appendChild(tabTitle);
-
-        const closeButton = document.createElement('span');
-        closeButton.className = 'close-tab';
-        closeButton.innerHTML = '&times;';
-        closeButton.onclick = (event) => {
-            event.stopPropagation(); // Prevent the tab-opening click event
-
-            const tabContent = document.getElementById(tabId);
-            if (tabContent) {
-                tabContent.remove();
-            }
-            tabButton.remove();
-
-            // Clean up stored data to prevent memory leaks
-            const containerId = `bteq-graph-container-${safeId}`;
-            delete networks[containerId];
-            delete graphData[containerId];
-
-            // If the closed tab was active, switch to the default tab
-            if (tabButton.classList.contains('active')) {
-                document.getElementById('defaultOpen').click();
+        const focusOptions = {
+            scale: 2.5,
+            animation: {
+                duration: 800,
+                easingFunction: 'easeInOutQuad'
             }
         };
 
-        tabButton.appendChild(closeButton);
-        tabContainer.appendChild(tabButton);
+        network.focus(nodeId, focusOptions);
 
-        // --- Create Tab Content ---
-        const flowMainContainer = document.getElementById('flow-main');
-        const tabContent = document.createElement('div');
-        tabContent.id = tabId;
-        tabContent.className = 'tabcontent bteq-tab-content';
+        network.once('animationFinished', function() {
+            const safeId = scriptName.replace(/[^a-zA-Z0-9]/g, '_');
+            const viewId = `bteq-view-${safeId}`;
+            const containerId = `bteq-graph-container-${safeId}`;
 
-        const graphContainer = document.createElement('div');
-        graphContainer.id = containerId;
-        graphContainer.style.height = '800px'; // Or make this dynamic
+            // If the view container doesn't exist, create it.
+            if (!document.getElementById(viewId)) {
+                const flowMainContainer = document.getElementById('flow-main');
+                const viewContent = document.createElement('div');
+                viewContent.id = viewId;
+                viewContent.className = 'tabcontent bteq-view';
+                viewContent.style.display = 'none'; // Create it hidden
 
-        tabContent.appendChild(graphContainer);
-        flowMainContainer.appendChild(tabContent);
+                const graphContainer = document.createElement('div');
+                graphContainer.id = containerId;
+                graphContainer.style.height = '800px';
 
-        // Render the graph
-        renderGraph(currentGraphData, graphContainer, true);
+                viewContent.appendChild(graphContainer);
+                flowMainContainer.appendChild(viewContent);
+            }
 
-        // Open the newly created tab
-        tabButton.click();
+            // Now that the div is guaranteed to exist, navigate to it.
+            const newView = { id: viewId, title: scriptName };
+            navigationStack.push(newView);
+            navigateTo(newView.id, newView.title); // This makes the div visible.
+
+            // Now that the div is visible, render the graph if it hasn't been rendered before.
+            if (!networks[containerId]) {
+                const currentGraphData = bteqFlowsData[scriptName];
+                if (!currentGraphData) {
+                    console.error('No graph data found for script:', scriptName);
+                    // Optionally navigate back if data is missing
+                    document.getElementById('back-button').click();
+                    return;
+                }
+                graphData[containerId] = currentGraphData;
+                // Delay rendering to the next tick to ensure the container is ready
+                setTimeout(() => {
+                    renderGraph(currentGraphData, document.getElementById(containerId), true);
+                }, 0);
+            }
+        });
     };
 
     let selectedFiles = [];
@@ -234,54 +276,65 @@
         fileListContainer.style.display = selectedFiles.length > 0 ? 'block' : 'none';
     }
 
-    function openTab(evt, tabName) {
-        var i, tabcontent, tablinks;
-        tabcontent = document.getElementsByClassName("tabcontent");
-        for (i = 0; i < tabcontent.length; i++) {
-            tabcontent[i].style.display = "none";
-        }
-        tablinks = document.getElementsByClassName("tablinks");
-        for (i = 0; i < tablinks.length; i++) {
-            tablinks[i].className = tablinks[i].className.replace(" active", "");
-        }
-        const tabToShow = document.getElementById(tabName);
-        tabToShow.style.display = "block";
-        if (evt) {
-            evt.currentTarget.className += " active";
-        }
+    document.addEventListener("DOMContentLoaded", function() {
+        navigationStack = [{ id: 'chain-flow', title: 'Flujo de cadena' }];
+        navigateTo(navigationStack[0].id, navigationStack[0].title);
+    });
 
-        // Center the graph in the newly opened tab
-        const graphContainer = tabToShow.querySelector('div[id^="bteq-graph-container-"], div[id="chain-flow-network"]');
-        if (graphContainer) {
-            const network = networks[graphContainer.id];
-            if (network) {
-                setTimeout(function() {
-                    if (graphContainer.id.startsWith('bteq-graph-container-')) {
-                        const nodes = new vis.DataSet(graphData[graphContainer.id].nodes);
-                        let firstNodeId = 'cmd-0';
-                        if (!nodes.get(firstNodeId)) {
-                            firstNodeId = 'cmd-group-0';
-                        }
-                        if (nodes.get(firstNodeId)) {
-                            network.focus(firstNodeId, { scale: 1.0, animation: false });
-                        } else {
-                            network.fit();
-                        }
-                    } else {
-                        network.fit();
-                    }
-                }, 100);
-            }
-        }
-
-
-        const table = document.getElementById('metadata-table');
-        table.innerHTML = "";
+    function findNodeIdByFileName(fileName) {
+        const mainGraphNodes = graphData['chain-flow-network']?.nodes;
+        if (!mainGraphNodes) return null;
+        const foundNode = mainGraphNodes.find(node => node.properties.fileName === fileName);
+        return foundNode ? foundNode.id : null;
     }
 
-    document.addEventListener("DOMContentLoaded", function() {
-        openTab(null, 'chain-flow');
-        document.querySelector('.tablinks').classList.add('active');
+    document.getElementById('home-button').addEventListener('click', () => {
+        if (navigationStack.length > 1) {
+            const currentView = navigationStack[navigationStack.length - 1];
+            const originNodeId = findNodeIdByFileName(currentView.title);
+
+            // Reset stack and navigate to home
+            navigationStack = [{ id: 'chain-flow', title: 'Flujo de cadena' }];
+            navigateTo(navigationStack[0].id, navigationStack[0].title);
+
+            if (originNodeId) {
+                const network = networks['chain-flow-network'];
+                // Instantly focus on the origin node with high zoom
+                network.focus(originNodeId, { scale: 2.5, animation: false });
+                // Animate zoom out
+                network.fit({
+                    animation: {
+                        duration: 1000,
+                        easingFunction: 'easeOutQuad'
+                    }
+                });
+            }
+        }
+    });
+
+    document.getElementById('back-button').addEventListener('click', () => {
+        if (navigationStack.length > 1) {
+            const currentView = navigationStack[navigationStack.length - 1];
+            const originNodeId = findNodeIdByFileName(currentView.title);
+
+            // Update stack and navigate to the previous view
+            navigationStack.pop();
+            const previousView = navigationStack[navigationStack.length - 1];
+            navigateTo(previousView.id, previousView.title);
+
+            if (previousView.id === 'chain-flow' && originNodeId) {
+                 const network = networks['chain-flow-network'];
+                // Instantly focus on the origin node with high zoom
+                network.focus(originNodeId, { scale: 2.5, animation: false });
+                // Animate zoom out
+                network.fit({
+                    animation: {
+                        duration: 1000,
+                        easingFunction: 'easeOutQuad'
+                    }
+                });
+            }
+        }
     });
 
     fileOrderForm.addEventListener('submit', (event) => {
@@ -289,7 +342,6 @@
 
         uploadContainer.style.display = 'none';
         flowContainer.style.display = 'flex';
-        tabContainer.style.display = 'block';
 
         const formData = new FormData();
         const fileOrder = [];
@@ -322,24 +374,25 @@
             return response.json();
         })
         .then(data => {
-            fileMetadata = data.fileMetadata; // Store metadata
-            graphData['chain-flow-network'] = data.chainFlow; // Store original data
-
-            // Render Chain Flow graph
-            const chainFlowContainer = document.getElementById('chain-flow-network');
-            renderGraph(data.chainFlow, chainFlowContainer, true); // Enable context menu for chain flow
-
-            // Store BTEQ flows data to be used on demand
+            // Store data first
+            fileMetadata = data.fileMetadata;
+            graphData['chain-flow-network'] = data.chainFlow;
             bteqFlowsData = data.bteqFlows;
 
-            // Clear any existing BTEQ tabs from previous uploads
-            const tabContainer = document.querySelector('.tab');
-            document.querySelectorAll('.bteq-tab').forEach(tab => tab.remove());
-            document.querySelectorAll('.bteq-tab-content').forEach(content => content.remove());
+            // Clean up old views from previous uploads (if any)
+            document.querySelectorAll('.bteq-view').forEach(view => view.remove());
 
-            // 3. Open the chain flow tab by default.
-            openTab(null, 'chain-flow');
-            document.getElementById('defaultOpen').classList.add('active');
+            // Set the view to the main chain-flow, which makes its container visible
+            navigationStack = [{ id: 'chain-flow', title: 'Flujo de cadena' }];
+            navigateTo('chain-flow', 'Flujo de cadena');
+
+            // NOW render the graph in the visible container
+            const chainFlowContainer = document.getElementById('chain-flow-network');
+            if (data.chainFlow) {
+                setTimeout(() => {
+                    renderGraph(data.chainFlow, chainFlowContainer, true);
+                }, 0);
+            }
         })
         .catch(error => {
             console.error('Error:', error);
@@ -368,28 +421,28 @@
         }
 
         const isDarkMode = document.documentElement.classList.contains('dark');
+        const finalNodeCoordinates = new Map();
 
         const nodes = new vis.DataSet(
             data.nodes.map(node => {
+                // Store final coordinates
+                finalNodeCoordinates.set(node.id, {
+                    x: parseInt(node.properties.x),
+                    y: parseInt(node.properties.y)
+                });
+
                 let nodeData = {
                     id: node.id,
                     label: node.label,
                     shape: node.properties.shape,
                     image: node.properties.image,
                     size: node.properties.size,
-                    x: parseInt(node.properties.x),
-                    y: parseInt(node.properties.y),
                     fullText: node.properties.fullText,
-                    fixed: true,
+                    fixed: false, // Start as not fixed
                     fileName: node.properties.fileName,
                     fileSize: node.properties.fileSize,
                     fileEncoding: node.properties.fileEncoding,
                     noContextMenu: node.properties.noContextMenu,
-                    metadataType: node.properties.metadataType,
-                    Tablename: node.properties.Tablename,
-                    Databasename: node.properties.Databasename,
-                    isDatabaseFromContext: node.properties.isDatabaseFromContext,
-                    columns: node.properties.columns,
                     font: node.properties.font || {} // Ensure font object exists
                 };
 
@@ -398,20 +451,18 @@
                 }
 
                 if (isDarkMode) {
-                    nodeData.font.color = '#d1d5db'; // Global dark mode font color for all nodes
+                    nodeData.font.color = '#d1d5db';
 
                     if (nodeData.shape === 'image' || nodeData.shape === 'circularImage') {
-                        // This is for the chain flow nodes
                         if (nodeData.shapeProperties?.useBorderWithImage) {
                             nodeData.color = {
-                                background: '#1f2937', // Dark background behind the image
+                                background: '#1f2937',
                                 border: '#4b5563',
                                 highlight: { background: '#374151', border: '#6b7280' },
                                 hover: { background: '#374151', border: '#6b7280' }
                             };
                         }
                     } else {
-                        // This is for other nodes (BTEQ flow)
                         nodeData.color = {
                             background: '#374151',
                             border: '#4b5563',
@@ -443,6 +494,7 @@
             nodes: nodes,
             edges: edges,
         };
+
         const options = {
             nodes: {
                 size: 25,
@@ -466,11 +518,42 @@
                 }
             },
             physics: {
-                enabled: false
+                enabled: true,
+                barnesHut: {
+                    gravitationalConstant: -8000,
+                    springConstant: 0.04,
+                    springLength: 95,
+                    damping: 0.09,
+                    centralGravity: 0.3
+                },
+                stabilization: {
+                    iterations: 2500
+                }
             }
         };
+
         const network = new vis.Network(container, networkData, options);
-        networks[container.id] = network; // Store the network instance
+        networks[container.id] = network;
+
+        network.once('stabilizationIterationsDone', function() {
+            network.setOptions({ physics: false });
+
+            finalNodeCoordinates.forEach((coords, id) => {
+                nodes.update({
+                    id: id,
+                    x: coords.x,
+                    y: coords.y,
+                    fixed: true
+                });
+            });
+
+            network.fit({
+                animation: {
+                    duration: 1200,
+                    easingFunction: 'easeInOutQuad'
+                }
+            });
+        });
 
         network.on('beforeDrawing', function(ctx) {
             const canvasWidth = container.clientWidth;
@@ -580,30 +663,6 @@
                             </tr>
                         `;
                     }
-                    table.innerHTML = tableHtml;
-                } else if (clickedNode && clickedNode.metadataType === 'CREATE_TABLE_STRUCTURE') {
-                    let dbNameHtml = clickedNode.isDatabaseFromContext
-                        ? `<i>${clickedNode.Databasename}</i>`
-                        : clickedNode.Databasename;
-
-                    let tableHtml = `
-                        <tr><th>Attribute</th><th>Value</th></tr>
-                        <tr><td>Tablename</td><td>${clickedNode.Tablename}</td></tr>
-                        <tr><td>Databasename</td><td>${dbNameHtml}</td></tr>
-                    `;
-
-                    if (clickedNode.columns && clickedNode.columns.length > 0) {
-                        tableHtml += '<tr><td colspan="2" class="font-bold pt-4">Columns</td></tr>';
-                        tableHtml += '<tr><th>Name</th><th>Type</th></tr>';
-                        clickedNode.columns.forEach(col => {
-                            tableHtml += `<tr><td>${col.name}</td><td>${col.type}</td></tr>`;
-                        });
-                    }
-
-                    tableHtml += `
-                        <tr><td colspan="2" class="font-bold pt-4">Full Text</td></tr>
-                        <tr><td colspan="2"><pre style="white-space: pre-wrap; word-wrap: break-word;">${clickedNode.fullText}</pre></td></tr>
-                    `;
                     table.innerHTML = tableHtml;
                 } else if (clickedNode && clickedNode.fullText) { // It's a command node in a BTEQ flow
                     table.innerHTML = `
