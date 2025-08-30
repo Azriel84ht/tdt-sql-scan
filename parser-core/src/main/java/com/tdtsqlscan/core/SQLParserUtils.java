@@ -6,12 +6,42 @@ import java.util.List;
 public class SQLParserUtils {
 
     public static String extractBetweenKeywords(String sql, String startKeyword, String endKeyword) {
-        int startIndex = sql.toUpperCase().indexOf(startKeyword.toUpperCase());
-        if (startIndex == -1) return null;
+        String upperSql = sql.toUpperCase();
+        String upperStart = startKeyword.toUpperCase();
+
+        int startIndex = upperSql.indexOf(upperStart);
+        if (startIndex == -1) {
+            return null;
+        }
         startIndex += startKeyword.length();
-        int endIndex = endKeyword != null ? sql.toUpperCase().indexOf(endKeyword.toUpperCase(), startIndex) : sql.length();
-        if (endIndex == -1) endIndex = sql.length();
-        return sql.substring(startIndex, endIndex).trim();
+
+        if (endKeyword == null) {
+            return sql.substring(startIndex).trim();
+        }
+        String upperEnd = endKeyword.toUpperCase();
+
+        int depth = 1;
+        int endIndex = -1;
+
+        for (int i = startIndex; i < sql.length(); i++) {
+            if (upperSql.startsWith(upperStart, i)) {
+                depth++;
+                i += startKeyword.length() - 1;
+            } else if (upperSql.startsWith(upperEnd, i)) {
+                depth--;
+                if (depth == 0) {
+                    endIndex = i;
+                    break;
+                }
+                i += endKeyword.length() - 1;
+            }
+        }
+
+        if (endIndex != -1) {
+            return sql.substring(startIndex, endIndex).trim();
+        } else {
+            return null;
+        }
     }
 
     public static String extractAfterKeyword(String sql, String keyword, String endKeyword) {

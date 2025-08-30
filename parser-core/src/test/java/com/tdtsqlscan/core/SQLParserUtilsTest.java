@@ -43,4 +43,18 @@ public class SQLParserUtilsTest {
         int idx = SQLParserUtils.findTopLevelKeyword(input, "INNER JOIN", 0);
         assertEquals(-1, idx);
     }
+
+    @Test
+    public void extractBetweenKeywords_handlesNestedParens() {
+        String sql = "CREATE TABLE my_table (col1 VARCHAR(50), col2 DECIMAL(10, 2))";
+        String result = SQLParserUtils.extractBetweenKeywords(sql, "(", ")");
+        assertEquals("col1 VARCHAR(50), col2 DECIMAL(10, 2)", result);
+    }
+
+    @Test
+    public void extractBetweenKeywords_withMultiCharKeywords() {
+        String sql = "SELECT * FROM my_table WHERE id = 1";
+        String result = SQLParserUtils.extractBetweenKeywords(sql, "FROM", "WHERE");
+        assertEquals("my_table", result.trim());
+    }
 }
