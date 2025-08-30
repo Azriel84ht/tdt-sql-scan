@@ -1,5 +1,9 @@
 package com.tdtsqlscan.web;
 
+import com.tdtsqlscan.core.SQLJoin;
+import com.tdtsqlscan.core.SQLTableRef;
+import com.tdtsqlscan.ddl.ColumnDefinition;
+import com.tdtsqlscan.ddl.CreateIndexQuery;
 import com.tdtsqlscan.ddl.CreateTableQuery;
 import com.tdtsqlscan.ddl.DropTableQuery;
 import com.tdtsqlscan.dml.DeleteQuery;
@@ -9,8 +13,10 @@ import com.tdtsqlscan.etl.*;
 import com.tdtsqlscan.graph.Edge;
 import com.tdtsqlscan.graph.Graph;
 import com.tdtsqlscan.graph.Node;
+import com.tdtsqlscan.select.SelectQuery;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 public class DataFlowGraphConverter {
@@ -138,7 +144,7 @@ public class DataFlowGraphConverter {
         int currentX = xOffset;
 
         if (command instanceof BteqControlCommand || command instanceof BteqConfigurationCommand ||
-            (command instanceof BteqSqlCommand && ((BteqSqlCommand) command).getQuery() instanceof com.tdtsqlscan.select.SelectQuery)) {
+            (command instanceof BteqSqlCommand && ((BteqSqlCommand) command).getQuery() instanceof SelectQuery)) {
             yPos = BTEQ_LANE_Y;
             if (command instanceof BteqControlCommand && ((BteqControlCommand) command).getType() == BteqCommandType.LABEL) {
                 graph.getVerticalLabelXs().add(currentX);
@@ -176,7 +182,7 @@ public class DataFlowGraphConverter {
 
     private int getLaneNumber(BteqCommand command, LaneManager laneManager) {
         if (command instanceof BteqControlCommand || command instanceof BteqConfigurationCommand ||
-                (command instanceof BteqSqlCommand && ((BteqSqlCommand) command).getQuery() instanceof com.tdtsqlscan.select.SelectQuery)) {
+                (command instanceof BteqSqlCommand && ((BteqSqlCommand) command).getQuery() instanceof SelectQuery)) {
             return -1; // Special value for the BTEQ lane
         } else {
             String targetTable = getTargetTable(command);
@@ -366,7 +372,7 @@ public class DataFlowGraphConverter {
             } else if (query instanceof InsertQuery) {
                 label = "INSERT";
                 image = "images/insert.png";
-            } else if (query instanceof com.tdtsqlscan.select.SelectQuery) {
+            } else if (query instanceof SelectQuery) {
                 label = "SELECT";
                 image = "images/select.png";
             } else if (query instanceof UpdateQuery) {
@@ -378,6 +384,9 @@ public class DataFlowGraphConverter {
             } else if (query instanceof DeleteQuery) {
                 label = "DELETE";
                 image = "images/delete.png";
+            } else if (query instanceof CreateIndexQuery) {
+                label = "CREATE INDEX";
+                image = "images/right_arrow.png";
             } else {
                 label = "SQL";
                 shape = "box"; // Revert to box for other SQL
@@ -395,12 +404,90 @@ public class DataFlowGraphConverter {
         if (command instanceof BteqConfigurationCommand) {
             node.addProperty("noContextMenu", true);
         }
+
+        if (command instanceof BteqSqlCommand) {
+            Object query = ((BteqSqlCommand) command).getQuery();
+            Map<String, Object> metadata = extractSqlMetadata(query);
+            if (!metadata.isEmpty()) {
+                node.addProperty("metadata", metadata);
+            }
+        }
+
         return node;
     }
 
     private void handleDataFlow(Node commandNode, BteqSqlCommand sqlCommand, int yPos, int currentX) {
         // This method is now obsolete, as per the user's request to not show data flow arrows
         // or table nodes, only the command nodes on the correct lanes.
+    }
+
+    private Map<String, Object> extractSqlMetadata(Object query) {
+        Map<String, Object> metadata = new LinkedHashMap<>();
+
+        if (query instanceof CreateTableQuery) {
+            CreateTableQuery q = (CreateTableQuery) query;
+            metadata.put("Tipo de Tabla", q.isVolatile() ? "Volatile" : "Permanente");
+            metadata.put("Tabla Creada", q.getTableName());
+            if (q.getSourceTables() != null && !q.getSourceTables().isEmpty()) {
+                metadata.put("Tablas Origen (CTAS)", q.getSourceTables());
+            }
+            if (q.getColumns() != null && !q.getColumns().isEmpty()) {
+                List<String> columnNames = q.getColumns().stream()
+                        .map(ColumnDefinition::getName)
+                        .collect(Collectors.toList());
+                metadata.put("Columnas", columnNames);
+            }
+        } else if (query instanceof InsertQuery) {
+            InsertQuery q = (InsertQuery) query;
+            metadata.put("Tabla Destino", q.getTableName());
+            if (q.getSourceTableName() != null) {
+                metadata.put("Tabla Origen", q.getSourceTableName());
+            }
+            if (q.getColumns() != null && !q.getColumns().isEmpty()) {
+                metadata.put("Columnas Afectadas", q.getColumns());
+            }
+        } else if (query instanceof UpdateQuery) {
+            UpdateQuery q = (UpdateQuery) query;
+            metadata.put("Tabla Modificada", q.getTargetTable());
+            if (q.getSourceTables() != null && !q.getSourceTables().isEmpty()) {
+                metadata.put("Tablas Origen", q.getSourceTables());
+            }
+        } else if (query instanceof DeleteQuery) {
+            DeleteQuery q = (DeleteQuery) query;
+            metadata.put("Tabla Afectada", q.getTable());
+        } else if (query instanceof DropTableQuery) {
+            DropTableQuery q = (DropTableQuery) query;
+            metadata.put("Tabla Eliminada", q.getTableName());
+        } else if (query instanceof SelectQuery) {
+            SelectQuery q = (SelectQuery) query;
+            if (q.getColumns() != null && !q.getColumns().isEmpty()) {
+                metadata.put("Columnas", q.getColumns());
+            }
+            if (q.getTables() != null && !q.getTables().isEmpty()) {
+                // NOTE: This is a naive way to get the table name, but SQLTableRef does not provide a direct getter.
+                // This will work for simple cases like "TABLE as ALIAS" or "TABLE".
+                List<String> tableNames = q.getTables().stream()
+                        .map(s -> s.getExpression().split("\\s+")[0])
+                        .collect(Collectors.toList());
+                metadata.put("Tablas", tableNames);
+            }
+            if (q.getJoins() != null && !q.getJoins().isEmpty()) {
+                List<String> joinConditions = q.getJoins().stream()
+                        .map(SQLJoin::getCondition)
+                        .collect(Collectors.toList());
+                metadata.put("Joins", joinConditions);
+            }
+        } else if (query instanceof CreateIndexQuery) {
+            CreateIndexQuery q = (CreateIndexQuery) query;
+            metadata.put("Nombre del Índice", q.getIndexName());
+            metadata.put("Tabla", q.getTableName());
+            metadata.put("Tipo", q.isUnique() ? "Unique" : "No Unique");
+            if (q.getColumns() != null && !q.getColumns().isEmpty()) {
+                metadata.put("Columnas", q.getColumns());
+            }
+        }
+
+        return metadata;
     }
 
     private Node getOrCreateTableNode(String tableName, int yPos) {
