@@ -181,47 +181,62 @@
     document.getElementById('show-schema').onclick = () => {
         if (!activeNode || !activeNode.fileName) return;
 
+        const network = networks['chain-flow-network'];
+        const nodeId = activeNode.id;
         const scriptName = activeNode.fileName;
-        const safeId = scriptName.replace(/[^a-zA-Z0-9]/g, '_');
-        const viewId = `bteq-view-${safeId}`;
-        const containerId = `bteq-graph-container-${safeId}`;
 
-        // If the view container doesn't exist, create it.
-        if (!document.getElementById(viewId)) {
-            const flowMainContainer = document.getElementById('flow-main');
-            const viewContent = document.createElement('div');
-            viewContent.id = viewId;
-            viewContent.className = 'tabcontent bteq-view';
-            viewContent.style.display = 'none'; // Create it hidden
-
-            const graphContainer = document.createElement('div');
-            graphContainer.id = containerId;
-            graphContainer.style.height = '800px';
-
-            viewContent.appendChild(graphContainer);
-            flowMainContainer.appendChild(viewContent);
-        }
-
-        // Now that the div is guaranteed to exist, navigate to it.
-        const newView = { id: viewId, title: scriptName };
-        navigationStack.push(newView);
-        navigateTo(newView.id, newView.title); // This makes the div visible.
-
-        // Now that the div is visible, render the graph if it hasn't been rendered before.
-        if (!networks[containerId]) {
-            const currentGraphData = bteqFlowsData[scriptName];
-            if (!currentGraphData) {
-                console.error('No graph data found for script:', scriptName);
-                // Optionally navigate back if data is missing
-                document.getElementById('back-button').click();
-                return;
+        const focusOptions = {
+            scale: 2.5,
+            animation: {
+                duration: 800,
+                easingFunction: 'easeInOutQuad'
             }
-            graphData[containerId] = currentGraphData;
-            // Delay rendering to the next tick to ensure the container is ready
-            setTimeout(() => {
-                renderGraph(currentGraphData, document.getElementById(containerId), true);
-            }, 0);
-        }
+        };
+
+        network.focus(nodeId, focusOptions);
+
+        network.once('animationFinished', function() {
+            const safeId = scriptName.replace(/[^a-zA-Z0-9]/g, '_');
+            const viewId = `bteq-view-${safeId}`;
+            const containerId = `bteq-graph-container-${safeId}`;
+
+            // If the view container doesn't exist, create it.
+            if (!document.getElementById(viewId)) {
+                const flowMainContainer = document.getElementById('flow-main');
+                const viewContent = document.createElement('div');
+                viewContent.id = viewId;
+                viewContent.className = 'tabcontent bteq-view';
+                viewContent.style.display = 'none'; // Create it hidden
+
+                const graphContainer = document.createElement('div');
+                graphContainer.id = containerId;
+                graphContainer.style.height = '800px';
+
+                viewContent.appendChild(graphContainer);
+                flowMainContainer.appendChild(viewContent);
+            }
+
+            // Now that the div is guaranteed to exist, navigate to it.
+            const newView = { id: viewId, title: scriptName };
+            navigationStack.push(newView);
+            navigateTo(newView.id, newView.title); // This makes the div visible.
+
+            // Now that the div is visible, render the graph if it hasn't been rendered before.
+            if (!networks[containerId]) {
+                const currentGraphData = bteqFlowsData[scriptName];
+                if (!currentGraphData) {
+                    console.error('No graph data found for script:', scriptName);
+                    // Optionally navigate back if data is missing
+                    document.getElementById('back-button').click();
+                    return;
+                }
+                graphData[containerId] = currentGraphData;
+                // Delay rendering to the next tick to ensure the container is ready
+                setTimeout(() => {
+                    renderGraph(currentGraphData, document.getElementById(containerId), true);
+                }, 0);
+            }
+        });
     };
 
     let selectedFiles = [];
@@ -266,18 +281,59 @@
         navigateTo(navigationStack[0].id, navigationStack[0].title);
     });
 
+    function findNodeIdByFileName(fileName) {
+        const mainGraphNodes = graphData['chain-flow-network']?.nodes;
+        if (!mainGraphNodes) return null;
+        const foundNode = mainGraphNodes.find(node => node.properties.fileName === fileName);
+        return foundNode ? foundNode.id : null;
+    }
+
     document.getElementById('home-button').addEventListener('click', () => {
         if (navigationStack.length > 1) {
+            const currentView = navigationStack[navigationStack.length - 1];
+            const originNodeId = findNodeIdByFileName(currentView.title);
+
+            // Reset stack and navigate to home
             navigationStack = [{ id: 'chain-flow', title: 'Flujo de cadena' }];
             navigateTo(navigationStack[0].id, navigationStack[0].title);
+
+            if (originNodeId) {
+                const network = networks['chain-flow-network'];
+                // Instantly focus on the origin node with high zoom
+                network.focus(originNodeId, { scale: 2.5, animation: false });
+                // Animate zoom out
+                network.fit({
+                    animation: {
+                        duration: 1000,
+                        easingFunction: 'easeOutQuad'
+                    }
+                });
+            }
         }
     });
 
     document.getElementById('back-button').addEventListener('click', () => {
         if (navigationStack.length > 1) {
+            const currentView = navigationStack[navigationStack.length - 1];
+            const originNodeId = findNodeIdByFileName(currentView.title);
+
+            // Update stack and navigate to the previous view
             navigationStack.pop();
             const previousView = navigationStack[navigationStack.length - 1];
             navigateTo(previousView.id, previousView.title);
+
+            if (previousView.id === 'chain-flow' && originNodeId) {
+                 const network = networks['chain-flow-network'];
+                // Instantly focus on the origin node with high zoom
+                network.focus(originNodeId, { scale: 2.5, animation: false });
+                // Animate zoom out
+                network.fit({
+                    animation: {
+                        duration: 1000,
+                        easingFunction: 'easeOutQuad'
+                    }
+                });
+            }
         }
     });
 
