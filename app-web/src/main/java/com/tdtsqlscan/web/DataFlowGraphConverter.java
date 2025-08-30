@@ -118,10 +118,13 @@ public class DataFlowGraphConverter {
                 if (nextLane != -2 && currentLane != nextLane) {
                     xStep = X_OFFSET_STEP_LANE_CHANGE;
                 } else {
-                    if ((command instanceof BteqControlCommand && ((BteqControlCommand) command).getType() != BteqCommandType.EXIT) || command instanceof BteqConfigurationCommand) {
-                        xStep = X_OFFSET_STEP_CONTROL;
+                    if (command instanceof BteqSqlCommand) {
+                        int lineCount = command.getRawText().split("\r\n|\r|\n").length;
+                        // Use a larger step for multi-line SQL to avoid overlap
+                        xStep = lineCount > 3 ? X_OFFSET_STEP_SQL * 2 : X_OFFSET_STEP_SQL;
                     } else {
-                        xStep = X_OFFSET_STEP_SQL;
+                        // For non-SQL commands, use the control step
+                        xStep = X_OFFSET_STEP_CONTROL;
                     }
                 }
                 i++;
