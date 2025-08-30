@@ -107,8 +107,6 @@ public class DataFlowGraphConverter {
                 }
                 i += groupSize; // Skip past the commands that were just grouped
             } else {
-                lastCommandNode = processCommand(command, i, lastCommandNode);
-
                 int currentLane = commandToLane.get(command);
                 int nextLane = -2;
                 if (i + 1 < script.getCommands().size()) {
@@ -122,11 +120,14 @@ public class DataFlowGraphConverter {
                         int lineCount = command.getRawText().split("\r\n|\r|\n").length;
                         // Use a larger step for multi-line SQL to avoid overlap
                         xStep = lineCount > 3 ? X_OFFSET_STEP_SQL * 2 : X_OFFSET_STEP_SQL;
+                    } else if (command instanceof BteqControlCommand && ((BteqControlCommand) command).getType() == BteqCommandType.EXIT) {
+                        xStep = X_OFFSET_STEP_SQL;
                     } else {
-                        // For non-SQL commands, use the control step
+                        // For other non-SQL commands, use the control step
                         xStep = X_OFFSET_STEP_CONTROL;
                     }
                 }
+                lastCommandNode = processCommand(command, i, lastCommandNode, xStep);
                 i++;
             }
             xOffset += xStep;
@@ -141,7 +142,7 @@ public class DataFlowGraphConverter {
         return graph;
     }
 
-    private Node processCommand(BteqCommand command, int index, Node lastCommandNode) {
+    private Node processCommand(BteqCommand command, int index, Node lastCommandNode, int xStep) {
         String commandNodeId = "cmd-" + index;
         int yPos;
         int currentX = xOffset;
@@ -163,7 +164,7 @@ public class DataFlowGraphConverter {
 
         if (command instanceof BteqSqlCommand) {
             // For SQL commands, center them between potential source/target tables
-            commandNode.addProperty("x", currentX + X_OFFSET_STEP_SQL / 2);
+            commandNode.addProperty("x", currentX + xStep / 2);
             handleDataFlow(commandNode, (BteqSqlCommand) command, yPos, currentX);
         } else {
             // For non-SQL commands, place them at the start of the block
