@@ -365,19 +365,24 @@
         }
 
         const isDarkMode = document.documentElement.classList.contains('dark');
+        const finalNodeCoordinates = new Map();
 
         const nodes = new vis.DataSet(
             data.nodes.map(node => {
+                // Store final coordinates
+                finalNodeCoordinates.set(node.id, {
+                    x: parseInt(node.properties.x),
+                    y: parseInt(node.properties.y)
+                });
+
                 let nodeData = {
                     id: node.id,
                     label: node.label,
                     shape: node.properties.shape,
                     image: node.properties.image,
                     size: node.properties.size,
-                    x: parseInt(node.properties.x),
-                    y: parseInt(node.properties.y),
                     fullText: node.properties.fullText,
-                    fixed: true,
+                    fixed: false, // Start as not fixed
                     fileName: node.properties.fileName,
                     fileSize: node.properties.fileSize,
                     fileEncoding: node.properties.fileEncoding,
@@ -390,20 +395,18 @@
                 }
 
                 if (isDarkMode) {
-                    nodeData.font.color = '#d1d5db'; // Global dark mode font color for all nodes
+                    nodeData.font.color = '#d1d5db';
 
                     if (nodeData.shape === 'image' || nodeData.shape === 'circularImage') {
-                        // This is for the chain flow nodes
                         if (nodeData.shapeProperties?.useBorderWithImage) {
                             nodeData.color = {
-                                background: '#1f2937', // Dark background behind the image
+                                background: '#1f2937',
                                 border: '#4b5563',
                                 highlight: { background: '#374151', border: '#6b7280' },
                                 hover: { background: '#374151', border: '#6b7280' }
                             };
                         }
                     } else {
-                        // This is for other nodes (BTEQ flow)
                         nodeData.color = {
                             background: '#374151',
                             border: '#4b5563',
@@ -435,6 +438,7 @@
             nodes: nodes,
             edges: edges,
         };
+
         const options = {
             nodes: {
                 size: 25,
@@ -458,11 +462,42 @@
                 }
             },
             physics: {
-                enabled: false
+                enabled: true,
+                barnesHut: {
+                    gravitationalConstant: -8000,
+                    springConstant: 0.04,
+                    springLength: 95,
+                    damping: 0.09,
+                    centralGravity: 0.3
+                },
+                stabilization: {
+                    iterations: 2500
+                }
             }
         };
+
         const network = new vis.Network(container, networkData, options);
-        networks[container.id] = network; // Store the network instance
+        networks[container.id] = network;
+
+        network.once('stabilizationIterationsDone', function() {
+            network.setOptions({ physics: false });
+
+            finalNodeCoordinates.forEach((coords, id) => {
+                nodes.update({
+                    id: id,
+                    x: coords.x,
+                    y: coords.y,
+                    fixed: true
+                });
+            });
+
+            network.fit({
+                animation: {
+                    duration: 1200,
+                    easingFunction: 'easeInOutQuad'
+                }
+            });
+        });
 
         network.on('beforeDrawing', function(ctx) {
             const canvasWidth = container.clientWidth;
