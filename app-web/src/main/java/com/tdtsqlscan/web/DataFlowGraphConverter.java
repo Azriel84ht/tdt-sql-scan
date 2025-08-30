@@ -118,7 +118,7 @@ public class DataFlowGraphConverter {
                 if (nextLane != -2 && currentLane != nextLane) {
                     xStep = X_OFFSET_STEP_LANE_CHANGE;
                 } else {
-                    if (command instanceof BteqControlCommand || command instanceof BteqConfigurationCommand) {
+                    if ((command instanceof BteqControlCommand && ((BteqControlCommand) command).getType() != BteqCommandType.EXIT) || command instanceof BteqConfigurationCommand) {
                         xStep = X_OFFSET_STEP_CONTROL;
                     } else {
                         xStep = X_OFFSET_STEP_SQL;
