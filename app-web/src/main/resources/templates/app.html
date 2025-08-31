@@ -61,7 +61,7 @@
                 <span id="current-view-title">Chain Flow</span>
             </div>
             <div id="graph-area" class="flex-grow relative">
-                <div id="chain-flow" class="tabcontent active">
+                <div id="chain-flow" class="tabcontent" style="display: block;">
                     <div id="chain-flow-network">
                         <div id="graph-placeholder" class="flex flex-col items-center justify-center h-full text-gray-400">
                             <svg class="w-24 h-24 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
@@ -145,12 +145,12 @@
     function navigateTo(viewId, viewTitle) {
         // Hide all views
         const allViews = document.querySelectorAll('.tabcontent');
-        allViews.forEach(view => view.classList.remove('active'));
+        allViews.forEach(view => view.style.display = 'none');
 
         // Show the target view
         const targetView = document.getElementById(viewId);
         if (targetView) {
-            targetView.classList.add('active');
+            targetView.style.display = 'block';
         }
 
         // Update title
