@@ -52,34 +52,35 @@
 
 <div th:replace="~{fragments/header :: header}"></div>
 
-<div class="main-content flex-grow flex flex-col items-center justify-center p-4">
-    <div id="flow-container" class="w-full h-full flex-grow flex flex-col">
-        <div id="flow-main" class="flex-grow">
+<div class="flex flex-col h-screen">
+    <div th:replace="~{fragments/header :: header}"></div>
+    <div class="flex flex-row flex-grow overflow-hidden">
+        <div id="flow-main" class="flex-grow flex flex-col">
             <div id="navigation-controls" class="navigation-controls">
                 <button id="load-scripts-button">Load Scripts</button>
                 <button id="home-button" disabled>Home</button>
                 <button id="back-button" disabled>Back</button>
                 <span id="current-view-title">Chain Flow</span>
             </div>
-
-            <div id="chain-flow" class="tabcontent h-full">
-                <div id="chain-flow-network" style="width: 100%; height: 100%; border: 1px solid #374151;">
-                    <div id="graph-placeholder" class="flex flex-col items-center justify-center h-full text-gray-400">
-                        <svg class="w-24 h-24 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
-                        <h3 class="text-2xl font-bold mb-2">Visualize Your Data Flow</h3>
-                        <p class="mb-4">Click the button below to load your scripts and generate an interactive graph.</p>
-                        <button id="placeholder-load-button" class="cta-button bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">Load Scripts</button>
+            <div id="graph-area" class="flex-grow relative">
+                <div id="chain-flow" class="tabcontent">
+                    <div id="chain-flow-network">
+                        <div id="graph-placeholder" class="flex flex-col items-center justify-center h-full text-gray-400">
+                            <svg class="w-24 h-24 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                            <h3 class="text-2xl font-bold mb-2">Visualize Your Data Flow</h3>
+                            <p class="mb-4">Click the button below to load your scripts and generate an interactive graph.</p>
+                            <button id="placeholder-load-button" class="cta-button bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">Load Scripts</button>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            <div id="bteq-flow-container" class="tabcontent">
-                <!-- BTEQ script tabs will be dynamically inserted here -->
+                <div id="bteq-flow-container" class="tabcontent">
+                    <!-- BTEQ script tabs will be dynamically inserted here -->
+                </div>
             </div>
         </div>
-        <div id="metadata-sidebar">
-            <h2>Metadata</h2>
-            <table id="metadata-table">
+        <div id="metadata-sidebar" class="w-1/4 p-4 border-l border-gray-700 bg-gray-800 overflow-y-auto">
+            <h2 class="text-lg font-bold mb-4">Metadata</h2>
+            <table id="metadata-table" class="w-full text-sm">
                 <!-- Metadata will be inserted here -->
             </table>
         </div>
@@ -558,14 +559,16 @@
             physics: {
                 enabled: true,
                 barnesHut: {
-                    gravitationalConstant: -8000,
-                    springConstant: 0.04,
-                    springLength: 95,
-                    damping: 0.09,
-                    centralGravity: 0.3
+                    gravitationalConstant: -4000,
+                    springConstant: 0.02,
+                    springLength: 150,
+                    damping: 0.1,
+                    centralGravity: 0.1
                 },
+                solver: 'barnesHut',
                 stabilization: {
-                    iterations: 2500
+                    iterations: 1000,
+                    fit: true
                 }
             }
         };
