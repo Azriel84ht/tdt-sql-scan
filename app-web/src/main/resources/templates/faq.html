@@ -1,15 +1,10 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" class="dark">
 <head>
     <title>FAQ | Data Flow Visualizer</title>
     <meta name="description" content="Frequently Asked Questions about the Data Flow Visualizer tool." />
     <meta name="keywords" content="FAQ, Data Flow Visualizer, Teradata, BTEQ, SQL, ETL, Data Lineage, Support, Help" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-        }
-    </script>
     <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
     <link
@@ -20,48 +15,53 @@
     />
     <style>
         .faq-item {
-            border: 1px solid #e2e8f0;
-            border-radius: 0.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
             margin-bottom: 1rem;
             overflow: hidden;
         }
         .faq-question {
             width: 100%;
             text-align: left;
-            padding: 1rem 1.5rem;
+            padding: 1.5rem;
             font-weight: 600;
             cursor: pointer;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            color: white;
         }
         .faq-answer {
-            padding: 1rem 1.5rem;
+            padding: 0 1.5rem 1.5rem 1.5rem;
             display: none;
+            color: #e2e8f0;
         }
     </style>
 </head>
-<body class="bg-white dark:bg-gray-900" style='font-family: Inter, "Noto Sans", sans-serif;'>
+<body style='font-family: Inter, "Noto Sans", sans-serif;'>
     <div class="relative flex size-full min-h-screen flex-col group/design-root overflow-x-hidden">
+        <canvas class="background"></canvas>
         <div class="layout-container flex h-full grow flex-col">
             <div th:replace="~{fragments/header :: header}"></div>
 
-            <main class="flex-1 justify-center py-5 px-4 sm:px-6 lg:px-8">
+            <main class="flex-1 justify-center py-20 px-4 sm:px-6 lg:px-8">
                 <div class="max-w-4xl mx-auto">
-                    <h1 class="text-4xl font-bold text-center text-gray-800 dark:text-white mb-10">Frequently Asked Questions</h1>
+                    <h1 class="text-4xl font-bold text-center text-white mb-12">Frequently Asked Questions</h1>
 
                     <div class="space-y-4">
-                        <div th:each="faq : ${faqs}" class="faq-item bg-white dark:bg-gray-800 rounded-lg shadow-md">
-                            <button class="faq-question text-gray-800 dark:text-gray-100">
+                        <div th:each="faq : ${faqs}" class="faq-item">
+                            <button class="faq-question">
                                 <span th:text="${faq.question}"></span>
                                 <span>&#9660;</span>
                             </button>
-                            <div class="faq-answer text-gray-600 dark:text-gray-300" th:utext="${faq.answer}">
+                            <div class="faq-answer prose prose-invert max-w-none" th:utext="${faq.answer}">
                             </div>
                         </div>
 
                         <div th:if="${faqs.isEmpty()}" class="text-center py-10">
-                            <p class="text-gray-500 dark:text-gray-400">No FAQs have been published yet. Check back soon!</p>
+                            <p class="text-gray-400">No FAQs have been published yet. Check back soon!</p>
                         </div>
                     </div>
                 </div>
@@ -70,7 +70,8 @@
             <div th:replace="~{fragments/footer :: footer}"></div>
         </div>
     </div>
-    <script th:src="@{/js/theme.js}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particlesjs/2.2.3/particles.min.js"></script>
+    <script th:src="@{/js/particles-config.js}"></script>
     <script>
         document.querySelectorAll('.faq-question').forEach(button => {
             button.addEventListener('click', () => {
