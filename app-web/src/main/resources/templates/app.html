@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" class="dark">
 <head>
     <title>The App | Data Flow Visualizer</title>
-    <link rel="icon" type="image/png" th:href="@{/main-images/icon_mini_100x100.png}" />
+    <link rel="icon" type="image/png" th:href="@{/main-images/icon_full_200x200.png}" />
     <meta name="description" content="The application part of Data Flow Visualizer, a tool to visualize complex data flows from Teradata BTEQ scripts. Upload your files and see the magic." />
     <meta name="keywords" content="Data Flow, Visualizer, Teradata, BTEQ, SQL, ETL, Data Lineage, Application" />
     <meta name="_csrf" th:content="${_csrf.token}"/>
@@ -50,44 +50,35 @@
 </head>
 <body class="dark:bg-gray-900">
 
-<div th:replace="~{fragments/header :: header}"></div>
-
-<div class="main-content">
-    <h1>Data Flow Visualizer for your Scripts</h1>
-
-    <div id="upload-container">
-        <div id="drop-zone" class="drop-zone">
-            <p>Drag and drop your BTEQ files here, or click to select files.</p>
-            <input type="file" id="file-input" multiple style="display: none;" />
-        </div>
-        <div id="file-list-container" style="display: none;">
-            <h3>Selected Files:</h3>
-            <form id="file-order-form">
-                <ul id="file-list"></ul>
-                <button type="submit">Upload and Visualize</button>
-            </form>
-        </div>
-    </div>
-
-    <div id="flow-container" style="display: none;">
-        <div id="flow-main">
+<div class="flex flex-col h-screen">
+    <div th:replace="~{fragments/header :: header}"></div>
+    <div id="flow-container" class="flex flex-row flex-grow overflow-hidden">
+        <div id="flow-main" class="flex-grow flex flex-col">
             <div id="navigation-controls" class="navigation-controls">
-                <button id="home-button" disabled>Inicio</button>
-                <button id="back-button" disabled>Atrás</button>
-                <span id="current-view-title">Flujo de cadena</span>
+                <button id="load-scripts-button">Load Scripts</button>
+                <button id="home-button" disabled>Home</button>
+                <button id="back-button" disabled>Back</button>
+                <span id="current-view-title">Chain Flow</span>
             </div>
-
-            <div id="chain-flow" class="tabcontent">
-                <div id="chain-flow-network" style="width: 100%; border: 1px solid lightgray;"></div>
-            </div>
-
-            <div id="bteq-flow-container" class="tabcontent">
-                <!-- BTEQ script tabs will be dynamically inserted here -->
+            <div id="graph-area" class="flex-grow relative">
+                <div id="chain-flow" class="tabcontent" style="display: block;">
+                    <div id="chain-flow-network">
+                        <div id="graph-placeholder" class="flex flex-col items-center justify-center h-full text-gray-400">
+                            <svg class="w-24 h-24 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                            <h3 class="text-2xl font-bold mb-2">Visualize Your Data Flow</h3>
+                            <p class="mb-4">Click the button below to load your scripts and generate an interactive graph.</p>
+                            <button id="placeholder-load-button" class="cta-button bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">Load Scripts</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="bteq-flow-container" class="tabcontent">
+                    <!-- BTEQ script tabs will be dynamically inserted here -->
+                </div>
             </div>
         </div>
-        <div id="metadata-sidebar">
-            <h2>Metadata</h2>
-            <table id="metadata-table">
+        <div id="metadata-sidebar" class="w-1/4 p-4 border-l border-gray-700 bg-gray-800 overflow-y-auto">
+            <h2 class="text-lg font-bold mb-4">Metadata</h2>
+            <table id="metadata-table" class="w-full text-sm">
                 <!-- Metadata will be inserted here -->
             </table>
         </div>
@@ -107,6 +98,25 @@
     <a href="#" id="copy-code">Copy Code</a>
 </div>
 
+<div id="upload-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-upload-modal">&times;</span>
+        <div id="upload-container">
+            <div id="drop-zone" class="drop-zone">
+                <p>Drag and drop your BTEQ files here, or click to select files.</p>
+                <input type="file" id="file-input" multiple style="display: none;" />
+            </div>
+            <div id="file-list-container" style="display: none;">
+                <h3>Selected Files:</h3>
+                <form id="file-order-form">
+                    <ul id="file-list"></ul>
+                    <button type="submit">Upload and Visualize</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script type="text/javascript" th:inline="javascript">
     /*<![CDATA[*/
     const dropZone = document.getElementById('drop-zone');
@@ -117,8 +127,13 @@
     const fileOrderForm = document.getElementById('file-order-form');
     const flowContainer = document.getElementById('flow-container');
     const modal = document.getElementById("myModal");
+    const uploadModal = document.getElementById('upload-modal');
     const modalText = document.getElementById("modal-text");
     const span = document.getElementsByClassName("close")[0];
+    const closeUploadModal = document.getElementsByClassName("close-upload-modal")[0];
+    const loadScriptsButton = document.getElementById('load-scripts-button');
+    const placeholderLoadButton = document.getElementById('placeholder-load-button');
+    const graphPlaceholder = document.getElementById('graph-placeholder');
     const contextMenu = document.getElementById('context-menu');
     let activeNode = null;
     let fileMetadata = {};
@@ -337,10 +352,31 @@
         }
     });
 
+    loadScriptsButton.addEventListener('click', () => {
+        uploadModal.style.display = 'block';
+    });
+
+    placeholderLoadButton.addEventListener('click', () => {
+        uploadModal.style.display = 'block';
+    });
+
+    closeUploadModal.onclick = function() {
+        uploadModal.style.display = "none";
+    }
+
+    window.addEventListener('click', function(event) {
+        if (event.target == uploadModal) {
+            uploadModal.style.display = 'none';
+        }
+    });
+
     fileOrderForm.addEventListener('submit', (event) => {
         event.preventDefault();
 
-        uploadContainer.style.display = 'none';
+        uploadModal.style.display = 'none';
+        if(graphPlaceholder) {
+            graphPlaceholder.style.display = 'none';
+        }
         flowContainer.style.display = 'flex';
 
         const formData = new FormData();
@@ -521,14 +557,16 @@
             physics: {
                 enabled: true,
                 barnesHut: {
-                    gravitationalConstant: -8000,
-                    springConstant: 0.04,
-                    springLength: 95,
-                    damping: 0.09,
-                    centralGravity: 0.3
+                    gravitationalConstant: -4000,
+                    springConstant: 0.02,
+                    springLength: 150,
+                    damping: 0.1,
+                    centralGravity: 0.1
                 },
+                solver: 'barnesHut',
                 stabilization: {
-                    iterations: 2500
+                    iterations: 1000,
+                    fit: true
                 }
             }
         };
@@ -703,6 +741,5 @@
     }
     /*]]>*/
 </script>
-<script th:src="@{/js/theme.js}"></script>
 </body>
 </html>
