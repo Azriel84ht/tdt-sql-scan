@@ -1,19 +1,13 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" class="dark">
 <head>
     <title>Admin - Manage What's New</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-        }
-    </script>
     <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
     <!-- TinyMCE Script -->
     <script th:src="@{'https://cdn.tiny.cloud/1/' + ${tinymceApiKey} + '/tinymce/6/tinymce.min.js'}" referrerpolicy="origin"></script>
     <script th:inline="javascript">
-        function initTinyMCE() {
-            const isDarkMode = document.documentElement.classList.contains('dark');
+        document.addEventListener('DOMContentLoaded', () => {
             tinymce.init({
                 selector: 'textarea#content-editor',
                 plugins: 'preview importcss searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen image link media template codesample table charmap pagebreak nonbreaking anchor insertdatetime advlist lists wordcount help charmap quickbars emoticons',
@@ -26,21 +20,13 @@
                 autosave_retention: '2m',
                 image_advtab: true,
                 height: 600,
-                skin: isDarkMode ? 'oxide-dark' : 'oxide',
-                content_css: isDarkMode ? 'dark' : 'default'
+                skin: 'oxide-dark',
+                content_css: 'dark'
             });
-        }
-
-        document.addEventListener('DOMContentLoaded', initTinyMCE);
-        document.addEventListener('themeChanged', () => {
-            if (tinymce.get('content-editor')) {
-                tinymce.get('content-editor').remove();
-            }
-            initTinyMCE();
         });
     </script>
 </head>
-<body class="bg-white dark:bg-gray-900">
+<body class="bg-gray-900">
 <div th:replace="~{fragments/header :: header}"></div>
 <div class="admin-wrapper">
     <nav class="sidebar">
@@ -72,6 +58,5 @@
         </form>
     </main>
 </div>
-<script th:src="@{/js/theme.js}"></script>
 </body>
 </html>

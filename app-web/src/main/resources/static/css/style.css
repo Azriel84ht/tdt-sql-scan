@@ -342,20 +342,46 @@ input[type=submit]:hover {
 }
 
 /* Overriding dark mode styles for user-generated content */
-.prose p,
-.prose ul,
-.prose li,
-.prose em {
-    color: #d1d5db !important;
+.prose-invert p,
+.prose-invert ul,
+.prose-invert li,
+.prose-invert em {
+    color: #d1d5db;
 }
 
-.prose blockquote {
-    color: #9ca3af !important;
-    border-left-color: #38bdf8 !important;
+.prose-invert blockquote {
+    color: #9ca3af;
+    border-left-color: #38bdf8;
 }
 
-.prose hr {
-    border-top-color: #374151 !important;
+.prose-invert hr {
+    border-top-color: #374151;
+}
+
+.prose-invert h1, .prose-invert h2, .prose-invert h3, .prose-invert h4, .prose-invert h5, .prose-invert h6 {
+  color: #ffffff;
+}
+.prose-invert a {
+  color: #38bdf8;
+}
+.prose-invert strong {
+  color: #ffffff;
+}
+.prose-invert code {
+    background-color: #374151;
+    color: #e5e7eb;
+}
+.prose-invert pre {
+    background-color: #1f2937;
+    color: #e5e7eb;
+}
+
+.prose-invert > :first-child {
+  margin-top: 0;
+}
+
+.prose-invert > :last-child {
+  margin-bottom: 0;
 }
 
 /* Styles for closable tabs */
