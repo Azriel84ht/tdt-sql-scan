@@ -1,14 +1,9 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" class="dark">
 <head>
     <title th:text="${post.title} + ' | Data Flow Visualizer Blog'"></title>
     <meta name="description" th:attr="content=${#strings.abbreviate(post.content, 155)}" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-        }
-    </script>
     <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
     <link
@@ -18,27 +13,28 @@
       href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900"
     />
 </head>
-<body class="bg-white dark:bg-gray-900" style='font-family: Inter, "Noto Sans", sans-serif;'>
+<body style='font-family: Inter, "Noto Sans", sans-serif;'>
     <div class="relative flex size-full min-h-screen flex-col group/design-root overflow-x-hidden">
+        <canvas class="background"></canvas>
         <div class="layout-container flex h-full grow flex-col">
             <div th:replace="~{fragments/header :: header}"></div>
 
-            <main class="flex-1 justify-center py-5 px-4 sm:px-6 lg:px-8">
+            <main class="flex-1 justify-center py-20 px-4 sm:px-6 lg:px-8">
                 <div class="max-w-4xl mx-auto">
-                    <article class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden p-6">
-                        <header class="border-b dark:border-gray-700 pb-4 mb-4">
-                            <h1 class="text-4xl font-bold text-gray-800 dark:text-gray-100" th:text="${post.title}">Post Title</h1>
-                            <div class="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                    <article class="feature-card">
+                        <header class="border-b border-white/20 pb-4 mb-4">
+                            <h1 class="text-4xl font-bold text-white" th:text="${post.title}">Post Title</h1>
+                            <div class="text-sm text-gray-400 mt-2">
                                 <span>By <span th:text="${post.author}">Author</span></span> |
                                 <span>Published on <span th:text="${#temporals.format(post.createdAt, 'MMMM dd, yyyy')}">Date</span></span>
                             </div>
                         </header>
-                        <section class="prose max-w-none dark:prose-invert" th:utext="${post.content}">
+                        <section class="prose prose-invert max-w-none" th:utext="${post.content}">
                             <!-- Post content will be rendered here -->
                         </section>
                     </article>
                     <div class="mt-8 text-center">
-                        <a th:href="@{/blog}" class="text-[#21bded] font-semibold hover:underline">&larr; Back to Blog</a>
+                        <a th:href="@{/blog}" class="font-semibold text-blue-400 hover:underline">&larr; Back to Blog</a>
                     </div>
                 </div>
             </main>
@@ -46,6 +42,7 @@
             <div th:replace="~{fragments/footer :: footer}"></div>
         </div>
     </div>
-    <script th:src="@{/js/theme.js}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particlesjs/2.2.3/particles.min.js"></script>
+    <script th:src="@{/js/particles-config.js}"></script>
 </body>
 </html>

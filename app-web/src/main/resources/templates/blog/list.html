@@ -1,14 +1,9 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" class="dark">
 <head>
     <title>Blog | Data Flow Visualizer</title>
     <meta name="description" content="Articles and updates on data engineering, Business Intelligence, Teradata, and the evolution of the Data Flow Visualizer tool." />
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-        }
-    </script>
     <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
     <link
@@ -18,32 +13,31 @@
       href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900"
     />
 </head>
-<body class="bg-white dark:bg-gray-900" style='font-family: Inter, "Noto Sans", sans-serif;'>
+<body style='font-family: Inter, "Noto Sans", sans-serif;'>
     <div class="relative flex size-full min-h-screen flex-col group/design-root overflow-x-hidden">
+        <canvas class="background"></canvas>
         <div class="layout-container flex h-full grow flex-col">
             <div th:replace="~{fragments/header :: header}"></div>
 
-            <main class="flex-1 justify-center py-5 px-4 sm:px-6 lg:px-8">
+            <main class="flex-1 justify-center py-20 px-4 sm:px-6 lg:px-8">
                 <div class="max-w-4xl mx-auto">
-                    <h1 class="text-4xl font-bold text-center text-gray-800 dark:text-white mb-10">Our Blog</h1>
+                    <h1 class="text-4xl font-bold text-center text-white mb-12">Our Blog</h1>
 
                     <div class="space-y-12">
-                        <div th:each="post : ${posts}" class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
-                            <div class="p-6">
-                                <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">
-                                    <a th:href="@{/blog/{slug}(slug=${post.slug})}" th:text="${post.title}" class="hover:text-[#21bded] transition-colors duration-300">Post Title</a>
-                                </h2>
-                                <div class="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                                    <span>By <span th:text="${post.author}">Author</span></span> |
-                                    <span>Published on <span th:text="${#temporals.format(post.createdAt, 'MMMM dd, yyyy')}">Date</span></span>
-                                </div>
-                                <!-- Summary is not available in the Post entity -->
-                                <a th:href="@{/blog/{slug}(slug=${post.slug})}" class="text-[#21bded] font-semibold hover:underline">Read more &rarr;</a>
+                        <div th:each="post : ${posts}" class="feature-card">
+                            <h2 class="text-2xl font-bold text-white mb-2">
+                                <a th:href="@{/blog/{slug}(slug=${post.slug})}" th:text="${post.title}" class="hover:text-blue-400 transition-colors duration-300">Post Title</a>
+                            </h2>
+                            <div class="text-sm text-gray-400 mb-4">
+                                <span>By <span th:text="${post.author}">Author</span></span> |
+                                <span>Published on <span th:text="${#temporals.format(post.createdAt, 'MMMM dd, yyyy')}">Date</span></span>
                             </div>
+                            <!-- Summary is not available in the Post entity -->
+                            <a th:href="@{/blog/{slug}(slug=${post.slug})}" class="font-semibold text-blue-400 hover:underline">Read more &rarr;</a>
                         </div>
 
                         <div th:if="${posts.isEmpty()}" class="text-center py-10">
-                            <p class="text-gray-500 dark:text-gray-400">No blog posts have been published yet. Check back soon!</p>
+                            <p class="text-gray-400">No blog posts have been published yet. Check back soon!</p>
                         </div>
                     </div>
                 </div>
@@ -52,6 +46,7 @@
             <div th:replace="~{fragments/footer :: footer}"></div>
         </div>
     </div>
-    <script th:src="@{/js/theme.js}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particlesjs/2.2.3/particles.min.js"></script>
+    <script th:src="@{/js/particles-config.js}"></script>
 </body>
 </html>
