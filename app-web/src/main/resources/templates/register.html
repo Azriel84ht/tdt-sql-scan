@@ -1,56 +1,40 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" class="dark">
 <head>
     <title>Register</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-        }
-    </script>
     <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
-    <style>
-        body { font-family: sans-serif; }
-        html:not(.dark) body { background-color: #f4f4f4; }
-        .alert { padding: 15px; margin-bottom: 20px; border: 1px solid transparent; border-radius: 4px; }
-        .alert-danger { color: #a94442; background-color: #f2dede; border-color: #ebccd1; }
-        .alert-success { color: #3c763d; background-color: #dff0d8; border-color: #d6e9c6; }
-        input[type=text], input[type=password], input[type=email] { width: 100%; padding: 10px; margin: 8px 0; display: inline-block; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        html.dark input[type=text], html.dark input[type=password], html.dark input[type=email] { background-color: #374151; border-color: #4b5563; color: white; }
-        input[type=submit] { width: 100%; background-color: #4CAF50; color: white; padding: 14px 20px; margin: 8px 0; border: none; border-radius: 4px; cursor: pointer; }
-        input[type=submit]:hover { background-color: #45a049; }
-        html.dark a { color: #38bdf8; }
-    </style>
 </head>
-<body class="bg-white dark:bg-gray-900">
+<body>
     <div th:replace="~{fragments/header :: header}"></div>
     <div class="form-container">
-        <h2>Create an Account</h2>
+        <h2 class="text-2xl font-bold text-center mb-6">Create an Account</h2>
         <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
         <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-        <form th:action="@{/register}" th:object="${user}" method="post">
+        <form th:action="@{/register}" th:object="${user}" method="post" class="space-y-6">
             <div>
-                <label for="username">Username:</label>
-                <input type="text" id="username" th:field="*{username}" required autofocus="autofocus"/>
+                <label for="username" class="block text-sm font-medium">Username:</label>
+                <input type="text" id="username" th:field="*{username}" required autofocus="autofocus" class="w-full"/>
             </div>
             <div>
-                <label for="email">Email:</label>
-                <input type="email" id="email" th:field="*{email}" required />
+                <label for="email" class="block text-sm font-medium">Email:</label>
+                <input type="email" id="email" th:field="*{email}" required class="w-full"/>
             </div>
             <div>
-                <label for="password">Password:</label>
-                <input type="password" id="password" th:field="*{password}" required />
+                <label for="password" class="block text-sm font-medium">Password:</label>
+                <input type="password" id="password" th:field="*{password}" required class="w-full"/>
             </div>
             <div>
-                <input type="submit" value="Register"/>
+                <input type="submit" value="Register" class="w-full"/>
             </div>
         </form>
-        <p>
-            Already have an account? <a th:href="@{/login}">Log in</a>
-        </p>
+        <div class="mt-6 text-center">
+            <p>
+                Already have an account? <a th:href="@{/login}" class="font-medium text-blue-400 hover:text-blue-300">Log in</a>
+            </p>
+        </div>
     </div>
     <div th:replace="~{fragments/footer :: footer}"></div>
-    <script th:src="@{/js/theme.js}"></script>
 </body>
 </html>

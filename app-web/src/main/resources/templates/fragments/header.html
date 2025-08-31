@@ -5,30 +5,22 @@
 </head>
 <body>
 
-<header th:fragment="header" class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#f0f3f4] px-10 py-3 dark:bg-gray-800 dark:border-gray-700">
-    <div class="flex items-center gap-4 text-[#111618] dark:text-white">
+<header th:fragment="header" class="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-solid border-white/20 px-10 py-3 bg-gray-900/50 backdrop-blur-lg">
+    <div class="flex items-center gap-4 text-white">
         <a th:href="@{/}" class="flex items-center gap-4">
             <img th:src="@{/main-images/icon_full_200x200.png}" alt="Data Flow Visualizer Logo" class="h-8 w-8">
             <h2 class="text-lg font-bold leading-tight tracking-[-0.015em]">Data Flow Visualizer</h2>
         </a>
     </div>
     <div class="flex items-center gap-4">
-        <!-- Theme Switcher -->
-        <div class="theme-switch-wrapper">
-            <label class="theme-switch" for="theme-toggle">
-                <input type="checkbox" id="theme-toggle" />
-                <span class="slider"></span>
-            </label>
-        </div>
-
         <!-- Dynamic Nav Links -->
         <div sec:authorize="isAuthenticated()" class="flex items-center gap-4">
-            <span class="dark:text-gray-300">Welcome, <span sec:authentication="name">User</span>!</span>
-            <a th:href="@{/app}" class="text-sm font-bold leading-normal tracking-[0.015em] dark:text-gray-300 dark:hover:text-white">App</a>
-            <a th:href="@{/suggestions}" class="text-sm font-bold leading-normal tracking-[0.015em] dark:text-gray-300 dark:hover:text-white">Suggestions</a>
-            <a sec:authorize="hasAuthority('ROLE_ADMIN')" th:href="@{/admin}" class="text-sm font-bold leading-normal tracking-[0.015em] dark:text-gray-300 dark:hover:text-white">Admin Panel</a>
+            <span class="text-gray-300">Welcome, <span sec:authentication="name">User</span>!</span>
+            <a th:href="@{/app}" class="text-sm font-bold leading-normal tracking-[0.015em] text-gray-300 hover:text-white">App</a>
+            <a th:href="@{/suggestions}" class="text-sm font-bold leading-normal tracking-[0.015em] text-gray-300 hover:text-white">Suggestions</a>
+            <a sec:authorize="hasAuthority('ROLE_ADMIN')" th:href="@{/admin}" class="text-sm font-bold leading-normal tracking-[0.015em] text-gray-300 hover:text-white">Admin Panel</a>
             <form th:action="@{/logout}" method="post" style="display: inline;">
-                <button type="submit" class="text-sm font-bold leading-normal tracking-[0.015em] dark:text-gray-300 dark:hover:text-white bg-transparent border-none cursor-pointer">Logout</button>
+                <button type="submit" class="text-sm font-bold leading-normal tracking-[0.015em] text-gray-300 hover:text-white bg-transparent border-none cursor-pointer">Logout</button>
             </form>
         </div>
 
@@ -36,7 +28,7 @@
             <a th:href="@{/register}" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#21bded] text-[#111618] text-sm font-bold leading-normal tracking-[0.015em]">
                 <span class="truncate">Register</span>
             </a>
-            <a th:href="@{/login}" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#f0f3f4] text-[#111618] text-sm font-bold leading-normal tracking-[0.015em] dark:bg-gray-700 dark:text-white">
+            <a th:href="@{/login}" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-gray-700 text-white text-sm font-bold leading-normal tracking-[0.015em]">
                 <span class="truncate">Login</span>
             </a>
         </div>
