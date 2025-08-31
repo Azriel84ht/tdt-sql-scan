@@ -185,7 +185,6 @@ input[type=submit]:hover {
 .tab button.active { background-color: #4b5563; }
 .tabcontent { display: none; padding: 6px 12px; border: 1px solid #4b5563; border-top: none; height: 100%; }
 #graph-area {
-    height: calc(100vh - 120px); /* Adjust height based on header and nav heights */
 }
 #chain-flow-network, #mynetwork, .bteq-view > div {
     width: 100%;
