@@ -419,7 +419,7 @@ public class DataFlowGraphConverter {
             // Check if the query contains a SELECT statement that can be visualized
             if (query instanceof SelectQuery ||
                 (query instanceof InsertQuery && ((InsertQuery) query).isSelect()) ||
-                (query instanceof CreateTableQuery && !((CreateTableQuery) query).getSourceTables().isEmpty())) {
+                (query instanceof CreateTableQuery && ((CreateTableQuery) query).getSelectQuery() != null)) {
                 node.addProperty("hasSelectQuery", true);
             }
         }
