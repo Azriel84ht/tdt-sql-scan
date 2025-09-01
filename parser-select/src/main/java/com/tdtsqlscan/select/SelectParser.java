@@ -25,16 +25,25 @@ public class SelectParser implements QueryParser {
     public SQLQuery parse(String sql) throws SQLParseException {
         SelectQuery q = new SelectQuery(sql);
 
-        // Columns
-        String selectList = SQLParserUtils.extractBetweenKeywords(sql, "SELECT", "FROM");
+        // Check for a FROM clause to determine parsing strategy
+        int fromIndex = SQLParserUtils.findTopLevelKeyword(sql, "FROM", 0);
+
+        String selectList;
+        if (fromIndex != -1) {
+            // FROM clause exists, parse normally
+            selectList = SQLParserUtils.extractBetweenKeywords(sql, "SELECT", "FROM");
+        } else {
+            // No FROM clause, select list is everything after SELECT
+            selectList = SQLParserUtils.extractAfterKeyword(sql, "SELECT", null);
+        }
+
         for (String field : SQLParserUtils.splitTopLevel(selectList, ",")) {
             q.addColumn(field);
         }
 
-        // FROM and JOINs
-        int fromIndex = SQLParserUtils.findTopLevelKeyword(sql, "FROM", 0);
-        String fromClause = null;
+        // The rest of the parsing only makes sense if a FROM clause exists
         if (fromIndex != -1) {
+            // FROM and JOINs
             fromIndex += "FROM".length();
             int whereIndex = SQLParserUtils.findTopLevelKeyword(sql, "WHERE", fromIndex);
             int groupByIndex = SQLParserUtils.findTopLevelKeyword(sql, "GROUP BY", fromIndex);
@@ -45,49 +54,49 @@ public class SelectParser implements QueryParser {
             if (groupByIndex != -1) endIndex = Math.min(endIndex, groupByIndex);
             if (orderByIndex != -1) endIndex = Math.min(endIndex, orderByIndex);
 
-            fromClause = sql.substring(fromIndex, endIndex).trim();
-        }
+            String fromClause = sql.substring(fromIndex, endIndex).trim();
 
-        if (fromClause != null) {
-            List<String> tablesAndJoins = SQLParserUtils.splitTopLevel(fromClause, "JOIN");
-            q.addTable(parseTableRef(tablesAndJoins.get(0)));
-            for (int i = 1; i < tablesAndJoins.size(); i++) {
-                q.addJoin(parseJoin("JOIN " + tablesAndJoins.get(i)));
-            }
-        }
-
-        // WHERE
-        String whereClause = SQLParserUtils.extractBetweenKeywords(sql, "WHERE", "GROUP BY");
-        if (whereClause == null) whereClause = SQLParserUtils.extractBetweenKeywords(sql, "WHERE", "ORDER BY");
-        if (whereClause == null) whereClause = SQLParserUtils.extractAfterKeyword(sql, "WHERE", null);
-        if (whereClause != null) {
-            // Dummy condition parsing
-            q.addWhereCondition(new com.tdtsqlscan.core.SQLCondition(whereClause));
-        }
-
-        // GROUP BY
-        String groupByClause = SQLParserUtils.extractBetweenKeywords(sql, "GROUP BY", "HAVING");
-        if (groupByClause == null) groupByClause = SQLParserUtils.extractBetweenKeywords(sql, "GROUP BY", "ORDER BY");
-        if (groupByClause == null) groupByClause = SQLParserUtils.extractAfterKeyword(sql, "GROUP BY", null);
-        if (groupByClause != null) {
-            for (String expr : SQLParserUtils.splitTopLevel(groupByClause, ",")) {
-                q.addGroupBy(expr);
-            }
-        }
-
-        // ORDER BY
-        String orderByClause = SQLParserUtils.extractAfterKeyword(sql, "ORDER BY", null);
-        if (orderByClause != null) {
-            for (String item : SQLParserUtils.splitTopLevel(orderByClause, ",")) {
-                String trimmedItem = item.trim();
-                SQLOrderItem.Direction dir = SQLOrderItem.Direction.ASC;
-                if (trimmedItem.toUpperCase().endsWith(" DESC")) {
-                    dir = SQLOrderItem.Direction.DESC;
-                    trimmedItem = trimmedItem.substring(0, trimmedItem.length() - 5).trim();
-                } else if (trimmedItem.toUpperCase().endsWith(" ASC")) {
-                    trimmedItem = trimmedItem.substring(0, trimmedItem.length() - 4).trim();
+            if (!fromClause.isEmpty()) {
+                List<String> tablesAndJoins = SQLParserUtils.splitTopLevel(fromClause, "JOIN");
+                q.addTable(parseTableRef(tablesAndJoins.get(0)));
+                for (int i = 1; i < tablesAndJoins.size(); i++) {
+                    q.addJoin(parseJoin("JOIN " + tablesAndJoins.get(i)));
                 }
-                q.addOrderBy(new com.tdtsqlscan.core.SQLOrderItem(trimmedItem, dir));
+            }
+
+            // WHERE
+            String whereClause = SQLParserUtils.extractBetweenKeywords(sql, "WHERE", "GROUP BY");
+            if (whereClause == null) whereClause = SQLParserUtils.extractBetweenKeywords(sql, "WHERE", "ORDER BY");
+            if (whereClause == null) whereClause = SQLParserUtils.extractAfterKeyword(sql, "WHERE", null);
+            if (whereClause != null) {
+                // Dummy condition parsing
+                q.addWhereCondition(new com.tdtsqlscan.core.SQLCondition(whereClause));
+            }
+
+            // GROUP BY
+            String groupByClause = SQLParserUtils.extractBetweenKeywords(sql, "GROUP BY", "HAVING");
+            if (groupByClause == null) groupByClause = SQLParserUtils.extractBetweenKeywords(sql, "GROUP BY", "ORDER BY");
+            if (groupByClause == null) groupByClause = SQLParserUtils.extractAfterKeyword(sql, "GROUP BY", null);
+            if (groupByClause != null) {
+                for (String expr : SQLParserUtils.splitTopLevel(groupByClause, ",")) {
+                    q.addGroupBy(expr);
+                }
+            }
+
+            // ORDER BY
+            String orderByClause = SQLParserUtils.extractAfterKeyword(sql, "ORDER BY", null);
+            if (orderByClause != null) {
+                for (String item : SQLParserUtils.splitTopLevel(orderByClause, ",")) {
+                    String trimmedItem = item.trim();
+                    SQLOrderItem.Direction dir = SQLOrderItem.Direction.ASC;
+                    if (trimmedItem.toUpperCase().endsWith(" DESC")) {
+                        dir = SQLOrderItem.Direction.DESC;
+                        trimmedItem = trimmedItem.substring(0, trimmedItem.length() - 5).trim();
+                    } else if (trimmedItem.toUpperCase().endsWith(" ASC")) {
+                        trimmedItem = trimmedItem.substring(0, trimmedItem.length() - 4).trim();
+                    }
+                    q.addOrderBy(new com.tdtsqlscan.core.SQLOrderItem(trimmedItem, dir));
+                }
             }
         }
 
