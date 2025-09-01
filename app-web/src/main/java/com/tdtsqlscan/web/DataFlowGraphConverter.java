@@ -215,8 +215,8 @@ public class DataFlowGraphConverter {
         if (!(query instanceof InsertQuery)) {
             return false;
         }
-        // Groupable inserts are those without a source table (i.e., INSERT ... VALUES)
-        return ((InsertQuery) query).getSourceTableName() == null;
+        // Groupable inserts are those that are not INSERT...SELECT
+        return !((InsertQuery) query).isSelect();
     }
 
     private Node processInsertGroup(List<BteqCommand> group, int startIndex, Node lastCommandNode) {
@@ -290,8 +290,8 @@ public class DataFlowGraphConverter {
                 tables.add(((CreateTableQuery) query).getTableName());
             } else if (query instanceof InsertQuery) {
                 tables.add(((InsertQuery) query).getTableName());
-                if (((InsertQuery) query).getSourceTableName() != null) {
-                    tables.add(((InsertQuery) query).getSourceTableName());
+                if (((InsertQuery) query).isSelect()) {
+                    tables.addAll(((InsertQuery) query).getSourceTables());
                 }
             } else if (query instanceof UpdateQuery) {
                 tables.add(((UpdateQuery) query).getTargetTable());
@@ -444,8 +444,8 @@ public class DataFlowGraphConverter {
         } else if (query instanceof InsertQuery) {
             InsertQuery q = (InsertQuery) query;
             metadata.put("Tabla Destino", q.getTableName());
-            if (q.getSourceTableName() != null) {
-                metadata.put("Tabla Origen", q.getSourceTableName());
+            if (q.isSelect()) {
+                metadata.put("Tablas Origen", q.getSourceTables());
             }
             if (q.getColumns() != null && !q.getColumns().isEmpty()) {
                 metadata.put("Columnas Afectadas", q.getColumns());

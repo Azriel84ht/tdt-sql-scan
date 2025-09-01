@@ -143,8 +143,10 @@ public class BteqUploadController {
                             } else {
                                 logger.warn("Found InsertQuery with null table name: {}", command.getRawText());
                             }
-                            if (insertQuery.getSourceTableName() != null) {
-                                readTables.add(insertQuery.getSourceTableName().toUpperCase());
+                            if (insertQuery.isSelect()) {
+                                for (String sourceTable : insertQuery.getSourceTables()) {
+                                    readTables.add(SQLParserUtils.extractTableFromExpression(sourceTable).toUpperCase());
+                                }
                             }
                         } else if (query instanceof UpdateQuery) {
                             UpdateQuery updateQuery = (UpdateQuery) query;
