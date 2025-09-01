@@ -232,7 +232,7 @@ public class BteqUploadController {
                     selectQuery = (SelectQuery) query;
                 } else if (query instanceof InsertQuery && ((InsertQuery) query).isSelect()) {
                     selectQuery = ((InsertQuery) query).getSelectQuery();
-                } else if (query instanceof CreateTableQuery && !((CreateTableQuery) query).getSourceTables().isEmpty()) {
+                } else if (query instanceof CreateTableQuery && ((CreateTableQuery) query).getSelectQuery() != null) {
                     selectQuery = ((CreateTableQuery) query).getSelectQuery();
                 }
 
