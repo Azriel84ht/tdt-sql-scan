@@ -41,29 +41,43 @@ public class CreateTableParser implements QueryParser {
 
         boolean isVolatile = matcher.group(1) != null;
         String tableName = matcher.group(2);
-        String asClause = matcher.group(3);
 
         List<ColumnDefinition> columns = new ArrayList<>();
         List<String> sourceTables = new ArrayList<>();
+        com.tdtsqlscan.select.SelectQuery selectQuery = null;
+
+        // More robustly find the AS clause, ignoring potential final clauses like "WITH DATA"
+        int asClausePos = sql.toUpperCase().indexOf(" AS ");
+        String asClause = null;
+        if (asClausePos > 0) {
+            String afterAs = sql.substring(asClausePos + " AS ".length());
+            if (afterAs.trim().startsWith("(")) {
+                asClause = SQLParserUtils.extractBetweenKeywords(afterAs, "(", ")");
+            }
+        }
 
         if (asClause != null) {
             // This is a CTAS statement. We need to parse the sub-select to find source tables.
-            com.tdtsqlscan.select.SelectQuery selectQuery = (com.tdtsqlscan.select.SelectQuery) selectParser.parse(asClause);
+            selectQuery = (com.tdtsqlscan.select.SelectQuery) selectParser.parse(asClause);
             for (SQLTableRef tableRef : selectQuery.getTables()) {
                 sourceTables.add(tableRef.getExpression());
             }
             for (SQLJoin join : selectQuery.getJoins()) {
                 sourceTables.add(join.getRight().getExpression());
             }
-        } else {
-            // This is a standard CREATE TABLE with column definitions.
+        }
+
+        // If it's not a CTAS, parse column definitions
+        if (selectQuery == null) {
             String colsInside = SQLParserUtils.extractBetweenKeywords(sql, "(", ")");
-            List<String> colDefs = SQLParserUtils.splitTopLevel(colsInside, ",");
-            for (String col : colDefs) {
-                columns.add(ColumnDefinition.from(col.trim()));
+            if (colsInside != null && !colsInside.trim().isEmpty()) {
+                List<String> colDefs = SQLParserUtils.splitTopLevel(colsInside, ",");
+                for (String col : colDefs) {
+                    columns.add(ColumnDefinition.from(col.trim()));
+                }
             }
         }
 
-        return new CreateTableQuery(sql, tableName, columns, isVolatile, sourceTables);
+        return new CreateTableQuery(sql, tableName, columns, isVolatile, sourceTables, selectQuery);
     }
 }
