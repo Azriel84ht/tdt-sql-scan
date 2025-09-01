@@ -415,6 +415,13 @@ public class DataFlowGraphConverter {
             if (!metadata.isEmpty()) {
                 node.addProperty("metadata", metadata);
             }
+
+            // Check if the query contains a SELECT statement that can be visualized
+            if (query instanceof SelectQuery ||
+                (query instanceof InsertQuery && ((InsertQuery) query).isSelect()) ||
+                (query instanceof CreateTableQuery && !((CreateTableQuery) query).getSourceTables().isEmpty())) {
+                node.addProperty("hasSelectQuery", true);
+            }
         }
 
         return node;

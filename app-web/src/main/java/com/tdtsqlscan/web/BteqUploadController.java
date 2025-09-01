@@ -42,6 +42,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
 public class BteqUploadController {
@@ -51,6 +52,8 @@ public class BteqUploadController {
     private final BteqScriptParser bteqScriptParser;
     private final ChainFlowGraphConverter chainFlowGraphConverter;
     private final ObjectMapper objectMapper;
+    private final Map<String, BteqScript> parsedScripts = new ConcurrentHashMap<>();
+
 
     public static class GraphResponse {
         public Graph chainFlow;
@@ -77,6 +80,7 @@ public class BteqUploadController {
     @PostMapping("/upload")
     public GraphResponse handleFileUpload(@RequestParam("files") MultipartFile[] files, @RequestParam("fileOrder") String fileOrderJson) throws IOException {
         logger.info("Received {} files for upload", files.length);
+        parsedScripts.clear();
 
         List<Map<String, String>> fileOrderList = objectMapper.readValue(fileOrderJson, new TypeReference<List<Map<String, String>>>(){});
         Map<String, Integer> fileOrderMap = fileOrderList.stream()
@@ -90,6 +94,7 @@ public class BteqUploadController {
             script.setSize(file.getSize());
             script.setEncoding(StandardCharsets.UTF_8.name());
             scripts.add(script);
+            parsedScripts.put(script.getScriptName(), script);
         }
 
         // Sort scripts: primary by user order, secondary by script name
@@ -202,5 +207,44 @@ public class BteqUploadController {
     @GetMapping("/hello")
     public String hello() {
         return "Hello from BTEQ Flow Visualizer!";
+    }
+
+    @PostMapping("/api/visualize-select")
+    public Graph visualizeSelect(@RequestParam("scriptName") String scriptName, @RequestParam("commandId") String commandId) {
+        logger.info("Request to visualize select query for script: {}, commandId: {}", scriptName, commandId);
+
+        BteqScript script = parsedScripts.get(scriptName);
+        if (script == null) {
+            logger.error("Script not found: {}", scriptName);
+            return new Graph(); // Return empty graph
+        }
+
+        try {
+            // commandId is "cmd-INDEX"
+            int commandIndex = Integer.parseInt(commandId.split("-")[1]);
+            BteqCommand command = script.getCommands().get(commandIndex);
+
+            if (command instanceof BteqSqlCommand) {
+                Object query = ((BteqSqlCommand) command).getQuery();
+                SelectQuery selectQuery = null;
+
+                if (query instanceof SelectQuery) {
+                    selectQuery = (SelectQuery) query;
+                } else if (query instanceof InsertQuery && ((InsertQuery) query).isSelect()) {
+                    selectQuery = ((InsertQuery) query).getSelectQuery();
+                } else if (query instanceof CreateTableQuery && !((CreateTableQuery) query).getSourceTables().isEmpty()) {
+                    selectQuery = ((CreateTableQuery) query).getSelectQuery();
+                }
+
+                if (selectQuery != null) {
+                    SelectGraphConverter converter = new SelectGraphConverter();
+                    return converter.convert(selectQuery);
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Error generating select visualization for script: {}, commandId: {}", scriptName, commandId, e);
+        }
+
+        return new Graph(); // Return empty graph on error
     }
 }

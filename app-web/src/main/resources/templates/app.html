@@ -94,6 +94,7 @@
 
 <div id="context-menu">
     <a href="#" id="show-schema">Show schema</a>
+    <a href="#" id="visualize-query">Visualizar Consulta</a>
     <a href="#" id="view-text">View Text</a>
     <a href="#" id="copy-code">Copy Code</a>
 </div>
@@ -191,6 +192,49 @@
         if (activeNode && activeNode.fullText) {
             navigator.clipboard.writeText(activeNode.fullText);
         }
+    };
+
+    document.getElementById('visualize-query').onclick = () => {
+        if (!activeNode || !activeNode.id) return;
+
+        const currentView = navigationStack[navigationStack.length - 1];
+        const scriptName = currentView.title;
+        const commandId = activeNode.id;
+
+        const formData = new FormData();
+        formData.append('scriptName', scriptName);
+        formData.append('commandId', commandId);
+
+        const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+        const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+        fetch('/api/visualize-select', {
+            method: 'POST',
+            headers: { [header]: token },
+            body: formData,
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.nodes && data.nodes.length > 0) {
+                // For the sub-graph, we can use a generic container inside the modal
+                const modalGraphContainer = document.createElement('div');
+                modalGraphContainer.id = 'modal-graph-container';
+                modalGraphContainer.style.height = '400px'; // Or any appropriate size
+                modalText.innerHTML = ''; // Clear previous text
+                modalText.appendChild(modalGraphContainer);
+                modal.style.display = 'block';
+
+                // Render the new graph in the modal
+                // We don't need context menu for this sub-graph
+                renderGraph(data, modalGraphContainer, false);
+            } else {
+                alert('Could not generate visualization for this query.');
+            }
+        })
+        .catch(error => {
+            console.error('Error visualizing query:', error);
+            alert('An error occurred while generating the visualization.');
+        });
     };
 
     document.getElementById('show-schema').onclick = () => {
@@ -643,11 +687,13 @@
                     const showSchemaLink = document.getElementById('show-schema');
                     const viewTextLink = document.getElementById('view-text');
                     const copyCodeLink = document.getElementById('copy-code');
+                    const visualizeQueryLink = document.getElementById('visualize-query');
 
                     // Hide all by default
                     showSchemaLink.style.display = 'none';
                     viewTextLink.style.display = 'none';
                     copyCodeLink.style.display = 'none';
+                    visualizeQueryLink.style.display = 'none';
 
                     let menuHasItems = false;
 
@@ -661,6 +707,12 @@
                     if (activeNode.fullText) {
                         viewTextLink.style.display = 'block';
                         copyCodeLink.style.display = 'block';
+                        menuHasItems = true;
+                    }
+
+                    // Logic for nodes that have a visualizable select query
+                    if (activeNode.metadata && activeNode.metadata.hasSelectQuery) {
+                        visualizeQueryLink.style.display = 'block';
                         menuHasItems = true;
                     }
 

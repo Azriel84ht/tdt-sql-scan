@@ -45,10 +45,11 @@ public class CreateTableParser implements QueryParser {
 
         List<ColumnDefinition> columns = new ArrayList<>();
         List<String> sourceTables = new ArrayList<>();
+        com.tdtsqlscan.select.SelectQuery selectQuery = null;
 
         if (asClause != null) {
             // This is a CTAS statement. We need to parse the sub-select to find source tables.
-            com.tdtsqlscan.select.SelectQuery selectQuery = (com.tdtsqlscan.select.SelectQuery) selectParser.parse(asClause);
+            selectQuery = (com.tdtsqlscan.select.SelectQuery) selectParser.parse(asClause);
             for (SQLTableRef tableRef : selectQuery.getTables()) {
                 sourceTables.add(tableRef.getExpression());
             }
@@ -64,6 +65,6 @@ public class CreateTableParser implements QueryParser {
             }
         }
 
-        return new CreateTableQuery(sql, tableName, columns, isVolatile, sourceTables);
+        return new CreateTableQuery(sql, tableName, columns, isVolatile, sourceTables, selectQuery);
     }
 }
