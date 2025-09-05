@@ -1,56 +1,11 @@
 <!DOCTYPE html>
-<html lang="en" class="dark" xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Error - Data Flow Visualizer</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0a0a0a;
-            color: #e5e7eb;
-        }
-        #particles-js {
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            z-index: -1;
-        }
-        .glassmorphism {
-            background: rgba(16, 16, 16, 0.6);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-    </style>
+    <title>Internal Server Error</title>
 </head>
-<body class="antialiased">
-    <div id="particles-js"></div>
-
-    <div th:replace="~{fragments/header :: header}"></div>
-
-    <main class="flex items-center justify-center min-h-screen px-4" style="padding-top: 80px;">
-        <div class="glassmorphism rounded-2xl p-8 md:p-12 w-full max-w-lg text-center">
-            <h1 class="text-4xl font-bold text-white mb-4">500 - Internal Server Error</h1>
-            <p class="text-gray-400 mt-2">Something went wrong on our side. Please try again later or contact support if the problem persists.</p>
-            <div class="mt-8">
-                <a th:href="@{/}" class="px-6 py-2 font-semibold rounded-lg text-black bg-cyan-400 hover:bg-cyan-300 transition-all duration-300">Go to Homepage</a>
-            </div>
-        </div>
-    </main>
-
-    <div th:replace="~{fragments/footer :: footer}"></div>
-
-    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-    <script>
-        particlesJS('particles-js', {
-            "particles": { "number": { "value": 50, "density": { "enable": true, "value_area": 800 } }, "color": { "value": "#ffffff" }, "shape": { "type": "circle", }, "opacity": { "value": 0.2, "random": true, }, "size": { "value": 3, "random": true, }, "line_linked": { "enable": true, "distance": 150, "color": "#ffffff", "opacity": 0.1, "width": 1 }, "move": { "enable": true, "speed": 1, "direction": "none", "random": false, "straight": false, "out_mode": "out", "bounce": false, } }, "interactivity": { "detect_on": "canvas", "events": { "onhover": { "enable": true, "mode": "repulse" }, "onclick": { "enable": false }, "resize": true }, "modes": { "repulse": { "distance": 100, "duration": 0.4 } } }, "retina_detect": true
-        });
-    </script>
+<body>
+    <h1>Something went wrong</h1>
+    <p>We are sorry, but something went wrong on our side. Please try again later.</p>
 </body>
 </html>

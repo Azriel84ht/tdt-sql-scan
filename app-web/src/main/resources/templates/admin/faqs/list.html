@@ -1,88 +1,59 @@
 <!DOCTYPE html>
-<html lang="en" class="dark" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - FAQ Management</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0a0a0a;
-            color: #e5e7eb;
-        }
-        #particles-js {
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            z-index: -1;
-        }
-        .glassmorphism {
-            background: rgba(16, 16, 16, 0.6);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
 </head>
-<body class="antialiased">
-    <div id="particles-js"></div>
-
-    <div th:replace="~{fragments/header :: header}"></div>
-
-    <div class="flex" style="padding-top: 80px;">
-        <div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
-
-        <main class="flex-1 p-8">
-            <div class="glassmorphism rounded-2xl p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h1 class="text-3xl font-bold text-white">FAQ Management</h1>
-                    <a th:href="@{/admin/faqs/new}" class="px-4 py-2 text-sm font-semibold rounded-lg text-black bg-cyan-400 hover:bg-cyan-300 transition-colors">Create New FAQ</a>
-                </div>
-
-                <div th:if="${successMessage}" class="bg-green-500/20 text-green-300 p-3 rounded-lg mb-4" th:text="${successMessage}"></div>
-                <div th:if="${errorMessage}" class="bg-red-500/20 text-red-300 p-3 rounded-lg mb-4" th:text="${errorMessage}"></div>
-
-                <div class="overflow-x-auto">
-                    <table class="min-w-full text-sm text-left text-gray-400">
-                        <thead class="text-xs text-gray-300 uppercase bg-white/5">
-                            <tr>
-                                <th scope="col" class="px-6 py-3">ID</th>
-                                <th scope="col" class="px-6 py-3">Question</th>
-                                <th scope="col" class="px-6 py-3">Created At</th>
-                                <th scope="col" class="px-6 py-3">Updated At</th>
-                                <th scope="col" class="px-6 py-3">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="faq : ${faqs}" class="border-b border-white/10 hover:bg-white/5">
-                                <td class="px-6 py-4" th:text="${faq.id}"></td>
-                                <td class="px-6 py-4 font-medium text-white" th:text="${faq.question}"></td>
-                                <td class="px-6 py-4" th:text="${#temporals.format(faq.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
-                                <td class="px-6 py-4" th:text="${#temporals.format(faq.updatedAt, 'yyyy-MM-dd HH:mm')}"></td>
-                                <td class="px-6 py-4 flex items-center space-x-2">
-                                    <a th:href="@{/admin/faqs/edit/{id}(id=${faq.id})}" class="px-3 py-1 text-sm font-semibold rounded-lg text-white bg-blue-600/50 hover:bg-blue-600/80">Edit</a>
-                                    <form th:action="@{/admin/faqs/delete/{id}(id=${faq.id})}" method="post" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this FAQ?');">
-                                        <button type="submit" class="px-3 py-1 text-sm font-semibold rounded-lg text-white bg-red-600/50 hover:bg-red-600/80">Delete</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-    <script>
-        particlesJS('particles-js', {
-            "particles": { "number": { "value": 50, "density": { "enable": true, "value_area": 800 } }, "color": { "value": "#ffffff" }, "shape": { "type": "circle", }, "opacity": { "value": 0.2, "random": true, }, "size": { "value": 3, "random": true, }, "line_linked": { "enable": true, "distance": 150, "color": "#ffffff", "opacity": 0.1, "width": 1 }, "move": { "enable": true, "speed": 1, "direction": "none", "random": false, "straight": false, "out_mode": "out", "bounce": false, } }, "interactivity": { "detect_on": "canvas", "events": { "onhover": { "enable": true, "mode": "repulse" }, "onclick": { "enable": false }, "resize": true }, "modes": { "repulse": { "distance": 100, "duration": 0.4 } } }, "retina_detect": true
-        });
-    </script>
+<body class="bg-white dark:bg-gray-900">
+<div th:replace="~{fragments/header :: header}"></div>
+<div class="admin-wrapper">
+    <nav class="sidebar">
+        <h2>Admin Panel</h2>
+        <ul>
+            <li><a th:href="@{/admin}">Dashboard</a></li>
+            <li><a th:href="@{/admin/content}">Manage Homepage</a></li>
+            <li><a th:href="@{/admin/users}">User Management</a></li>
+            <li><a th:href="@{/admin/suggestions}">View Suggestions</a></li>
+            <li><a th:href="@{/admin/posts}">Blog Management</a></li>
+            <li><a th:href="@{/admin/faqs}" class="active">FAQ Management</a></li>
+            <li><a th:href="@{/admin/whats-new}">What's New Management</a></li>
+            <li><a th:href="@{/app}">Back to App</a></li>
+        </ul>
+    </nav>
+    <main class="main-content">
+        <div class="header-actions">
+            <h1>FAQs</h1>
+            <a th:href="@{/admin/faqs/new}" class="btn btn-primary">Create New FAQ</a>
+        </div>
+        <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Question</th>
+                <th>Created At</th>
+                <th>Updated At</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="faq : ${faqs}">
+                <td th:text="${faq.id}"></td>
+                <td th:text="${faq.question}"></td>
+                <td th:text="${#temporals.format(faq.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+                <td th:text="${#temporals.format(faq.updatedAt, 'yyyy-MM-dd HH:mm')}"></td>
+                <td class="action-links">
+                    <a th:href="@{/admin/faqs/edit/{id}(id=${faq.id})}" class="btn btn-sm btn-primary">Edit</a>
+                    <form th:action="@{/admin/faqs/delete/{id}(id=${faq.id})}" method="post" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this FAQ?');">
+                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </main>
+</div>
+<script th:src="@{/js/theme.js}"></script>
 </body>
 </html>

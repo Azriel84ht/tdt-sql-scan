@@ -1,75 +1,78 @@
 <!DOCTYPE html>
-<html lang="en" class="dark" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FAQ - Data Flow Visualizer</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <title>FAQ | Data Flow Visualizer</title>
+    <meta name="description" content="Frequently Asked Questions about the Data Flow Visualizer tool." />
+    <meta name="keywords" content="FAQ, Data Flow Visualizer, Teradata, BTEQ, SQL, ETL, Data Lineage, Support, Help" />
+    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
+    <link
+      rel="stylesheet"
+      as="style"
+      onload="this.rel='stylesheet'"
+      href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900"
+    />
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0a0a0a;
-            color: #e5e7eb;
-        }
-        #particles-js {
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            z-index: -1;
-        }
-        .glassmorphism {
-            background: rgba(16, 16, 16, 0.6);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+        .faq-item {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            margin-bottom: 1rem;
+            overflow: hidden;
         }
-        .faq-item summary {
+        .faq-question {
+            width: 100%;
+            text-align: left;
+            padding: 1.5rem;
+            font-weight: 600;
+            cursor: pointer;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            cursor: pointer;
+            color: white;
         }
-        .faq-item summary::-webkit-details-marker {
+        .faq-answer {
+            padding: 0 1.5rem 1.5rem 1.5rem;
             display: none;
-        }
-        .faq-item[open] summary .icon-plus {
-            transform: rotate(45deg);
+            color: #e2e8f0;
         }
     </style>
 </head>
-<body class="antialiased">
-    <div id="particles-js"></div>
-
-    <div th:replace="~{fragments/header :: header}"></div>
-
-    <main class="pt-32 pb-16 px-4 max-w-4xl mx-auto">
-        <h1 class="text-4xl font-bold text-center text-white mb-12">Frequently Asked Questions</h1>
-        <div class="space-y-4">
-            <div th:each="faq : ${faqs}" class="glassmorphism rounded-xl p-6 faq-item">
-                <details>
-                    <summary>
-                        <span class="font-semibold text-lg" th:text="${faq.question}"></span>
-                        <i class="fas fa-plus icon-plus text-cyan-400 transition-transform"></i>
-                    </summary>
-                    <div class="text-gray-400 mt-4" th:utext="${faq.answer}"></div>
-                </details>
-            </div>
-            <div th:if="${faqs.isEmpty()}" class="text-center py-10">
-                <p class="text-gray-400">No FAQs have been published yet. Check back soon!</p>
-            </div>
+<body style='font-family: Inter, "Noto Sans", sans-serif;'>
+    <div class="relative flex size-full min-h-screen flex-col group/design-root overflow-x-hidden">
+        <canvas class="background"></canvas>
+        <div class="layout-container flex h-full grow flex-col">
+            <div th:replace="~{fragments/header :: header}"></div>
+            <main class="flex-1 justify-center py-20 px-4 sm:px-6 lg:px-8">
+                <div class="max-w-4xl mx-auto">
+                    <h1 class="text-4xl font-bold text-center text-white mb-12">Frequently Asked Questions</h1>
+                    <div class="space-y-4">
+                        <div th:each="faq : ${faqs}" class="faq-item">
+                            <button class="faq-question">
+                                <span th:text="${faq.question}"></span>
+                                <span>&#9660;</span>
+                            </button>
+                            <div class="faq-answer prose prose-invert max-w-none" th:utext="${faq.answer}">
+                            </div>
+                        </div>
+                        <div th:if="${faqs.isEmpty()}" class="text-center py-10">
+                            <p class="text-gray-400">No FAQs have been published yet. Check back soon!</p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+            <div th:replace="~{fragments/footer :: footer}"></div>
         </div>
-    </main>
-
-    <div th:replace="~{fragments/footer :: footer}"></div>
-
-    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particlesjs/2.2.3/particles.min.js"></script>
+    <script th:src="@{/js/particles-config.js}"></script>
     <script>
-        particlesJS('particles-js', {
-            "particles": { "number": { "value": 50, "density": { "enable": true, "value_area": 800 } }, "color": { "value": "#ffffff" }, "shape": { "type": "circle", }, "opacity": { "value": 0.2, "random": true, }, "size": { "value": 3, "random": true, }, "line_linked": { "enable": true, "distance": 150, "color": "#ffffff", "opacity": 0.1, "width": 1 }, "move": { "enable": true, "speed": 1, "direction": "none", "random": false, "straight": false, "out_mode": "out", "bounce": false, } }, "interactivity": { "detect_on": "canvas", "events": { "onhover": { "enable": true, "mode": "repulse" }, "onclick": { "enable": false }, "resize": true }, "modes": { "repulse": { "distance": 100, "duration": 0.4 } } }, "retina_detect": true
+        document.querySelectorAll('.faq-question').forEach(button => {
+            button.addEventListener('click', () => {
+                const answer = button.nextElementSibling;
+                answer.style.display = answer.style.display === 'block' ? 'none' : 'block';
+            });
         });
     </script>
 </body>
