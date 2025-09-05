@@ -2,9 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org" class="dark">
 <head>
     <title>Admin - Manage Post</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
-    <!-- TinyMCE Script -->
     <script th:src="@{'https://cdn.tiny.cloud/1/' + ${tinymceApiKey} + '/tinymce/6/tinymce.min.js'}" referrerpolicy="origin"></script>
     <script th:inline="javascript">
         document.addEventListener('DOMContentLoaded', () => {
@@ -37,8 +35,8 @@
             <li><a th:href="@{/admin/users}">User Management</a></li>
             <li><a th:href="@{/admin/suggestions}">View Suggestions</a></li>
             <li><a th:href="@{/admin/posts}" class="active">Blog Management</a></li>
-                <li><a th:href="@{/admin/faqs}">FAQ Management</a></li>
-                <li><a th:href="@{/admin/whats-new}">What's New Management</a></li>
+            <li><a th:href="@{/admin/faqs}">FAQ Management</a></li>
+            <li><a th:href="@{/admin/whats-new}">What's New Management</a></li>
             <li><a th:href="@{/app}">Back to App</a></li>
         </ul>
     </nav>

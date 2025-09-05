@@ -40,11 +40,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .authorizeRequests(authorize -> authorize
-                .antMatchers("/", "/home", "/login", "/register", "/verify**", "/blog/**", "/css/**", "/js/**", "/images/**", "/main-images/**", "/faq", "/whats-new", "/sitemap.xml", "/upload").permitAll()
-                .antMatchers("/h2-console/**").permitAll()
-                .antMatchers("/app/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
-                .antMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
+            .authorizeHttpRequests(authorize -> authorize
+                .requestMatchers("/", "/home", "/login", "/register", "/verify**", "/blog/**", "/css/**", "/js/**", "/images/**", "/main-images/**", "/faq", "/whats-new", "/sitemap.xml", "/upload").permitAll()
+                .requestMatchers("/h2-console/**").permitAll()
+                .requestMatchers("/app/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+                .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
@@ -57,7 +57,7 @@ public class SecurityConfig {
                 .permitAll()
             )
             .csrf(csrf -> csrf
-                .ignoringAntMatchers("/h2-console/**")
+                .ignoringRequestMatchers("/h2-console/**")
             )
             .headers(headers -> headers
                 .frameOptions().sameOrigin()

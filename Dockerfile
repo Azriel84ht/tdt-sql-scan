@@ -1,30 +1,24 @@
-# --- Fase de Construcción (Build Stage) ---
-# Usamos una imagen oficial de Maven con Java 8 para compilar el proyecto.
-FROM maven:3.8-openjdk-8 AS build
-
-# Establecemos el directorio de trabajo dentro del contenedor
+# --- ETAPA 1: Construcción del Frontend ---
+FROM node:18 AS frontend
 WORKDIR /app
+COPY app-web/package.json ./
+RUN npm install
+COPY app-web/ ./
+RUN npm run build
 
-# Copiamos todo el código fuente del proyecto primero
+# --- ETAPA 2: Construcción del Backend (Java) ---
+FROM maven:3.8-openjdk-17 AS build
+WORKDIR /app
 COPY . .
+# --- LÍNEA MODIFICADA ---
+# Copia el CSS generado desde la etapa del frontend a la carpeta de recursos estáticos del backend.
+COPY --from=frontend /app/dist/style.css ./app-web/src/main/resources/static/css/style.css
+RUN mvn clean package -DskipTests
 
-# Ahora que todos los módulos están presentes, compilamos el proyecto.
-# Usamos el comando 'mvn' de la imagen base para mayor robustez.
-RUN ["mvn", "clean", "package", "-DskipTests"]
-
-
-# --- Fase de Ejecución (Run Stage) ---
-# Usamos una imagen ligera de Java 8 para ejecutar la aplicación
-FROM openjdk:8-jre-slim
-
-# Establecemos el directorio de trabajo
+# --- ETAPA 3: Imagen Final de Ejecución ---
+FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
-
-# Copiamos solo el JAR compilado desde la fase de construcción
-COPY --from=build /app/app-web/target/app-web-*.jar ./app.jar
-
-# El puerto en el que escuchará la aplicación
+COPY --from=build /app/app-web/target/*.jar ./app.jar
 EXPOSE 8080
-
-# El comando para arrancar la aplicación
+# Activa el perfil 'production' para que no se cargue el CDN de Tailwind
 CMD ["java", "-Dspring.profiles.active=production", "-jar", "app.jar"]

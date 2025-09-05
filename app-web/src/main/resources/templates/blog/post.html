@@ -3,7 +3,6 @@
 <head>
     <title th:text="${post.title} + ' | Data Flow Visualizer Blog'"></title>
     <meta name="description" th:attr="content=${#strings.abbreviate(post.content, 155)}" />
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
     <link
@@ -18,7 +17,6 @@
         <canvas class="background"></canvas>
         <div class="layout-container flex h-full grow flex-col">
             <div th:replace="~{fragments/header :: header}"></div>
-
             <main class="flex-1 justify-center py-20 px-4 sm:px-6 lg:px-8">
                 <div class="max-w-4xl mx-auto">
                     <article class="feature-card">
@@ -29,16 +27,13 @@
                                 <span>Published on <span th:text="${#temporals.format(post.createdAt, 'MMMM dd, yyyy')}">Date</span></span>
                             </div>
                         </header>
-                        <section class="prose prose-invert max-w-none" th:utext="${post.content}">
-                            <!-- Post content will be rendered here -->
-                        </section>
+                        <section class="prose prose-invert max-w-none" th:utext="${post.content}"></section>
                     </article>
                     <div class="mt-8 text-center">
                         <a th:href="@{/blog}" class="font-semibold text-blue-400 hover:underline">&larr; Back to Blog</a>
                     </div>
                 </div>
             </main>
-
             <div th:replace="~{fragments/footer :: footer}"></div>
         </div>
     </div>

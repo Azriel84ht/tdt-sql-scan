@@ -1,12 +1,13 @@
 package com.tdtsqlscan.web.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
 import java.util.Date;
 
 @Entity
@@ -17,6 +18,7 @@ public class Suggestion {
     private Long id;
 
     @Lob
+    @Column(columnDefinition = "TEXT")
     private String text;
 
     @ManyToOne
