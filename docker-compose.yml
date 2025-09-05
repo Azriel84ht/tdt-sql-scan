@@ -7,14 +7,20 @@ services:
     ports:
       - "8080:8080"
     environment:
-      # Spring Boot usará estas variables. Docker Compose las rellenará:
-      # 1. Desde el entorno del host (servidor de producción).
-      # 2. Si no existen en el host, desde el fichero .env en la misma carpeta.
+      # JVM Options
+      - JAVA_TOOL_OPTIONS=${JAVA_TOOL_OPTIONS}
+
+      # Datasource
       - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
       - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
       - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
+
+      # Mail Server
       - SPRING_MAIL_HOST=${SPRING_MAIL_HOST}
       - SPRING_MAIL_PORT=${SPRING_MAIL_PORT}
       - SPRING_MAIL_USERNAME=${SPRING_MAIL_USERNAME}
       - SPRING_MAIL_PASSWORD=${SPRING_MAIL_PASSWORD}
       - SPRING_MAIL_FROM=${SPRING_MAIL_FROM}
+
+      # Third-Party Services
+      - TINYMCE_API_KEY=${TINYMCE_API_KEY}
