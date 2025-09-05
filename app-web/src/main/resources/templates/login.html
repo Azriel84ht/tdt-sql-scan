@@ -1,46 +1,25 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" class="dark">
 <head>
-<title>Login</title>
-<link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
-
+    <title>Login</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
 </head>
 <body>
     <div th:replace="~{fragments/header :: header}"></div>
     <div class="form-container">
         <h2 class="text-2xl font-bold text-center mb-6">Login</h2>
-        <div th:if="${param.error}" class="alert alert-danger">
-            Invalid username or password.
-        </div>
-        <div th:if="${param.logout}" class="alert alert-info">
-            You have been logged out.
-        </div>
-        <div th:if="${param.verified == 'true'}" class="alert alert-success">
-            Your account has been successfully verified. Please log in.
-        </div>
-        <div th:if="${param.verified == 'false'}" class="alert alert-danger">
-            There was an error during your account verification. Please contact support or try registering again.
-        </div>
+        <div th:if="${param.error}" class="alert alert-danger">Invalid username or password.</div>
+        <div th:if="${param.logout}" class="alert alert-info">You have been logged out.</div>
+        <div th:if="${param.verified == 'true'}" class="alert alert-success">Your account has been successfully verified. Please log in.</div>
+        <div th:if="${param.verified == 'false'}" class="alert alert-danger">There was an error during your account verification.</div>
         <form th:action="@{/login}" method="post" class="space-y-6">
-            <div>
-                <label for="username" class="block text-sm font-medium">Username:</label>
-                <input type="text" id="username" name="username" autofocus="autofocus" class="w-full"/>
-            </div>
-            <div>
-                <label for="password" class="block text-sm font-medium">Password:</label>
-                <input type="password" id="password" name="password" class="w-full"/>
-            </div>
-            <div>
-                <input type="submit" value="Log In" class="w-full"/>
-            </div>
+            <div><label for="username" class="block text-sm font-medium">Username:</label><input type="text" id="username" name="username" autofocus="autofocus" class="w-full"/></div>
+            <div><label for="password" class="block text-sm font-medium">Password:</label><input type="password" id="password" name="password" class="w-full"/></div>
+            <div><input type="submit" value="Log In" class="w-full"/></div>
         </form>
         <div class="mt-6 text-center">
-            <p>
-                No account yet? <a th:href="@{/register}" class="font-medium text-blue-400 hover:text-blue-300">Create an account</a>
-            </p>
-            <p>
-                <a th:href="@{/forgot-password}" class="font-medium text-blue-400 hover:text-blue-300">Forgot Password?</a>
-            </p>
+            <p>No account yet? <a th:href="@{/register}" class="font-medium text-blue-400 hover:text-blue-300">Create an account</a></p>
+            <p><a th:href="@{/forgot-password}" class="font-medium text-blue-400 hover:text-blue-300">Forgot Password?</a></p>
         </div>
     </div>
     <div th:replace="~{fragments/footer :: footer}"></div>

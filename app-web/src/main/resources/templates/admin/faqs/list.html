@@ -2,11 +2,6 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Admin - FAQ Management</title>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-        }
-    </script>
     <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
 </head>
 <body class="bg-white dark:bg-gray-900">
@@ -30,10 +25,8 @@
             <h1>FAQs</h1>
             <a th:href="@{/admin/faqs/new}" class="btn btn-primary">Create New FAQ</a>
         </div>
-
         <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
         <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
-
         <table class="data-table">
             <thead>
             <tr>
