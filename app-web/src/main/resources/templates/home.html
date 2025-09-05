@@ -1,180 +1,313 @@
-<html>
-  <head>
-    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
-    <link
-      rel="stylesheet"
-      as="style"
-      onload="this.rel='stylesheet'"
-      href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900"
-    />
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Flow Visualizer - Visualiza tus procesos ETL de Teradata</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a;
+            color: #e5e7eb;
+        }
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+        .glassmorphism {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .hero-glow {
+            box-shadow: 0 0 80px rgba(52, 144, 220, 0.3), 0 0 120px rgba(52, 211, 153, 0.2);
+        }
+        .feature-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+        .news-card:hover .news-image {
+            transform: scale(1.05);
+        }
+        .faq-item summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        .faq-item summary::-webkit-details-marker {
+            display: none;
+        }
+        .faq-item[open] summary .icon-plus {
+            transform: rotate(45deg);
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div id="particles-js"></div>
 
-    <title>Stitch Design</title>
-    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
-
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  </head>
-  <body>
-    <div class="relative flex size-full min-h-screen flex-col bg-[#111618] dark group/design-root overflow-x-hidden" style='font-family: Inter, "Noto Sans", sans-serif;'>
-      <div class="layout-container flex h-full grow flex-col">
-        <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#283539] px-10 py-3">
-          <div class="flex items-center gap-4 text-white">
-            <div class="size-4">
-              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path
-                  d="M4 42.4379C4 42.4379 14.0962 36.0744 24 41.1692C35.0664 46.8624 44 42.2078 44 42.2078L44 7.01134C44 7.01134 35.068 11.6577 24.0031 5.96913C14.0971 0.876274 4 7.27094 4 7.27094L4 42.4379Z"
-                  fill="currentColor"
-                ></path>
-              </svg>
+    <!-- Header -->
+    <header id="main-header" class="glassmorphism fixed top-4 left-1/2 -translate-x-1/2 w-[95%] max-w-6xl mx-auto rounded-2xl z-50 transition-all duration-300">
+        <nav class="flex items-center justify-between p-4">
+            <a href="#" class="flex items-center space-x-2">
+                <svg class="h-8 w-8 text-cyan-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1.5-1.5m1.5 1.5l1.5-1.5m3.75-3l-1.5-1.5m1.5 1.5l1.5-1.5m-7.5 3h7.5m-1.5-1.5l-1.5 1.5m1.5-1.5l1.5 1.5M6 6.75h.008v.008H6V6.75z" />
+                </svg>
+                <span class="text-xl font-bold text-white">Data Flow Visualizer</span>
+            </a>
+            <div class="hidden md:flex items-center space-x-6 text-sm font-medium">
+                <a href="#features" class="text-gray-300 hover:text-cyan-400 transition-colors">Características</a>
+                <a href="#news" class="text-gray-300 hover:text-cyan-400 transition-colors">Novedades</a>
+                <a href="#faq" class="text-gray-300 hover:text-cyan-400 transition-colors">FAQ</a>
+                <a href="#" class="text-gray-300 hover:text-cyan-400 transition-colors">Blog</a>
             </div>
-            <h2 class="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Data Flow Visualizer</h2>
-          </div>
-          <div class="flex flex-1 justify-end gap-8">
-            <div class="flex items-center gap-9">
-              <a class="text-white text-sm font-medium leading-normal" href="#">Home</a>
-              <a class="text-white text-sm font-medium leading-normal" href="#">Features</a>
-              <a class="text-white text-sm font-medium leading-normal" href="#">Pricing</a>
-              <a class="text-white text-sm font-medium leading-normal" href="#">Contact</a>
+            <div class="hidden md:flex items-center space-x-3">
+                <a href="#" class="px-4 py-2 text-sm font-semibold rounded-lg text-white hover:bg-white/10 transition-colors">Login</a>
+                <a href="#" class="px-4 py-2 text-sm font-semibold rounded-lg text-black bg-cyan-400 hover:bg-cyan-300 transition-colors">Registro</a>
             </div>
-            <button
-              class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#21bded] text-[#111618] text-sm font-bold leading-normal tracking-[0.015em]"
-            >
-              <span class="truncate">Get Started</span>
+            <button id="mobile-menu-button" class="md:hidden text-white">
+                <i class="fas fa-bars fa-lg"></i>
             </button>
-          </div>
-        </header>
-        <div class="px-40 flex flex-1 justify-center py-5">
-          <div class="layout-content-container flex flex-col max-w-[960px] flex-1">
-            <div class="@container">
-              <div class="@[480px]:p-4">
-                <div
-                  class="flex min-h-[480px] flex-col gap-6 bg-cover bg-center bg-no-repeat @[480px]:gap-8 @[480px]:rounded-xl items-center justify-center p-4"
-                  style='background-image: linear-gradient(rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.4) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuDsX-ZGGkbwMMD1TIDkFyj5q15sDYAvGyNMGsOBs9WIMzC8oXUl5dKv9p2X60TvdI47Ed4bOX05jPOCYxqfQtwEThyf1asqH72fHB33qr0KkPtqOnaBklSwfb2YECZbcBqxpmV1cHXNRBnkPbeQ0goRC5UrCG8DhMyLChUsq39SsrfcDoW-qcej8kxAHXSb_lRKZw5ZynxwijJ1sUcvdmelQkqSa-Mm8b90PCksW04MsvAEJBy3j--HY4EVBfQZN92W9wUyi0Sg4wM8");'
-                >
-                  <div class="flex flex-col gap-2 text-center">
-                    <h1
-                      class="text-white text-4xl font-black leading-tight tracking-[-0.033em] @[480px]:text-5xl @[480px]:font-black @[480px]:leading-tight @[480px]:tracking-[-0.033em]"
-                    >
-                      Visualize Your Data Flow
-                    </h1>
-                    <h2 class="text-white text-sm font-normal leading-normal @[480px]:text-base @[480px]:font-normal @[480px]:leading-normal">
-                      Transform complex Teradata BTEQ scripts into intuitive visual diagrams. Understand data lineage, dependencies, and transformations with ease.
-                    </h2>
-                  </div>
-                  <button
-                    class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 @[480px]:h-12 @[480px]:px-5 bg-[#21bded] text-[#111618] text-sm font-bold leading-normal tracking-[0.015em] @[480px]:text-base @[480px]:font-bold @[480px]:leading-normal @[480px]:tracking-[0.015em]"
-                  >
-                    <span class="truncate">Get Started</span>
-                  </button>
-                </div>
-              </div>
+        </nav>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden p-4 border-t border-white/10">
+            <a href="#features" class="block py-2 text-gray-300 hover:text-cyan-400">Características</a>
+            <a href="#news" class="block py-2 text-gray-300 hover:text-cyan-400">Novedades</a>
+            <a href="#faq" class="block py-2 text-gray-300 hover:text-cyan-400">FAQ</a>
+            <a href="#" class="block py-2 text-gray-300 hover:text-cyan-400">Blog</a>
+            <div class="mt-4 pt-4 border-t border-white/10 space-y-2">
+                <a href="#" class="block text-center w-full px-4 py-2 text-sm font-semibold rounded-lg text-white bg-white/10 hover:bg-white/20">Login</a>
+                <a href="#" class="block text-center w-full px-4 py-2 text-sm font-semibold rounded-lg text-black bg-cyan-400 hover:bg-cyan-300">Registro</a>
             </div>
-            <h2 class="text-white text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">Key Features</h2>
-            <div class="grid grid-cols-[repeat(auto-fit,minmax(158px,1fr))] gap-3 p-4">
-              <div class="flex flex-1 gap-3 rounded-lg border border-[#3b4e54] bg-[#1c2427] p-4 flex-col">
-                <div class="text-white" data-icon="PresentationChart" data-size="24px" data-weight="regular">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
-                    <path
-                      d="M216,40H136V24a8,8,0,0,0-16,0V40H40A16,16,0,0,0,24,56V176a16,16,0,0,0,16,16H79.36L57.75,219a8,8,0,0,0,12.5,10l29.59-37h56.32l29.59,37a8,8,0,1,0,12.5-10l-21.61-27H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40Zm0,136H40V56H216V176ZM104,120v24a8,8,0,0,1-16,0V120a8,8,0,0,1,16,0Zm32-16v40a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm32-16v56a8,8,0,0,1-16,0V88a8,8,0,0,1,16,0Z"
-                    ></path>
-                  </svg>
-                </div>
-                <div class="flex flex-col gap-1">
-                  <h2 class="text-white text-base font-bold leading-tight">Visual Data Flow Diagrams</h2>
-                  <p class="text-[#9db2b9] text-sm font-normal leading-normal">Easily understand complex data flows with clear, interactive diagrams.</p>
-                </div>
-              </div>
-              <div class="flex flex-1 gap-3 rounded-lg border border-[#3b4e54] bg-[#1c2427] p-4 flex-col">
-                <div class="text-white" data-icon="Code" data-size="24px" data-weight="regular">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
-                    <path
-                      d="M69.12,94.15,28.5,128l40.62,33.85a8,8,0,1,1-10.24,12.29l-48-40a8,8,0,0,1,0-12.29l48-40a8,8,0,0,1,10.24,12.3Zm176,27.7-48-40a8,8,0,1,0-10.24,12.3L227.5,128l-40.62,33.85a8,8,0,1,0,10.24,12.29l48-40a8,8,0,0,0,0-12.29ZM162.73,32.48a8,8,0,0,0-10.25,4.79l-64,176a8,8,0,0,0,4.79,10.26A8.14,8.14,0,0,0,96,224a8,8,0,0,0,7.52-5.27l64-176A8,8,0,0,0,162.73,32.48Z"
-                    ></path>
-                  </svg>
-                </div>
-                <div class="flex flex-col gap-1">
-                  <h2 class="text-white text-base font-bold leading-tight">BTEQ Script Parsing</h2>
-                  <p class="text-[#9db2b9] text-sm font-normal leading-normal">Seamlessly convert your Teradata BTEQ scripts into visual representations.</p>
-                </div>
-              </div>
-              <div class="flex flex-1 gap-3 rounded-lg border border-[#3b4e54] bg-[#1c2427] p-4 flex-col">
-                <div class="text-white" data-icon="Eye" data-size="24px" data-weight="regular">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
-                    <path
-                      d="M247.31,124.76c-.35-.79-8.82-19.58-27.65-38.41C194.57,61.26,162.88,48,128,48S61.43,61.26,36.34,86.35C17.51,105.18,9,124,8.69,124.76a8,8,0,0,0,0,6.5c.35.79,8.82,19.57,27.65,38.4C61.43,194.74,93.12,208,128,208s66.57-13.26,91.66-38.34c18.83-18.83,27.3-37.61,27.65-38.4A8,8,0,0,0,247.31,124.76ZM128,192c-30.78,0-57.67-11.19-79.93-33.25A133.47,133.47,0,0,1,25,128,133.33,133.33,0,0,1,48.07,97.25C70.33,75.19,97.22,64,128,64s57.67,11.19,79.93,33.25A133.46,133.46,0,0,1,231.05,128C223.84,141.46,192.43,192,128,192Zm0-112a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Z"
-                    ></path>
-                  </svg>
-                </div>
-                <div class="flex flex-col gap-1">
-                  <h2 class="text-white text-base font-bold leading-tight">Interactive Exploration</h2>
-                  <p class="text-[#9db2b9] text-sm font-normal leading-normal">Dive deep into your data flow with interactive features like zooming and panning.</p>
-                </div>
-              </div>
-            </div>
-            <h2 class="text-white text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">How It Works</h2>
-            <div class="grid grid-cols-[40px_1fr] gap-x-2 px-4">
-              <div class="flex flex-col items-center gap-1 pt-3">
-                <div class="text-white" data-icon="Upload" data-size="24px" data-weight="regular">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
-                    <path
-                      d="M240,136v64a16,16,0,0,1-16,16H32a16,16,0,0,1-16-16V136a16,16,0,0,1,16-16H80a8,8,0,0,1,0,16H32v64H224V136H176a8,8,0,0,1,0-16h48A16,16,0,0,1,240,136ZM85.66,77.66,120,43.31V128a8,8,0,0,0,16,0V43.31l34.34,34.35a8,8,0,0,0,11.32-11.32l-48-48a8,8,0,0,0-11.32,0l-48,48A8,8,0,0,0,85.66,77.66ZM200,168a12,12,0,1,0-12,12A12,12,0,0,0,200,168Z"
-                    ></path>
-                  </svg>
-                </div>
-                <div class="w-[1.5px] bg-[#3b4e54] h-2 grow"></div>
-              </div>
-              <div class="flex flex-1 flex-col py-3">
-                <p class="text-white text-base font-medium leading-normal">Upload Your BTEQ Script</p>
-                <p class="text-[#9db2b9] text-base font-normal leading-normal">Upload your Teradata BTEQ script to the application.</p>
-              </div>
-              <div class="flex flex-col items-center gap-1">
-                <div class="w-[1.5px] bg-[#3b4e54] h-2"></div>
-                <div class="text-white" data-icon="PresentationChart" data-size="24px" data-weight="regular">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
-                    <path
-                      d="M216,40H136V24a8,8,0,0,0-16,0V40H40A16,16,0,0,0,24,56V176a16,16,0,0,0,16,16H79.36L57.75,219a8,8,0,0,0,12.5,10l29.59-37h56.32l29.59,37a8,8,0,1,0,12.5-10l-21.61-27H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40Zm0,136H40V56H216V176ZM104,120v24a8,8,0,0,1-16,0V120a8,8,0,0,1,16,0Zm32-16v40a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm32-16v56a8,8,0,0,1-16,0V88a8,8,0,0,1,16,0Z"
-                    ></path>
-                  </svg>
-                </div>
-                <div class="w-[1.5px] bg-[#3b4e54] h-2 grow"></div>
-              </div>
-              <div class="flex flex-1 flex-col py-3">
-                <p class="text-white text-base font-medium leading-normal">Visualize the Data Flow</p>
-                <p class="text-[#9db2b9] text-base font-normal leading-normal">The application parses the script and generates a visual data flow diagram.</p>
-              </div>
-              <div class="flex flex-col items-center gap-1 pb-3">
-                <div class="w-[1.5px] bg-[#3b4e54] h-2"></div>
-                <div class="text-white" data-icon="MagnifyingGlass" data-size="24px" data-weight="regular">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
-                    <path
-                      d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"
-                    ></path>
-                  </svg>
-                </div>
-              </div>
-              <div class="flex flex-1 flex-col py-3">
-                <p class="text-white text-base font-medium leading-normal">Explore and Analyze</p>
-                <p class="text-[#9db2b9] text-base font-normal leading-normal">Interact with the diagram to understand data lineage and transformations.</p>
-              </div>
-            </div>
-            <h2 class="text-white text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">News &amp; Updates</h2>
-            <div class="p-4 @container">
-              <div class="flex flex-col items-stretch justify-start rounded-xl @xl:flex-row @xl:items-start">
-                <div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-xl"></div>
-                <div class="flex w-full min-w-72 grow flex-col items-stretch justify-center gap-1 py-4 @xl:px-4">
-                  <p class="text-[#9db2b9] text-sm font-normal leading-normal">Latest Update</p>
-                  <p class="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Enhanced Script Parsing</p>
-                  <div class="flex items-end gap-3 justify-between">
-                    <p class="text-[#9db2b9] text-base font-normal leading-normal">
-                      We've improved our BTEQ script parsing engine to support more complex scripts and provide more accurate visualizations. Enjoy a smoother and more reliable
-                      experience.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
-      </div>
-    </div>
-  </body>
+    </header>
+
+    <main class="pt-32 pb-16 px-4 max-w-6xl mx-auto">
+        <!-- Hero Section -->
+        <section class="text-center">
+            <div class="glassmorphism hero-glow rounded-3xl p-8 md:p-16">
+                <h1 class="text-4xl md:text-6xl font-black text-white leading-tight mb-4">
+                    Decodifica tus Procesos ETL en Segundos
+                </h1>
+                <p class="text-lg md:text-xl max-w-3xl mx-auto text-gray-300 mb-8">
+                    Transforma complejos scripts BTEQ de Teradata en diagramas de flujo de datos claros e interactivos. Audita, depura y optimiza con una facilidad sin precedentes.
+                </p>
+                <div class="flex justify-center items-center gap-4">
+                    <a href="#" class="px-8 py-3 font-semibold rounded-xl text-black bg-cyan-400 hover:bg-cyan-300 transition-all duration-300 transform hover:scale-105">
+                        Empezar Gratis
+                    </a>
+                    <a href="#" class="px-8 py-3 font-semibold rounded-xl text-white bg-white/10 hover:bg-white/20 transition-all duration-300">
+                        Ver Demo
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="mt-24">
+            <h2 class="text-3xl font-bold text-center mb-12">Una Herramienta, Potencia Ilimitada</h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="glassmorphism rounded-2xl p-6 text-center transition-all duration-300 feature-card">
+                    <i class="fas fa-sitemap fa-3x text-cyan-400 mb-4"></i>
+                    <h3 class="text-xl font-bold mb-2">Visualización Instantánea</h3>
+                    <p class="text-gray-400">Sube tus ficheros .bteq y obtén al instante un grafo interactivo que muestra el linaje de datos y las dependencias entre procesos.</p>
+                </div>
+                <!-- Feature 2 -->
+                <div class="glassmorphism rounded-2xl p-6 text-center transition-all duration-300 feature-card">
+                    <i class="fas fa-search-plus fa-3x text-emerald-400 mb-4"></i>
+                    <h3 class="text-xl font-bold mb-2">Auditoría Profunda</h3>
+                    <p class="text-gray-400">Navega por el flujo, inspecciona cada sentencia SQL y entiende el impacto de cada paso en tu ecosistema de datos Teradata.</p>
+                </div>
+                <!-- Feature 3 -->
+                <div class="glassmorphism rounded-2xl p-6 text-center transition-all duration-300 feature-card">
+                    <i class="fas fa-bolt fa-3x text-amber-400 mb-4"></i>
+                    <h3 class="text-xl font-bold mb-2">Optimización Eficiente</h3>
+                    <p class="text-gray-400">Detecta redundancias, cuellos de botella y errores lógicos de forma visual, acelerando tus ciclos de desarrollo y mantenimiento.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- News Section -->
+        <section id="news" class="mt-24">
+            <h2 class="text-3xl font-bold text-center mb-12">Novedades Recientes</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- News Card 1 -->
+                <div class="glassmorphism rounded-2xl overflow-hidden group news-card">
+                    <div class="overflow-hidden">
+                        <img src="https://placehold.co/600x400/0a0a0a/cyan?text=Novedad" alt="Imagen de la noticia" class="w-full h-48 object-cover transition-transform duration-300 news-image">
+                    </div>
+                    <div class="p-6">
+                        <p class="text-sm text-cyan-400 mb-2">Release</p>
+                        <h3 class="text-xl font-bold mb-3">Lanzamiento de la Versión 1.0</h3>
+                        <p class="text-gray-400 text-sm mb-4">Estamos emocionados de anunciar el lanzamiento oficial de Data Flow Visualizer, ¡listo para revolucionar tus flujos de trabajo con Teradata!</p>
+                        <a href="#" class="font-semibold text-white hover:text-cyan-400">Leer más &rarr;</a>
+                    </div>
+                </div>
+                <!-- News Card 2 -->
+                <div class="glassmorphism rounded-2xl overflow-hidden group news-card">
+                    <div class="overflow-hidden">
+                        <img src="https://placehold.co/600x400/0a0a0a/emerald?text=Tutorial" alt="Imagen de la noticia" class="w-full h-48 object-cover transition-transform duration-300 news-image">
+                    </div>
+                    <div class="p-6">
+                        <p class="text-sm text-emerald-400 mb-2">Tutorial</p>
+                        <h3 class="text-xl font-bold mb-3">Cómo analizar tu primer BTEQ</h3>
+                        <p class="text-gray-400 text-sm mb-4">Aprende paso a paso cómo subir y visualizar tu primer script. Descubre los conceptos básicos de la interfaz en menos de 5 minutos.</p>
+                        <a href="#" class="font-semibold text-white hover:text-cyan-400">Ver tutorial &rarr;</a>
+                    </div>
+                </div>
+                <!-- News Card 3 -->
+                <div class="glassmorphism rounded-2xl overflow-hidden group news-card">
+                    <div class="overflow-hidden">
+                       <img src="https://placehold.co/600x400/0a0a0a/amber?text=Próximamente" alt="Imagen de la noticia" class="w-full h-48 object-cover transition-transform duration-300 news-image">
+                    </div>
+                    <div class="p-6">
+                        <p class="text-sm text-amber-400 mb-2">Roadmap</p>
+                        <h3 class="text-xl font-bold mb-3">Futuras Integraciones</h3>
+                        <p class="text-gray-400 text-sm mb-4">Adelantamos las próximas tecnologías y sistemas que se integrarán en la plataforma. ¡El futuro es multi-nube!</p>
+                        <a href="#" class="font-semibold text-white hover:text-cyan-400">Ver roadmap &rarr;</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section id="faq" class="mt-24 max-w-3xl mx-auto">
+             <h2 class="text-3xl font-bold text-center mb-12">Preguntas Frecuentes</h2>
+             <div class="space-y-4">
+                 <details class="glassmorphism rounded-xl p-6 faq-item">
+                     <summary>
+                         <span class="font-semibold text-lg">¿Qué es exactamente Data Flow Visualizer?</span>
+                         <i class="fas fa-plus icon-plus text-cyan-400 transition-transform"></i>
+                     </summary>
+                     <p class="text-gray-400 mt-4">Es una herramienta de software que analiza ficheros de script BTEQ de Teradata y genera automáticamente un grafo visual e interactivo. Este grafo te ayuda a entender el flujo de datos y la lógica de ejecución de tus procesos ETL de una forma mucho más intuitiva que leyendo el código.</p>
+                 </details>
+                 <details class="glassmorphism rounded-xl p-6 faq-item">
+                     <summary>
+                         <span class="font-semibold text-lg">¿Necesito instalar algo en mis servidores?</span>
+                          <i class="fas fa-plus icon-plus text-cyan-400 transition-transform"></i>
+                     </summary>
+                     <p class="text-gray-400 mt-4">No. Nuestra aplicación funciona de forma completamente independiente. Solo necesitas subir tus ficheros de script (.bteq) a través de nuestro interfaz web. No requerimos acceso a tus bases de datos ni a tus sistemas.</p>
+                 </details>
+                  <details class="glassmorphism rounded-xl p-6 faq-item">
+                     <summary>
+                         <span class="font-semibold text-lg">¿Es seguro subir nuestros scripts?</span>
+                          <i class="fas fa-plus icon-plus text-cyan-400 transition-transform"></i>
+                     </summary>
+                     <p class="text-gray-400 mt-4">Sí. La seguridad es nuestra máxima prioridad. Los scripts se procesan en memoria en nuestros servidores seguros y no se almacenan permanentemente a menos que tú lo decidas. Utilizamos encriptación de extremo a extremo para proteger tus datos.</p>
+                 </details>
+             </div>
+        </section>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="border-t border-white/10 mt-16">
+        <div class="max-w-6xl mx-auto px-4 py-8">
+            <div class="flex flex-col md:flex-row justify-between items-center text-center md:text-left space-y-4 md:space-y-0">
+                <p class="text-sm text-gray-400">&copy; 2025 Data Flow Visualizer. Todos los derechos reservados.</p>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-github"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        // Configuración de Particles.js
+        particlesJS('particles-js', {
+            "particles": {
+                "number": {
+                    "value": 50,
+                    "density": {
+                        "enable": true,
+                        "value_area": 800
+                    }
+                },
+                "color": {
+                    "value": "#ffffff"
+                },
+                "shape": {
+                    "type": "circle",
+                },
+                "opacity": {
+                    "value": 0.2,
+                    "random": true,
+                },
+                "size": {
+                    "value": 3,
+                    "random": true,
+                },
+                "line_linked": {
+                    "enable": true,
+                    "distance": 150,
+                    "color": "#ffffff",
+                    "opacity": 0.1,
+                    "width": 1
+                },
+                "move": {
+                    "enable": true,
+                    "speed": 1,
+                    "direction": "none",
+                    "random": false,
+                    "straight": false,
+                    "out_mode": "out",
+                    "bounce": false,
+                }
+            },
+            "interactivity": {
+                "detect_on": "canvas",
+                "events": {
+                    "onhover": {
+                        "enable": true,
+                        "mode": "repulse"
+                    },
+                    "onclick": {
+                        "enable": false
+                    },
+                    "resize": true
+                },
+                "modes": {
+                     "repulse": {
+                        "distance": 100,
+                        "duration": 0.4
+                    }
+                }
+            },
+            "retina_detect": true
+        });
+
+        // Menú móvil
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Ocultar header al hacer scroll hacia abajo, mostrar al subir
+        let lastScrollTop = 0;
+        const header = document.getElementById('main-header');
+        window.addEventListener('scroll', function() {
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            if (scrollTop > lastScrollTop && scrollTop > 100) {
+                // Scroll hacia abajo
+                header.style.top = '-100px';
+            } else {
+                // Scroll hacia arriba
+                header.style.top = '1rem';
+            }
+            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop; 
+        }, false);
+    </script>
+</body>
 </html>
