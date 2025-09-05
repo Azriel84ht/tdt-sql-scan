@@ -10,6 +10,8 @@ RUN npm run build
 FROM maven:3.8-openjdk-17 AS build
 WORKDIR /app
 COPY . .
+# --- LÍNEA MODIFICADA ---
+# Copia el CSS generado desde la etapa del frontend a la carpeta de recursos estáticos del backend.
 COPY --from=frontend /app/dist/style.css ./app-web/src/main/resources/static/css/style.css
 RUN mvn clean package -DskipTests
 
