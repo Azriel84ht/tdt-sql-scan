@@ -1,15 +1,20 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
-<footer th:fragment="footer" class="flex justify-center border-t border-solid border-t-[#f0f3f4] dark:bg-gray-900 dark:border-gray-700 mt-10">
-    <div class="flex max-w-[960px] flex-1 flex-col items-center">
-        <div class="flex gap-6 py-5 text-center">
-            <a th:href="@{/blog}" class="text-sm font-bold leading-normal tracking-[0.015em] text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">Blog</a>
-            <a th:href="@{/faq}" class="text-sm font-bold leading-normal tracking-[0.015em] text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">FAQ</a>
-            <a th:href="@{/whats-new}" class="text-sm font-bold leading-normal tracking-[0.015em] text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">What's New</a>
+<footer th:fragment="footer" class="border-t border-white/10 mt-16">
+    <div class="max-w-6xl mx-auto px-4 py-8">
+        <div class="flex justify-center mb-4 space-x-6">
+            <a th:href="@{/blog}" class="text-sm font-bold leading-normal tracking-[0.015em] text-gray-300 hover:text-white">Blog</a>
+            <a th:href="@{/faq}" class="text-sm font-bold leading-normal tracking-[0.015em] text-gray-300 hover:text-white">FAQ</a>
+            <a th:href="@{/whats-new}" class="text-sm font-bold leading-normal tracking-[0.015em] text-gray-300 hover:text-white">What's New</a>
         </div>
-        <div class="flex flex-col gap-6 px-5 pb-10 text-center">
-            <p class="text-[#618089] dark:text-gray-400 text-base font-normal leading-normal">© 2025 azprojs.net. All rights reserved.</p>
+        <div class="flex flex-col md:flex-row justify-between items-center text-center md:text-left space-y-4 md:space-y-0">
+            <p class="text-sm text-gray-400">&copy; 2025 Data Flow Visualizer. All rights reserved.</p>
+            <div class="flex space-x-4">
+                <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-github"></i></a>
+                <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-linkedin"></i></a>
+            </div>
         </div>
     </div>
 </footer>

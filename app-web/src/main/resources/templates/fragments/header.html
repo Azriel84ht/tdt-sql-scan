@@ -1,39 +1,58 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 <body>
-
-<header th:fragment="header" class="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-solid border-white/20 px-10 py-3 bg-gray-900/50 backdrop-blur-lg">
-    <div class="flex items-center gap-4 text-white">
-        <a th:href="@{/}" class="flex items-center gap-4">
-            <img th:src="@{/main-images/icon_full_200x200.png}" alt="Data Flow Visualizer Logo" class="h-8 w-8">
-            <h2 class="text-lg font-bold leading-tight tracking-[-0.015em]">Data Flow Visualizer</h2>
+<header th:fragment="header" id="main-header" class="glassmorphism fixed top-4 left-1/2 -translate-x-1/2 w-[95%] max-w-6xl mx-auto rounded-2xl z-50 transition-all duration-300">
+    <nav class="flex items-center justify-between p-4">
+        <a th:href="@{/}" class="flex items-center space-x-2">
+            <svg class="h-8 w-8 text-cyan-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1.5-1.5m1.5 1.5l1.5-1.5m3.75-3l-1.5-1.5m1.5 1.5l1.5-1.5m-7.5 3h7.5m-1.5-1.5l-1.5 1.5m1.5-1.5l1.5 1.5M6 6.75h.008v.008H6V6.75z" />
+            </svg>
+            <span class="text-xl font-bold text-white">Data Flow Visualizer</span>
         </a>
-    </div>
-    <div class="flex items-center gap-4">
-        <!-- Dynamic Nav Links -->
-        <div sec:authorize="isAuthenticated()" class="flex items-center gap-4">
-            <span class="text-gray-300">Welcome, <span sec:authentication="name">User</span>!</span>
-            <a th:href="@{/app}" class="text-sm font-bold leading-normal tracking-[0.015em] text-gray-300 hover:text-white">App</a>
-            <a th:href="@{/suggestions}" class="text-sm font-bold leading-normal tracking-[0.015em] text-gray-300 hover:text-white">Suggestions</a>
-            <a sec:authorize="hasAuthority('ROLE_ADMIN')" th:href="@{/admin}" class="text-sm font-bold leading-normal tracking-[0.015em] text-gray-300 hover:text-white">Admin Panel</a>
+        <div class="hidden md:flex items-center space-x-6 text-sm font-medium">
+            <a th:href="@{/#features}" class="text-gray-300 hover:text-cyan-400 transition-colors">Features</a>
+            <a th:href="@{/whats-new}" class="text-gray-300 hover:text-cyan-400 transition-colors">What's New</a>
+            <a th:href="@{/faq}" class="text-gray-300 hover:text-cyan-400 transition-colors">FAQ</a>
+            <a th:href="@{/blog}" class="text-gray-300 hover:text-cyan-400 transition-colors">Blog</a>
+        </div>
+        <div sec:authorize="!isAuthenticated()" class="hidden md:flex items-center space-x-3">
+            <a th:href="@{/login}" class="px-4 py-2 text-sm font-semibold rounded-lg text-white hover:bg-white/10 transition-colors">Login</a>
+            <a th:href="@{/register}" class="px-4 py-2 text-sm font-semibold rounded-lg text-black bg-cyan-400 hover:bg-cyan-300 transition-colors">Register</a>
+        </div>
+        <div sec:authorize="isAuthenticated()" class="hidden md:flex items-center space-x-4">
+             <a th:href="@{/app}" class="text-sm font-bold leading-normal tracking-[0.015em] text-gray-300 hover:text-white">App</a>
+             <a th:href="@{/suggestions}" class="text-sm font-bold leading-normal tracking-[0.015em] text-gray-300 hover:text-white">Suggestions</a>
+             <a sec:authorize="hasAuthority('ROLE_ADMIN')" th:href="@{/admin}" class="text-sm font-bold leading-normal tracking-[0.015em] text-gray-300 hover:text-white">Admin Panel</a>
             <form th:action="@{/logout}" method="post" style="display: inline;">
-                <button type="submit" class="text-sm font-bold leading-normal tracking-[0.015em] text-gray-300 hover:text-white bg-transparent border-none cursor-pointer">Logout</button>
+                <button type="submit" class="px-4 py-2 text-sm font-semibold rounded-lg text-white hover:bg-white/10 transition-colors bg-transparent border-none cursor-pointer">Logout</button>
             </form>
         </div>
-
-        <div sec:authorize="!isAuthenticated()" class="flex gap-2">
-            <a th:href="@{/register}" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#21bded] text-[#111618] text-sm font-bold leading-normal tracking-[0.015em]">
-                <span class="truncate">Register</span>
-            </a>
-            <a th:href="@{/login}" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-gray-700 text-white text-sm font-bold leading-normal tracking-[0.015em]">
-                <span class="truncate">Login</span>
-            </a>
+        <button id="mobile-menu-button" class="md:hidden text-white">
+            <i class="fas fa-bars fa-lg"></i>
+        </button>
+    </nav>
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="hidden md:hidden p-4 border-t border-white/10">
+        <a th:href="@{/#features}" class="block py-2 text-gray-300 hover:text-cyan-400">Features</a>
+        <a th:href="@{/whats-new}" class="block py-2 text-gray-300 hover:text-cyan-400">What's New</a>
+        <a th:href="@{/faq}" class="block py-2 text-gray-300 hover:text-cyan-400">FAQ</a>
+        <a th:href="@{/blog}" class="block py-2 text-gray-300 hover:text-cyan-400">Blog</a>
+        <div sec:authorize="!isAuthenticated()" class="mt-4 pt-4 border-t border-white/10 space-y-2">
+            <a th:href="@{/login}" class="block text-center w-full px-4 py-2 text-sm font-semibold rounded-lg text-white bg-white/10 hover:bg-white/20">Login</a>
+            <a th:href="@{/register}" class="block text-center w-full px-4 py-2 text-sm font-semibold rounded-lg text-black bg-cyan-400 hover:bg-cyan-300">Register</a>
+        </div>
+         <div sec:authorize="isAuthenticated()" class="mt-4 pt-4 border-t border-white/10 space-y-2">
+             <a th:href="@{/app}" class="block py-2 text-gray-300 hover:text-cyan-400">App</a>
+             <a th:href="@{/suggestions}" class="block py-2 text-gray-300 hover:text-cyan-400">Suggestions</a>
+             <a sec:authorize="hasAuthority('ROLE_ADMIN')" th:href="@{/admin}" class="block py-2 text-gray-300 hover:text-cyan-400">Admin Panel</a>
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="block text-center w-full px-4 py-2 text-sm font-semibold rounded-lg text-white bg-white/10 hover:bg-white/20">Logout</button>
+            </form>
         </div>
     </div>
 </header>
-
 </body>
 </html>
