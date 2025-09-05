@@ -1,5 +1,6 @@
 package com.tdtsqlscan.web.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -17,6 +18,7 @@ public class Suggestion {
     private Long id;
 
     @Lob
+    @Column(columnDefinition = "TEXT")
     private String text;
 
     @ManyToOne
