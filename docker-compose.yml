@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  app:
+    container_name: tdt-scan-app
+    image: tdt-sql-scan:staging
+    ports:
+      - "8080:8080"
+    environment:
+      # Spring Boot usará estas variables. Docker Compose las rellenará:
+      # 1. Desde el entorno del host (servidor de producción).
+      # 2. Si no existen en el host, desde el fichero .env en la misma carpeta.
+      - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
+      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
+      - SPRING_MAIL_HOST=${SPRING_MAIL_HOST}
+      - SPRING_MAIL_PORT=${SPRING_MAIL_PORT}
+      - SPRING_MAIL_USERNAME=${SPRING_MAIL_USERNAME}
+      - SPRING_MAIL_PASSWORD=${SPRING_MAIL_PASSWORD}
+      - SPRING_MAIL_FROM=${SPRING_MAIL_FROM}
