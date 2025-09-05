@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" class="dark">
 <head>
-    <title>The App | Data Flow Visualizer</title>
+    <title>Data Flow Visualizer</title>
     <link rel="icon" type="image/png" th:href="@{/main-images/icon_full_200x200.png}" />
     <meta name="description" content="The application part of Data Flow Visualizer, a tool to visualize complex data flows from Teradata BTEQ scripts. Upload your files and see the magic." />
     <meta name="_csrf" th:content="${_csrf.token}"/>
@@ -49,7 +49,7 @@
 <div id="myModal" class="modal"><div class="modal-content"><span class="close">&times;</span><pre id="modal-text"></pre></div></div>
 <div id="context-menu">
     <a href="#" id="show-schema">Show schema</a>
-    <a href="#" id="visualize-query">Visualizar Consulta</a>
+    <a href="#" id="visualize-query">Visualize Query</a>
     <a href="#" id="view-text">View Text</a>
     <a href="#" id="copy-code">Copy Code</a>
 </div>
