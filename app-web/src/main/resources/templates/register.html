@@ -2,7 +2,9 @@
 <html xmlns:th="http://www.thymeleaf.org" class="dark">
 <head>
     <title>Register</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <th:block th:if="${#strings.equals(#strings.arrayJoin(environment.getActiveProfiles(), ','), '')}">
+        <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    </th:block>
     <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
 </head>
 <body>

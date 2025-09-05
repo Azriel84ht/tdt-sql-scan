@@ -4,7 +4,9 @@
     <title>FAQ | Data Flow Visualizer</title>
     <meta name="description" content="Frequently Asked Questions about the Data Flow Visualizer tool." />
     <meta name="keywords" content="FAQ, Data Flow Visualizer, Teradata, BTEQ, SQL, ETL, Data Lineage, Support, Help" />
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <th:block th:if="${#strings.equals(#strings.arrayJoin(environment.getActiveProfiles(), ','), '')}">
+        <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    </th:block>
     <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
     <link

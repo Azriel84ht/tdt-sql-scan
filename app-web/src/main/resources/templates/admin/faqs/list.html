@@ -2,7 +2,9 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Admin - FAQ Management</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <th:block th:if="${#strings.equals(#strings.arrayJoin(environment.getActiveProfiles(), ','), '')}">
+        <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    </th:block>
     <script>
         tailwind.config = {
             darkMode: 'class',

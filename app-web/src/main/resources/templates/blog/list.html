@@ -3,7 +3,9 @@
 <head>
     <title>Blog | Data Flow Visualizer</title>
     <meta name="description" content="Articles and updates on data engineering, Business Intelligence, Teradata, and the evolution of the Data Flow Visualizer tool." />
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <th:block th:if="${#strings.equals(#strings.arrayJoin(environment.getActiveProfiles(), ','), '')}">
+        <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    </th:block>
     <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
     <link
