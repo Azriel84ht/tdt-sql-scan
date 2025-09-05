@@ -1,58 +1,98 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en" class="dark" xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Manage Homepage</title>
-    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a;
+            color: #e5e7eb;
+        }
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+        .glassmorphism {
+            background: rgba(16, 16, 16, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .input-field {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s;
+        }
+        .input-field:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #21bded;
+            box-shadow: 0 0 0 2px rgba(33, 189, 237, 0.5);
+            outline: none;
+        }
+    </style>
 </head>
-<body class="bg-white dark:bg-gray-900">
+<body class="antialiased">
+    <div id="particles-js"></div>
+
     <div th:replace="~{fragments/header :: header}"></div>
-    <div class="admin-wrapper">
-        <nav class="sidebar">
-            <h2>Admin Panel</h2>
-            <ul>
-                <li><a th:href="@{/admin}">Dashboard</a></li>
-                <li><a th:href="@{/admin/content}" class="active">Manage Homepage</a></li>
-                <li><a th:href="@{/admin/users}">User Management</a></li>
-                <li><a th:href="@{/admin/suggestions}">View Suggestions</a></li>
-                <li><a th:href="@{/admin/posts}">Blog Management</a></li>
-                <li><a th:href="@{/admin/faqs}">FAQ Management</a></li>
-                <li><a th:href="@{/admin/whats-new}">What's New Management</a></li>
-                <li><a th:href="@{/app}">Back to App</a></li>
-            </ul>
-        </nav>
-        <main class="main-content">
-            <h1>Manage Homepage Content</h1>
 
-            <div th:if="${message}" class="alert-success" th:text="${message}"></div>
+    <div class="flex" style="padding-top: 80px;">
+        <div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
 
-            <form th:action="@{/admin/content}" th:object="${content}" method="post">
-                <input type="hidden" th:field="*{id}" />
-                <div class="form-group">
-                    <label for="heroTitle">Hero Title</label>
-                    <input type="text" id="heroTitle" th:field="*{heroTitle}" />
-                </div>
-                <div class="form-group">
-                    <label for="heroSubtitle">Hero Subtitle</label>
-                    <textarea id="heroSubtitle" th:field="*{heroSubtitle}"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="newsSection">News Section (HTML allowed)</label>
-                    <textarea id="newsSection" th:field="*{newsSection}"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="popupMessage">Popup Message</label>
-                    <input type="text" id="popupMessage" th:field="*{popupMessage}" />
-                </div>
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" th:field="*{showPopup}" />
-                        Show Popup on Homepage
-                    </label>
-                </div>
-                <button type="submit" class="btn-primary">Save Content</button>
-            </form>
+        <main class="flex-1 p-8">
+            <div class="glassmorphism rounded-2xl p-6">
+                <h1 class="text-3xl font-bold text-white mb-6">Manage Homepage Content</h1>
+
+                <div th:if="${message}" class="bg-green-500/20 text-green-300 p-3 rounded-lg mb-4" th:text="${message}"></div>
+
+                <form th:action="@{/admin/content}" th:object="${content}" method="post" class="space-y-6">
+                    <input type="hidden" th:field="*{id}" />
+                    <div>
+                        <label for="heroTitle" class="block text-sm font-medium text-gray-300 mb-1">Hero Title</label>
+                        <input type="text" id="heroTitle" th:field="*{heroTitle}" class="input-field" />
+                    </div>
+                    <div>
+                        <label for="heroSubtitle" class="block text-sm font-medium text-gray-300 mb-1">Hero Subtitle</label>
+                        <textarea id="heroSubtitle" th:field="*{heroSubtitle}" rows="3" class="input-field"></textarea>
+                    </div>
+                    <div>
+                        <label for="newsSection" class="block text-sm font-medium text-gray-300 mb-1">News Section (HTML allowed)</label>
+                        <textarea id="newsSection" th:field="*{newsSection}" rows="6" class="input-field"></textarea>
+                    </div>
+                    <div>
+                        <label for="popupMessage" class="block text-sm font-medium text-gray-300 mb-1">Popup Message</label>
+                        <input type="text" id="popupMessage" th:field="*{popupMessage}" class="input-field" />
+                    </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="showPopup" th:field="*{showPopup}" class="h-4 w-4 rounded border-gray-600 bg-gray-700 text-cyan-500 focus:ring-cyan-600" />
+                        <label for="showPopup" class="ml-2 block text-sm text-gray-300">Show Popup on Homepage</label>
+                    </div>
+                    <div>
+                        <button type="submit" class="px-6 py-2 font-semibold rounded-lg text-black bg-cyan-400 hover:bg-cyan-300 transition-all duration-300">Save Content</button>
+                    </div>
+                </form>
+            </div>
         </main>
     </div>
-    <script th:src="@{/js/theme.js}"></script>
+
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        particlesJS('particles-js', {
+            "particles": { "number": { "value": 50, "density": { "enable": true, "value_area": 800 } }, "color": { "value": "#ffffff" }, "shape": { "type": "circle", }, "opacity": { "value": 0.2, "random": true, }, "size": { "value": 3, "random": true, }, "line_linked": { "enable": true, "distance": 150, "color": "#ffffff", "opacity": 0.1, "width": 1 }, "move": { "enable": true, "speed": 1, "direction": "none", "random": false, "straight": false, "out_mode": "out", "bounce": false, } }, "interactivity": { "detect_on": "canvas", "events": { "onhover": { "enable": true, "mode": "repulse" }, "onclick": { "enable": false }, "resize": true }, "modes": { "repulse": { "distance": 100, "duration": 0.4 } } }, "retina_detect": true
+        });
+    </script>
 </body>
 </html>

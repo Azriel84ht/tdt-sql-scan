@@ -1,8 +1,12 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" class="dark">
+<html lang="en" class="dark" xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Manage What's New</title>
-    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script th:src="@{'https://cdn.tiny.cloud/1/' + ${tinymceApiKey} + '/tinymce/6/tinymce.min.js'}" referrerpolicy="origin"></script>
     <script th:inline="javascript">
         document.addEventListener('DOMContentLoaded', () => {
@@ -23,38 +27,77 @@
             });
         });
     </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a;
+            color: #e5e7eb;
+        }
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+        .glassmorphism {
+            background: rgba(16, 16, 16, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .input-field {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s;
+        }
+        .input-field:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #21bded;
+            box-shadow: 0 0 0 2px rgba(33, 189, 237, 0.5);
+            outline: none;
+        }
+    </style>
 </head>
-<body class="bg-gray-900">
-<div th:replace="~{fragments/header :: header}"></div>
-<div class="admin-wrapper">
-    <nav class="sidebar">
-        <h2>Admin Panel</h2>
-        <ul>
-            <li><a th:href="@{/admin}">Dashboard</a></li>
-            <li><a th:href="@{/admin/content}">Manage Homepage</a></li>
-            <li><a th:href="@{/admin/users}">User Management</a></li>
-            <li><a th:href="@{/admin/suggestions}">View Suggestions</a></li>
-            <li><a th:href="@{/admin/posts}">Blog Management</a></li>
-            <li><a th:href="@{/admin/faqs}">FAQ Management</a></li>
-            <li><a th:href="@{/admin/whats-new}" class="active">What's New Management</a></li>
-            <li><a th:href="@{/app}">Back to App</a></li>
-        </ul>
-    </nav>
-    <main class="main-content">
-        <h1 th:text="${whatsnew.id == null} ? 'Create New What\'s New' : 'Edit What\'s New'">Manage What's New</h1>
-        <form th:object="${whatsnew}" th:action="${whatsnew.id == null} ? @{/admin/whats-new} : @{/admin/whats-new/edit/{id}(id=${whatsnew.id})}" method="post">
-            <div class="form-group">
-                <label for="title">Title</label>
-                <input type="text" id="title" th:field="*{title}" class="form-control" required>
+<body class="antialiased">
+    <div id="particles-js"></div>
+
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <div class="flex" style="padding-top: 80px;">
+        <div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
+
+        <main class="flex-1 p-8">
+            <div class="glassmorphism rounded-2xl p-6">
+                <h1 class="text-3xl font-bold text-white mb-6" th:text="${whatsnew.id == null} ? 'Create New What\'s New' : 'Edit What\'s New'">Manage What's New</h1>
+                <form th:object="${whatsnew}" th:action="${whatsnew.id == null} ? @{/admin/whats-new} : @{/admin/whats-new/edit/{id}(id=${whatsnew.id})}" method="post" class="space-y-6">
+                    <div>
+                        <label for="title" class="block text-sm font-medium text-gray-300 mb-1">Title</label>
+                        <input type="text" id="title" th:field="*{title}" class="input-field" required>
+                    </div>
+                    <div>
+                        <label for="content-editor" class="block text-sm font-medium text-gray-300 mb-1">Content</label>
+                        <textarea id="content-editor" th:field="*{content}"></textarea>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button type="submit" class="px-6 py-2 font-semibold rounded-lg text-black bg-cyan-400 hover:bg-cyan-300 transition-all duration-300">Save What's New</button>
+                        <a th:href="@{/admin/whats-new}" class="px-6 py-2 font-semibold rounded-lg text-white bg-gray-600/50 hover:bg-gray-600/80 transition-all duration-300">Cancel</a>
+                    </div>
+                </form>
             </div>
-            <div class="form-group">
-                <label for="content-editor">Content</label>
-                <textarea id="content-editor" th:field="*{content}" class="form-control"></textarea>
-            </div>
-            <button type="submit" class="btn btn-primary">Save What's New</button>
-            <a th:href="@{/admin/whats-new}" class="btn btn-secondary">Cancel</a>
-        </form>
-    </main>
-</div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        particlesJS('particles-js', {
+            "particles": { "number": { "value": 50, "density": { "enable": true, "value_area": 800 } }, "color": { "value": "#ffffff" }, "shape": { "type": "circle", }, "opacity": { "value": 0.2, "random": true, }, "size": { "value": 3, "random": true, }, "line_linked": { "enable": true, "distance": 150, "color": "#ffffff", "opacity": 0.1, "width": 1 }, "move": { "enable": true, "speed": 1, "direction": "none", "random": false, "straight": false, "out_mode": "out", "bounce": false, } }, "interactivity": { "detect_on": "canvas", "events": { "onhover": { "enable": true, "mode": "repulse" }, "onclick": { "enable": false }, "resize": true }, "modes": { "repulse": { "distance": 100, "duration": 0.4 } } }, "retina_detect": true
+        });
+    </script>
 </body>
 </html>

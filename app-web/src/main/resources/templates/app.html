@@ -7,40 +7,74 @@
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
     <style>
-        .navigation-controls { padding: 10px; background-color: #1f2937; border-bottom: 1px solid #4b5563; display: flex; align-items: center; gap: 10px; }
-        .navigation-controls button { padding: 5px 10px; border: 1px solid #4b5563; background-color: #374151; color: #d1d5db; cursor: pointer; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a;
+            color: #e5e7eb;
+        }
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+        .glassmorphism {
+            background: rgba(16, 16, 16, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .navigation-controls { padding: 10px; display: flex; align-items: center; gap: 10px; }
+        .navigation-controls button {
+             padding: 8px 16px;
+             font-size: 0.875rem;
+             font-weight: 600;
+             border-radius: 0.5rem;
+             color: white;
+             background-color: rgba(255, 255, 255, 0.1);
+             transition: background-color 0.3s;
+        }
+        .navigation-controls button:hover:not(:disabled) {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
         .navigation-controls button:disabled { cursor: not-allowed; opacity: 0.5; }
         #current-view-title { font-weight: bold; }
     </style>
 </head>
-<body class="dark:bg-gray-900">
+<body class="antialiased">
+<div id="particles-js"></div>
 <div class="flex flex-col h-screen">
     <div th:replace="~{fragments/header :: header}"></div>
-    <div id="flow-container" class="flex flex-row flex-grow overflow-hidden">
+    <div id="flow-container" class="flex flex-row flex-grow overflow-hidden pt-24">
         <div id="flow-main" class="flex-grow flex flex-col">
-            <div id="navigation-controls" class="navigation-controls">
+            <div id="navigation-controls" class="navigation-controls glassmorphism mx-4 mb-4 rounded-lg">
                 <button id="load-scripts-button">Load Scripts</button>
                 <button id="home-button" disabled>Home</button>
                 <button id="back-button" disabled>Back</button>
                 <span id="current-view-title">Chain Flow</span>
             </div>
-            <div id="graph-area" class="flex-grow relative">
+            <div id="graph-area" class="flex-grow relative mx-4 mb-4 glassmorphism rounded-lg">
                 <div id="chain-flow" class="tabcontent" style="display: block;">
-                    <div id="chain-flow-network">
+                    <div id="chain-flow-network" class="h-full">
                         <div id="graph-placeholder" class="flex flex-col items-center justify-center h-full text-gray-400">
                             <svg class="w-24 h-24 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
                             <h3 class="text-2xl font-bold mb-2">Visualize Your Data Flow</h3>
                             <p class="mb-4">Click the button below to load your scripts and generate an interactive graph.</p>
-                            <button id="placeholder-load-button" class="cta-button bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">Load Scripts</button>
+                            <button id="placeholder-load-button" class="px-4 py-2 text-sm font-semibold rounded-lg text-black bg-cyan-400 hover:bg-cyan-300 transition-colors">Load Scripts</button>
                         </div>
                     </div>
                 </div>
                 <div id="bteq-flow-container" class="tabcontent"></div>
             </div>
         </div>
-        <div id="metadata-sidebar" class="w-1/4 p-4 border-l border-gray-700 bg-gray-800 overflow-y-auto">
+        <div id="metadata-sidebar" class="w-1/4 p-4 border-l border-gray-700 glassmorphism rounded-lg mr-4 mb-4 overflow-y-auto">
             <h2 class="text-lg font-bold mb-4">Metadata</h2>
             <table id="metadata-table" class="w-full text-sm"></table>
         </div>
@@ -54,7 +88,7 @@
     <a href="#" id="copy-code">Copy Code</a>
 </div>
 <div id="upload-modal" class="modal">
-    <div class="modal-content">
+    <div class="modal-content glassmorphism">
         <span class="close-upload-modal">&times;</span>
         <div id="upload-container">
             <div id="drop-zone" class="drop-zone">
@@ -65,13 +99,18 @@
                 <h3>Selected Files:</h3>
                 <form id="file-order-form">
                     <ul id="file-list"></ul>
-                    <button type="submit">Upload and Visualize</button>
+                    <button type="submit" class="px-4 py-2 text-sm font-semibold rounded-lg text-black bg-cyan-400 hover:bg-cyan-300 transition-colors">Upload and Visualize</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+<script>
+    particlesJS('particles-js', {
+        "particles": { "number": { "value": 50, "density": { "enable": true, "value_area": 800 } }, "color": { "value": "#ffffff" }, "shape": { "type": "circle", }, "opacity": { "value": 0.2, "random": true, }, "size": { "value": 3, "random": true, }, "line_linked": { "enable": true, "distance": 150, "color": "#ffffff", "opacity": 0.1, "width": 1 }, "move": { "enable": true, "speed": 1, "direction": "none", "random": false, "straight": false, "out_mode": "out", "bounce": false, } }, "interactivity": { "detect_on": "canvas", "events": { "onhover": { "enable": true, "mode": "repulse" }, "onclick": { "enable": false }, "resize": true }, "modes": { "repulse": { "distance": 100, "duration": 0.4 } } }, "retina_detect": true
+    });
+</script>
 <script type="text/javascript" th:src="@{/js/app.js}"></script>
-<script th:src="@{/js/theme.js}"></script>
 </body>
 </html>
