@@ -57,21 +57,22 @@
     <!-- Header -->
     <header id="main-header" class="glassmorphism fixed top-4 left-1/2 -translate-x-1/2 w-[95%] max-w-6xl mx-auto rounded-2xl z-50 transition-all duration-300">
         <nav class="flex items-center justify-between p-4">
-            <a href="#" class="flex items-center space-x-2">
+            <a href="/" class="flex items-center space-x-2">
                 <svg class="h-8 w-8 text-cyan-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1.5-1.5m1.5 1.5l1.5-1.5m3.75-3l-1.5-1.5m1.5 1.5l1.5-1.5m-7.5 3h7.5m-1.5-1.5l-1.5 1.5m1.5-1.5l1.5 1.5M6 6.75h.008v.008H6V6.75z" />
                 </svg>
                 <span class="text-xl font-bold text-white">Data Flow Visualizer</span>
             </a>
-            <div class="hidden md:flex items-center space-x-6 text-sm font-medium">
-                <a href="#features" class="text-gray-300 hover:text-cyan-400 transition-colors">Features</a>
-                <a href="#news" class="text-gray-300 hover:text-cyan-400 transition-colors">News</a>
-                <a href="#faq" class="text-gray-300 hover:text-cyan-400 transition-colors">FAQ</a>
-                <a href="#" class="text-gray-300 hover:text-cyan-400 transition-colors">Blog</a>
+
+            <div class="hidden md:flex items-center space-x-6 text-sm font-medium mx-auto">
+                <a href="/blog" class="text-gray-300 hover:text-cyan-400 transition-colors">Blog</a>
+                <a href="/faq" class="text-gray-300 hover:text-cyan-400 transition-colors">FAQ</a>
+                <a href="/whats-new" class="text-gray-300 hover:text-cyan-400 transition-colors">What's New</a>
             </div>
+
             <div class="hidden md:flex items-center space-x-3">
-                <a href="#" class="px-4 py-2 text-sm font-semibold rounded-lg text-white hover:bg-white/10 transition-colors">Login</a>
-                <a href="#" class="px-4 py-2 text-sm font-semibold rounded-lg text-black bg-cyan-400 hover:bg-cyan-300 transition-colors">Sign Up</a>
+                <a href="/login" class="px-4 py-2 text-sm font-semibold rounded-lg text-white hover:bg-white/10 transition-colors">Login</a>
+                <a href="/register" class="px-4 py-2 text-sm font-semibold rounded-lg text-black bg-cyan-400 hover:bg-cyan-300 transition-colors">Sign Up</a>
             </div>
             <button id="mobile-menu-button" class="md:hidden text-white">
                 <i class="fas fa-bars fa-lg"></i>
@@ -79,13 +80,12 @@
         </nav>
         <!-- Mobile Menu -->
         <div id="mobile-menu" class="hidden md:hidden p-4 border-t border-white/10">
-            <a href="#features" class="block py-2 text-gray-300 hover:text-cyan-400">Features</a>
-            <a href="#news" class="block py-2 text-gray-300 hover:text-cyan-400">News</a>
-            <a href="#faq" class="block py-2 text-gray-300 hover:text-cyan-400">FAQ</a>
-            <a href="#" class="block py-2 text-gray-300 hover:text-cyan-400">Blog</a>
+            <a href="/blog" class="block py-2 text-gray-300 hover:text-cyan-400">Blog</a>
+            <a href="/faq" class="block py-2 text-gray-300 hover:text-cyan-400">FAQ</a>
+            <a href="/whats-new" class="block py-2 text-gray-300 hover:text-cyan-400">What's New</a>
             <div class="mt-4 pt-4 border-t border-white/10 space-y-2">
-                <a href="#" class="block text-center w-full px-4 py-2 text-sm font-semibold rounded-lg text-white bg-white/10 hover:bg-white/20">Login</a>
-                <a href="#" class="block text-center w-full px-4 py-2 text-sm font-semibold rounded-lg text-black bg-cyan-400 hover:bg-cyan-300">Sign Up</a>
+                <a href="/login" class="block text-center w-full px-4 py-2 text-sm font-semibold rounded-lg text-white bg-white/10 hover:bg-white/20">Login</a>
+                <a href="/register" class="block text-center w-full px-4 py-2 text-sm font-semibold rounded-lg text-black bg-cyan-400 hover:bg-cyan-300">Sign Up</a>
             </div>
         </div>
     </header>
