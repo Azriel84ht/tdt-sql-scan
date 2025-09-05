@@ -1,227 +1,202 @@
 <html xmlns:th="http://www.thymeleaf.org">
-  <head>
-    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
-    <link
-      rel="stylesheet"
-      as="style"
-      onload="this.rel='stylesheet'"
-      href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900"
-    />
 
-    <title>Data Flow Visualizer | Teradata BTEQ & ETL Lineage Tool</title>
-    <link rel="icon" type="image/png" th:href="@{/main-images/icon_full_200x200.png}" />
-    <meta name="description" content="Visualize complex Teradata BTEQ scripts instantly. Our tool transforms convoluted SQL into clear, interactive data flow diagrams to untangle your ETL processes." />
-    <meta name="keywords" content="Data Flow, Visualizer, Teradata, BTEQ, SQL, ETL, Data Lineage, Stitch Design" />
+<head>
+<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
+<link
+rel="stylesheet"
+as="style"
+onload="this.rel='stylesheet'"
+href="https://www.google.com/search?q=https://fonts.googleapis.com/css2%3Fdisplay%3Dswap%26family%3DInter%253Awght%2540400%253B500%253B700%253B900%26family%3DNoto%2BSans%253Awght%2540400%253B500%253B700%253B900"
+/>
+<title>Data Flow Visualizer | Teradata BTEQ & ETL Lineage Tool</title>
+<link rel="icon" type="image/png" th:href="@{/main-images/icon_full_200x200.png}" />
+<meta name="description" content="Visualize complex Teradata BTEQ scripts instantly. Our tool transforms convoluted SQL into clear, interactive data flow diagrams to untangle your ETL processes." />
+<meta name="keywords" content="Data Flow, Visualizer, Teradata, BTEQ, SQL, ETL, Data Lineage, Stitch Design" />
+<script>
+tailwind.config = {
+darkMode: 'class',
+}
+</script>
+<link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
+<style>
+.popup-overlay {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background-color: rgba(0, 0, 0, 0.5);
+backdrop-filter: blur(5px);
+-webkit-backdrop-filter: blur(5px);
+display: flex;
+justify-content: center;
+align-items: center;
+z-index: 1000;
+}
+.popup-content {
+background: rgba(40, 40, 40, 0.65);
+backdrop-filter: blur(10px);
+-webkit-backdrop-filter: blur(10px);
+border-radius: 16px;
+border: 1px solid rgba(255, 255, 255, 0.2);
+box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+color: #e5e7eb;
+max-width: 500px;
+width: 90%;
+position: relative;
+padding: 0;
+display: flex;
+flex-direction: column;
+}
+.popup-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 10px 20px;
+border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+.popup-title {
+display: flex;
+align-items: center;
+font-weight: bold;
+}
+.alert-icon {
+color: #ffc107;
+font-size: 24px;
+margin-right: 10px;
+}
+.popup-body {
+padding: 20px;
+text-align: left;
+}
+.popup-footer {
+padding: 15px 20px;
+text-align: center;
+}
+.popup-ok-button {
+background-color: #007bff;
+color: white;
+padding: 10px 30px;
+border: none;
+border-radius: 5px;
+cursor: pointer;
+font-size: 1rem;
+}
+.popup-ok-button:hover {
+background-color: #0056b3;
+}
+.popup-close {
+cursor: pointer;
+font-size: 24px;
+color: #9ca3af;
+background: none;
+border: none;
+transition: color 0.2s ease-in-out;
+}
+.popup-close:hover {
+color: #ffffff;
+}
+</style>
+</head>
+<body>
+<div th:if="${content.showPopup}" id="popup-overlay" class="popup-overlay"\>
+\
 
-    <th:block th:if="${#strings.equals(#strings.arrayJoin(environment.getActiveProfiles(), ','), '')}">
-        <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    </th:block>
-    <script>
-      tailwind.config = {
-        darkMode: 'class',
-      }
-    </script>
-    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
-    <style>
-      .popup-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5); /* Fondo oscurecido */
-        backdrop-filter: blur(5px); /* Desenfoque del fondo */
-        -webkit-backdrop-filter: blur(5px); /* Compatibilidad con Safari */
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-      }
-      .popup-content {
-        /* Estilo Glassmorphism */
-        background: rgba(40, 40, 40, 0.65);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border-radius: 16px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        color: #e5e7eb;
-        max-width: 500px;
-        width: 90%;
-        position: relative;
-        /* Remove padding to allow header/footer to span full width */
-        padding: 0;
-        display: flex;
-        flex-direction: column;
-      }
-      .popup-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px 20px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-      }
-      .popup-title {
-        display: flex;
-        align-items: center;
-        font-weight: bold;
-      }
-      .alert-icon {
-        color: #ffc107; /* Yellow */
-        font-size: 24px;
-        margin-right: 10px;
-      }
-      .popup-body {
-        padding: 20px;
-        text-align: left;
-      }
-      .popup-footer {
-        padding: 15px 20px;
-        text-align: center;
-      }
-      .popup-ok-button {
-        background-color: #007bff;
-        color: white;
-        padding: 10px 30px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 1rem;
-      }
-      .popup-ok-button:hover {
-        background-color: #0056b3;
-      }
-      .popup-close {
-        cursor: pointer;
-        font-size: 24px;
-        color: #9ca3af;
-        background: none;
-        border: none;
-        transition: color 0.2s ease-in-out;
-        /* Remove absolute positioning */
-      }
-      .popup-close:hover {
-        color: #ffffff;
-      }
-    </style>
-  </head>
-  <body>
-    <div th:if="${content.showPopup}" id="popup-overlay" class="popup-overlay">
-        <div class="popup-content">
-            <div class="popup-header">
-                <div class="popup-title">
-                    <!-- Placeholder for yellow alert icon -->
-                    <span class="alert-icon">&#9888;</span>
-                    <span>ATTENTION</span>
-                </div>
-                <span id="popup-close" class="popup-close">&times;</span>
-            </div>
-            <div class="popup-body">
-                <p th:text="${content.popupMessage}"></p>
-            </div>
-            <div class="popup-footer">
-                <button id="popup-ok" class="popup-ok-button">OK</button>
-            </div>
-        </div>
-    </div>
+\
+\
+\&\#9888;\ \ \ \\×\ \ \
+\
+{content.popupMessage}"></p> </div> <div class="popup-footer"> <button id="popup-ok" class="popup-ok-button">OK</button> </div> </div> </div>
+<div class="relative flex size-full min-h-screen flex-col group/design-root overflow-x-hidden" style='font-family: Inter, "Noto Sans", sans-serif;'>
+<div class="layout-container flex h-full grow flex-col">
+<div th:replace="~{fragments/header :: header}"></div>
+<main class="flex-grow">
+<section class="hero-section relative text-white text-center py-20 px-4">
+<div class="relative z-10">
+<h1 class="text-5xl font-black tracking-tighter mb-4" th:text="${content.heroTitle}"\>Untangle Your Teradata BTEQ Scripts\
+\{content.heroSubtitle}">Transform complex Teradata BTEQ scripts into interactive data flow diagrams with Data Flow Visualizer. Visualize your data's journey, understand dependencies, and optimize your processes effortlessly.</p>
+<a th:href="@{/register}" class="cta-button bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-full transition duration-300 ease-in-out">Get Started for Free</a>
+</div>
+</section>
 
-    <div class="relative flex size-full min-h-screen flex-col group/design-root overflow-x-hidden" style='font-family: Inter, "Noto Sans", sans-serif;'>
-      <div class="layout-container flex h-full grow flex-col">
-        <div th:replace="~{fragments/header :: header}"></div>
-        <main class="flex-grow">
-          <!-- Hero Section -->
-          <section class="hero-section relative text-white text-center py-20 px-4">
-            <div class="relative z-10">
-              <h1 class="text-5xl font-black tracking-tighter mb-4" th:text="${content.heroTitle}">Untangle Your Teradata BTEQ Scripts</h1>
-              <p class="text-lg max-w-3xl mx-auto mb-8" th:utext="${content.heroSubtitle}">Transform complex Teradata BTEQ scripts into interactive data flow diagrams with Data Flow Visualizer. Visualize your data's journey, understand dependencies, and optimize your processes effortlessly.</p>
-              <a th:href="@{/register}" class="cta-button bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-full transition duration-300 ease-in-out">Get Started for Free</a>
-            </div>
-          </section>
+     <section class="features-section py-20 px-4">
+       <div class="max-w-7xl mx-auto">
+         <h2 class="text-4xl font-bold text-center text-white mb-12">Main Features</h2>
+         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+           <div class="feature-card">
+             <h3 class="text-2xl font-bold mb-4">Interactive Visualization</h3>
+             <p>Engage with your data lineage through a dynamic and interactive graph. Zoom, pan, and click on nodes to explore dependencies.</p>
+           </div>
+           <div class="feature-card">
+             <h3 class="text-2xl font-bold mb-4">Effortless Script Parsing</h3>
+             <p>Our intelligent parser automatically analyzes your Teradata BTEQ scripts, saving you hours of manual work.</p>
+           </div>
+           <div class="feature-card">
+             <h3 class="text-2xl font-bold mb-4">Export and Share</h3>
+             <p>Export your data flow diagrams as images or JSON to share with your team and stakeholders, improving collaboration.</p>
+           </div>
+         </div>
+       </div>
+     </section>
 
-          <!-- Features Section -->
-          <section class="features-section py-20 px-4">
-            <div class="max-w-7xl mx-auto">
-              <h2 class="text-4xl font-bold text-center text-white mb-12">Main Features</h2>
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- Feature Card 1 -->
-                <div class="feature-card">
-                  <h3 class="text-2xl font-bold mb-4">Interactive Visualization</h3>
-                  <p>Engage with your data lineage through a dynamic and interactive graph. Zoom, pan, and click on nodes to explore dependencies.</p>
-                </div>
-                <!-- Feature Card 2 -->
-                <div class="feature-card">
-                  <h3 class="text-2xl font-bold mb-4">Effortless Script Parsing</h3>
-                  <p>Our intelligent parser automatically analyzes your Teradata BTEQ scripts, saving you hours of manual work.</p>
-                </div>
-                <!-- Feature Card 3 -->
-                <div class="feature-card">
-                  <h3 class="text-2xl font-bold mb-4">Export and Share</h3>
-                  <p>Export your data flow diagrams as images or JSON to share with your team and stakeholders, improving collaboration.</p>
-                </div>
-              </div>
-            </div>
-          </section>
+     <section class="how-it-works-section py-20 px-4">
+       <div class="max-w-7xl mx-auto text-center text-white">
+         <h2 class="text-4xl font-bold mb-12">How It Works</h2>
+         <div class="flex flex-col md:flex-row justify-center items-center gap-8">
+           <div class="step">
+             <div class="step-number">1</div>
+             <h3 class="text-xl font-bold mt-4">Upload Your Scripts</h3>
+             <p>Drag and drop your Teradata BTEQ files into the application.</p>
+           </div>
+           <div class="step-arrow">&rarr;</div>
+           <div class="step">
+             <div class="step-number">2</div>
+             <h3 class="text-xl font-bold mt-4">Visualize the Flow</h3>
+             <p>Watch as the application instantly generates a clear data flow diagram.</p>
+           </div>
+           <div class="step-arrow">&rarr;</div>
+           <div class="step">
+             <div class="step-number">3</div>
+             <h3 class="text-xl font-bold mt-4">Analyze and Optimize</h3>
+             <p>Explore the graph to understand dependencies and identify optimization opportunities.</p>
+           </div>
+         </div>
+       </div>
+     </section>
 
-          <!-- How It Works Section -->
-          <section class="how-it-works-section py-20 px-4">
-            <div class="max-w-7xl mx-auto text-center text-white">
-              <h2 class="text-4xl font-bold mb-12">How It Works</h2>
-              <div class="flex flex-col md:flex-row justify-center items-center gap-8">
-                <div class="step">
-                  <div class="step-number">1</div>
-                  <h3 class="text-xl font-bold mt-4">Upload Your Scripts</h3>
-                  <p>Drag and drop your Teradata BTEQ files into the application.</p>
-                </div>
-                <div class="step-arrow">&rarr;</div>
-                <div class="step">
-                  <div class="step-number">2</div>
-                  <h3 class="text-xl font-bold mt-4">Visualize the Flow</h3>
-                  <p>Watch as the application instantly generates a clear data flow diagram.</p>
-                </div>
-                <div class="step-arrow">&rarr;</div>
-                <div class="step">
-                  <div class="step-number">3</div>
-                  <h3 class="text-xl font-bold mt-4">Analyze and Optimize</h3>
-                  <p>Explore the graph to understand dependencies and identify optimization opportunities.</p>
-                </div>
-              </div>
-            </div>
-          </section>
+     <section class="news-section py-20 px-4">
+       <div class="max-w-7xl mx-auto">
+         <h2 class="text-4xl font-bold text-center text-white mb-12">News and Updates</h2>
+         <div class="news-content prose prose-invert max-w-none" th:utext="${content.newsSection}">
+         </div>
+       </div>
+     </section>
+   </main>
+   <div th:replace="~{fragments/footer :: footer}"></div>
+ </div>
+</div>
+<canvas class="background"></canvas>
+<script>
+const popupOverlay = document.getElementById('popup-overlay');
+const popupClose = document.getElementById('popup-close');
+const popupOk = document.getElementById('popup-ok');
 
-          <!-- News and Updates Section -->
-          <section class="news-section py-20 px-4">
-            <div class="max-w-7xl mx-auto">
-              <h2 class="text-4xl font-bold text-center text-white mb-12">News and Updates</h2>
-              <div class="news-content prose prose-invert max-w-none" th:utext="${content.newsSection}">
-                <!-- Dynamic content will be injected here -->
-              </div>
-            </div>
-          </section>
-        </main>
-        <div th:replace="~{fragments/footer :: footer}"></div>
-      </div>
-    </div>
-    <canvas class="background"></canvas>
-    <script>
-      const popupOverlay = document.getElementById('popup-overlay');
-      const popupClose = document.getElementById('popup-close');
-      const popupOk = document.getElementById('popup-ok');
+ const closePopup = () => {
+   if (popupOverlay) {
+     popupOverlay.style.display = 'none';
+   }
+ };
 
-      const closePopup = () => {
-        if (popupOverlay) {
-          popupOverlay.style.display = 'none';
-        }
-      };
+ if (popupClose) {
+   popupClose.addEventListener('click', closePopup);
+ }
 
-      if (popupClose) {
-        popupClose.addEventListener('click', closePopup);
-      }
+ if (popupOk) {
+   popupOk.addEventListener('click', closePopup);
+ }
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/particlesjs/2.2.3/particles.min.js"></script>
+<script th:src="@{/js/particles-config.js}"></script>
+</body>
 
-      if (popupOk) {
-        popupOk.addEventListener('click', closePopup);
-      }
-    </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/particlesjs/2.2.3/particles.min.js"></script>
-    <script th:src="@{/js/particles-config.js}"></script>
-  </body>
 </html>

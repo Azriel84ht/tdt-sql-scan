@@ -1,11 +1,9 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" class="dark">
 <head>
-    <title>Login</title>
-    <th:block th:if="${#strings.equals(#strings.arrayJoin(environment.getActiveProfiles(), ','), '')}">
-        <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    </th:block>
-    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
+<title>Login</title>
+<link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
+
 </head>
 <body>
     <div th:replace="~{fragments/header :: header}"></div>

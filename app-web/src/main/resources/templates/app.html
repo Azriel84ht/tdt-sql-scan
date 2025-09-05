@@ -8,9 +8,6 @@
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
-    <th:block th:if="${#strings.equals(#strings.arrayJoin(environment.getActiveProfiles(), ','), '')}">
-        <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    </th:block>
     <script>
       tailwind.config = {
         darkMode: 'class',
