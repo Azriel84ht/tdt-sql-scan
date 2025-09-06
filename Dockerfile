@@ -1,6 +1,6 @@
 # --- Fase de Construcción (Build Stage) ---
-# Usamos una imagen oficial de Maven con Java 8 para compilar el proyecto.
-FROM maven:3.8-openjdk-8 AS build
+# Usamos una imagen oficial de Maven con Java 21 para compilar el proyecto.
+FROM maven:3.8.7-eclipse-temurin-21 AS build
 
 # Establecemos el directorio de trabajo dentro del contenedor
 WORKDIR /app
@@ -14,8 +14,8 @@ RUN ["mvn", "clean", "package", "-DskipTests"]
 
 
 # --- Fase de Ejecución (Run Stage) ---
-# Usamos una imagen ligera de Java 8 para ejecutar la aplicación
-FROM openjdk:8-jre-slim
+# Usamos una imagen ligera de Java 21 para ejecutar la aplicación
+FROM openjdk:21-jre-slim
 
 # Establecemos el directorio de trabajo
 WORKDIR /app
