@@ -192,8 +192,8 @@ input[type=submit]:hover {
     border: 1px solid #374151;
 }
 #flow-container { display: flex; flex-direction: row; flex-grow: 1; }
-#flow-main { width: 75%; display: flex; flex-direction: column; }
-#metadata-sidebar { width: 25%; padding-left: 20px; border-left: 1px solid #374151; background-color: #111827; overflow-y: auto; }
+#flow-main { width: 80%; display: flex; flex-direction: column; }
+#metadata-sidebar { width: 20%; padding-left: 20px; border-left: 1px solid #374151; background-color: #111827; overflow-y: auto; }
 #metadata-table { width: 100%; border-collapse: collapse; }
 #metadata-table th, #metadata-table td { border: 1px solid #4b5563; padding: 8px; text-align: left; }
 #metadata-table th { background-color: #374151; }
