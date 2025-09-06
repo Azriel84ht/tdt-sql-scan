@@ -87,8 +87,12 @@ public class BteqScriptParser {
     }
 
     private SQLQuery parseSql(String sql) {
+        String processedSql = sql;
+        if (sql.toUpperCase().contains("WITH DATA")) {
+            processedSql = sql.replaceAll("(?i)WITH DATA", "");
+        }
         try {
-            return sqlParser.parse(sql);
+            return sqlParser.parse(processedSql);
         } catch (Exception e) {
             // For now, just return null if parsing fails.
             // In a real application, we would want to log this.
