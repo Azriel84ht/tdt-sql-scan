@@ -5,8 +5,19 @@
 </head>
 <body>
 <div th:fragment="content">
+    <!-- Hero Section -->
+    <section class="text-center mb-24">
+        <div class="glassmorphism hero-glow rounded-3xl p-8 md:p-16">
+            <h1 class="text-4xl md:text-6xl font-black text-white leading-tight mb-4">
+                Frequently Asked Questions
+            </h1>
+            <p class="text-lg md:text-xl max-w-3xl mx-auto text-gray-300 mb-8">
+                Have questions? We've got answers. If you can't find what you're looking for, feel free to contact us.
+            </p>
+        </div>
+    </section>
+
     <section id="faq" class="max-w-3xl mx-auto">
-         <h2 class="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h2>
          <div class="space-y-4">
              <details class="glassmorphism rounded-xl p-6 faq-item" th:each="faq : ${faqs}">
                  <summary>
@@ -16,6 +27,9 @@
                  <p class="text-gray-400 mt-4" th:text="${faq.answer}"></p>
              </details>
          </div>
+         <div th:if="${faqs.isEmpty()}" class="text-center py-10 glassmorphism rounded-2xl mt-8">
+            <p class="text-gray-300 text-lg">No FAQs have been published yet. Check back soon!</p>
+        </div>
     </section>
 </div>
 </body>
