@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: html(view=~{::content})}">
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: html(view=~{::content}, mainClass=' ')}">
 <head>
     <title>Data Flow Visualizer - App</title>
     <meta name="_csrf" th:content="${_csrf.token}"/>
