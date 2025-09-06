@@ -2,16 +2,16 @@
 <html lang="en" class="dark" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/common-head :: head}">
 </head>
-<body class="antialiased">
+<body class="antialiased flex flex-col h-screen">
     <div id="particles-js"></div>
 
     <header th:replace="~{fragments/header :: header}"></header>
 
-    <main class="pt-32 pb-16 px-4 max-w-6xl mx-auto">
+    <main th:class="${mainClass ?: 'pt-32 pb-16 px-4 max-w-6xl mx-auto'}" th:classappend="' flex-grow'">
         <th:block th:replace="${view}"></th:block>
     </main>
 
-    <footer th:replace="~{fragments/footer :: footer}"></footer>
+    <footer th:replace="~{fragments/footer :: footer}" class="mt-auto"></footer>
 
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script>
