@@ -62,21 +62,6 @@
         </dependency>
         <dependency>
             <groupId>com.tdtsqlscan</groupId>
-            <artifactId>parser-etl</artifactId>
-            <version>0.4.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.tdtsqlscan</groupId>
-            <artifactId>parser-ddl</artifactId>
-            <version>0.4.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.tdtsqlscan</groupId>
-            <artifactId>parser-dml</artifactId>
-            <version>0.4.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.tdtsqlscan</groupId>
             <artifactId>graph</artifactId>
             <version>0.4.1</version>
         </dependency>
