@@ -1,6 +1,6 @@
 # --- Fase de Construcción (Build Stage) ---
-# Usamos una imagen oficial de Maven con OpenJDK 21.
-FROM maven:eclipse-temurin-21-noble AS build
+# Usamos una imagen de Maven con OpenJDK 21 del repositorio de csanchez.
+FROM csanchez/maven:eclipse-temurin-21-noble AS build
 
 # Establecemos el directorio de trabajo dentro del contenedor
 WORKDIR /app
