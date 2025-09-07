@@ -1,7 +1,9 @@
 # --- Frontend build stage ---
 FROM maven:3.9.6-eclipse-temurin-21 AS frontend
 RUN apt-get update -y && \
-    apt-get install -y nodejs npm
+    apt-get install -y curl gnupg && \
+    curl -sL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y nodejs
 WORKDIR /app
 COPY app-web/package.json ./
 RUN npm install
