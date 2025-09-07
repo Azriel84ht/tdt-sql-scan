@@ -4,7 +4,7 @@ import com.tdtsqlscan.core.SQLParserUtils;
 import com.tdtsqlscan.graph.Edge;
 import com.tdtsqlscan.graph.Graph;
 import com.tdtsqlscan.graph.Node;
-import com.tdtsqlscan.select.SelectQuery;
+import com.tdtsqlscan.core.SelectQuery;
 import com.tdtsqlscan.core.SQLTableRef;
 import com.tdtsqlscan.core.SQLJoin;
 
@@ -44,12 +44,12 @@ public class SelectGraphConverter {
 
         // Add source tables from main FROM clause
         for (SQLTableRef tableRef : selectQuery.getTables()) {
-            tableNames.add(SQLParserUtils.extractTableFromExpression(tableRef.getExpression()));
+            tableNames.add(tableRef.getName());
         }
 
         // Add source tables from JOIN clauses
         for (SQLJoin join : selectQuery.getJoins()) {
-            tableNames.add(SQLParserUtils.extractTableFromExpression(join.getRight().getExpression()));
+            tableNames.add(join.getRight().getName());
         }
 
         // Create nodes and edges for each unique source table

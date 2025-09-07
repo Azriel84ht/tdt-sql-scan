@@ -30,10 +30,10 @@ public class BteqScriptGraphConverter {
                 if (sqlCommand.getQuery() != null) {
                     commandType = sqlCommand.getQuery().getType().toString();
                     nodeLabel = commandType.replace("_", " ");
-                    if (sqlCommand.getQuery() instanceof com.tdtsqlscan.ddl.CreateTableQuery) {
-                        nodeLabel = "CREATE TABLE\n" + ((com.tdtsqlscan.ddl.CreateTableQuery) sqlCommand.getQuery()).getTableName();
-                    } else if (sqlCommand.getQuery() instanceof com.tdtsqlscan.dml.InsertQuery) {
-                        nodeLabel = "INSERT\n" + ((com.tdtsqlscan.dml.InsertQuery) sqlCommand.getQuery()).getTableName();
+                    if (sqlCommand.getQuery() instanceof com.tdtsqlscan.core.CreateTableQuery) {
+                        nodeLabel = "CREATE TABLE\n" + ((com.tdtsqlscan.core.CreateTableQuery) sqlCommand.getQuery()).getTableName();
+                    } else if (sqlCommand.getQuery() instanceof com.tdtsqlscan.core.InsertQuery) {
+                        nodeLabel = "INSERT\n" + ((com.tdtsqlscan.core.InsertQuery) sqlCommand.getQuery()).getTableName();
                     }
                 } else {
                     commandType = "SQL";

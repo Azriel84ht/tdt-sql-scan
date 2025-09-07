@@ -17,6 +17,7 @@ public class Suggestion {
     private Long id;
 
     @Lob
+    @Column(columnDefinition = "TEXT")
     private String text;
 
     @ManyToOne

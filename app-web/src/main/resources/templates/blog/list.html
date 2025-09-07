@@ -1,52 +1,42 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" class="dark">
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: html(view=~{::content})}">
 <head>
-    <title>Blog | Data Flow Visualizer</title>
-    <meta name="description" content="Articles and updates on data engineering, Business Intelligence, Teradata, and the evolution of the Data Flow Visualizer tool." />
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
-    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
-    <link
-      rel="stylesheet"
-      as="style"
-      onload="this.rel='stylesheet'"
-      href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900"
-    />
+    <title>Blog</title>
 </head>
-<body style='font-family: Inter, "Noto Sans", sans-serif;'>
-    <div class="relative flex size-full min-h-screen flex-col group/design-root overflow-x-hidden">
-        <canvas class="background"></canvas>
-        <div class="layout-container flex h-full grow flex-col">
-            <div th:replace="~{fragments/header :: header}"></div>
-
-            <main class="flex-1 justify-center py-20 px-4 sm:px-6 lg:px-8">
-                <div class="max-w-4xl mx-auto">
-                    <h1 class="text-4xl font-bold text-center text-white mb-12">Our Blog</h1>
-
-                    <div class="space-y-12">
-                        <div th:each="post : ${posts}" class="feature-card">
-                            <h2 class="text-2xl font-bold text-white mb-2">
-                                <a th:href="@{/blog/{slug}(slug=${post.slug})}" th:text="${post.title}" class="hover:text-blue-400 transition-colors duration-300">Post Title</a>
-                            </h2>
-                            <div class="text-sm text-gray-400 mb-4">
-                                <span>By <span th:text="${post.author}">Author</span></span> |
-                                <span>Published on <span th:text="${#temporals.format(post.createdAt, 'MMMM dd, yyyy')}">Date</span></span>
-                            </div>
-                            <!-- Summary is not available in the Post entity -->
-                            <a th:href="@{/blog/{slug}(slug=${post.slug})}" class="font-semibold text-blue-400 hover:underline">Read more &rarr;</a>
-                        </div>
-
-                        <div th:if="${posts.isEmpty()}" class="text-center py-10">
-                            <p class="text-gray-400">No blog posts have been published yet. Check back soon!</p>
-                        </div>
-                    </div>
-                </div>
-            </main>
-
-            <div th:replace="~{fragments/footer :: footer}"></div>
+<body>
+<div th:fragment="content">
+    <!-- Hero Section -->
+    <section class="text-center mb-24">
+        <div class="glassmorphism hero-glow rounded-3xl p-8 md:p-16">
+            <h1 class="text-4xl md:text-6xl font-black text-white leading-tight mb-4">
+                Our Blog
+            </h1>
+            <p class="text-lg md:text-xl max-w-3xl mx-auto text-gray-300 mb-8">
+                Articles and updates on data engineering, Business Intelligence, Teradata, and the evolution of the Data Flow Visualizer tool.
+            </p>
         </div>
-    </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/particlesjs/2.2.3/particles.min.js"></script>
-    <script th:src="@{/js/particles-config.js}"></script>
+    </section>
+
+    <section id="news">
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="glassmorphism rounded-2xl overflow-hidden group news-card" th:each="post : ${posts}">
+                <div class="overflow-hidden">
+                    <img src="https://placehold.co/600x400/0a0a0a/cyan?text=News" alt="News image" class="w-full h-48 object-cover transition-transform duration-300 news-image">
+                </div>
+                <div class="p-6">
+                    <h3 class="text-xl font-bold mb-3" th:text="${post.title}">Version 1.0 Released</h3>
+                    <div class="text-sm text-gray-400 mb-4">
+                        <span>By <span th:text="${post.author}">Author</span></span> |
+                        <span><span th:text="${#temporals.format(post.createdAt, 'MMMM dd, yyyy')}">Date</span></span>
+                    </div>
+                    <a th:href="@{'/blog/' + ${post.slug}}" class="font-semibold text-white hover:text-cyan-400">Read more &rarr;</a>
+                </div>
+            </div>
+        </div>
+        <div th:if="${posts.isEmpty()}" class="text-center py-10 glassmorphism rounded-2xl mt-8">
+            <p class="text-gray-300 text-lg">No blog posts have been published yet. Check back soon!</p>
+        </div>
+    </section>
+</div>
 </body>
 </html>

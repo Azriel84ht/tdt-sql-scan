@@ -1,13 +1,12 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" class="dark">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Admin - Manage FAQ</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
-    <!-- TinyMCE Script -->
     <script th:src="@{'https://cdn.tiny.cloud/1/' + ${tinymceApiKey} + '/tinymce/6/tinymce.min.js'}" referrerpolicy="origin"></script>
     <script th:inline="javascript">
-        document.addEventListener('DOMContentLoaded', () => {
+        function initTinyMCE() {
+            const isDarkMode = document.documentElement.classList.contains('dark');
             tinymce.init({
                 selector: 'textarea#content-editor',
                 plugins: 'preview importcss searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen image link media template codesample table charmap pagebreak nonbreaking anchor insertdatetime advlist lists wordcount help charmap quickbars emoticons',
@@ -20,20 +19,26 @@
                 autosave_retention: '2m',
                 image_advtab: true,
                 height: 600,
-                skin: 'oxide-dark',
-                content_css: 'dark'
+                skin: isDarkMode ? 'oxide-dark' : 'oxide',
+                content_css: isDarkMode ? 'dark' : 'default'
             });
+        }
+        document.addEventListener('DOMContentLoaded', initTinyMCE);
+        document.addEventListener('themeChanged', () => {
+            if (tinymce.get('content-editor')) {
+                tinymce.get('content-editor').remove();
+            }
+            initTinyMCE();
         });
     </script>
 </head>
-<body class="bg-gray-900">
+<body class="bg-white dark:bg-gray-900">
 <div th:replace="~{fragments/header :: header}"></div>
 <div class="admin-wrapper">
     <nav class="sidebar">
         <h2>Admin Panel</h2>
         <ul>
             <li><a th:href="@{/admin}">Dashboard</a></li>
-            <li><a th:href="@{/admin/content}">Manage Homepage</a></li>
             <li><a th:href="@{/admin/users}">User Management</a></li>
             <li><a th:href="@{/admin/suggestions}">View Suggestions</a></li>
             <li><a th:href="@{/admin/posts}">Blog Management</a></li>
@@ -58,5 +63,6 @@
         </form>
     </main>
 </div>
+<script th:src="@{/js/theme.js}"></script>
 </body>
 </html>

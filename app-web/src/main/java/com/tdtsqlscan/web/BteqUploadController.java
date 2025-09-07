@@ -1,12 +1,6 @@
 package com.tdtsqlscan.web;
 
 import com.tdtsqlscan.core.QueryParser;
-import com.tdtsqlscan.ddl.CreateIndexParser;
-import com.tdtsqlscan.ddl.CreateTableParser;
-import com.tdtsqlscan.ddl.DropTableParser;
-import com.tdtsqlscan.dml.DeleteParser;
-import com.tdtsqlscan.dml.InsertParser;
-import com.tdtsqlscan.dml.UpdateParser;
 import com.tdtsqlscan.etl.BteqScript;
 import com.tdtsqlscan.etl.BteqScriptParser;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -14,16 +8,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tdtsqlscan.core.SQLParserUtils;
 import com.tdtsqlscan.core.SQLQuery;
 import com.tdtsqlscan.core.SQLTableRef;
-import com.tdtsqlscan.ddl.CreateTableQuery;
-import com.tdtsqlscan.ddl.DropTableQuery;
-import com.tdtsqlscan.dml.DeleteQuery;
-import com.tdtsqlscan.dml.InsertQuery;
-import com.tdtsqlscan.dml.UpdateQuery;
+import com.tdtsqlscan.core.CreateTableQuery;
+import com.tdtsqlscan.core.DropTableQuery;
+import com.tdtsqlscan.core.DeleteQuery;
+import com.tdtsqlscan.core.InsertQuery;
+import com.tdtsqlscan.core.UpdateQuery;
 import com.tdtsqlscan.etl.BteqCommand;
 import com.tdtsqlscan.etl.BteqSqlCommand;
 import com.tdtsqlscan.graph.Graph;
-import com.tdtsqlscan.select.SelectParser;
-import com.tdtsqlscan.select.SelectQuery;
+import com.tdtsqlscan.core.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -63,15 +56,7 @@ public class BteqUploadController {
 
     public BteqUploadController() {
         logger.info("Initializing BteqUploadController");
-        List<QueryParser> sqlParsers = new ArrayList<>();
-        sqlParsers.add(new SelectParser());
-        sqlParsers.add(new CreateTableParser());
-        sqlParsers.add(new DropTableParser());
-        sqlParsers.add(new CreateIndexParser());
-        sqlParsers.add(new InsertParser());
-        sqlParsers.add(new UpdateParser());
-        sqlParsers.add(new DeleteParser());
-        this.bteqScriptParser = new BteqScriptParser(sqlParsers);
+        this.bteqScriptParser = new BteqScriptParser();
         this.chainFlowGraphConverter = new ChainFlowGraphConverter();
         this.objectMapper = new ObjectMapper();
         logger.info("BteqUploadController initialized");
@@ -139,7 +124,7 @@ public class BteqUploadController {
                         if (query instanceof SelectQuery) {
                             SelectQuery selectQuery = (SelectQuery) query;
                             for (SQLTableRef tableRef : selectQuery.getTables()) {
-                                readTables.add(SQLParserUtils.extractTableFromExpression(tableRef.getExpression()).toUpperCase());
+                                readTables.add(tableRef.getName().toUpperCase());
                             }
                         } else if (query instanceof InsertQuery) {
                             InsertQuery insertQuery = (InsertQuery) query;
@@ -149,15 +134,15 @@ public class BteqUploadController {
                                 logger.warn("Found InsertQuery with null table name: {}", command.getRawText());
                             }
                             if (insertQuery.isSelect()) {
-                                for (String sourceTable : insertQuery.getSourceTables()) {
-                                    readTables.add(SQLParserUtils.extractTableFromExpression(sourceTable).toUpperCase());
+                                for (SQLTableRef sourceTable : insertQuery.getSourceTables()) {
+                                    readTables.add(sourceTable.getName().toUpperCase());
                                 }
                             }
                         } else if (query instanceof UpdateQuery) {
                             UpdateQuery updateQuery = (UpdateQuery) query;
                             writtenTables.add(updateQuery.getTargetTable().toUpperCase());
-                            for (String sourceTable : updateQuery.getSourceTables()) {
-                                readTables.add(sourceTable.toUpperCase());
+                            for (SQLTableRef sourceTable : updateQuery.getSourceTables()) {
+                                readTables.add(sourceTable.getName().toUpperCase());
                             }
                         } else if (query instanceof DeleteQuery) {
                             DeleteQuery deleteQuery = (DeleteQuery) query;

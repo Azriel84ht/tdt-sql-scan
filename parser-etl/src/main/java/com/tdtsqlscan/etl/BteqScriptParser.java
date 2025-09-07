@@ -7,10 +7,10 @@ import java.util.List;
 
 public class BteqScriptParser {
 
-    private final List<QueryParser> sqlParsers;
+    private final QueryParser sqlParser;
 
-    public BteqScriptParser(List<QueryParser> sqlParsers) {
-        this.sqlParsers = sqlParsers;
+    public BteqScriptParser() {
+        this.sqlParser = new com.tdtsqlscan.core.JsqlQueryParser();
     }
 
     public BteqScript parse(String bteqScript, String scriptName) {
@@ -87,18 +87,17 @@ public class BteqScriptParser {
     }
 
     private SQLQuery parseSql(String sql) {
-        for (QueryParser parser : sqlParsers) {
-            if (parser.supports(sql)) {
-                try {
-                    return parser.parse(sql);
-                } catch (Exception e) {
-                    // For now, just return null if parsing fails.
-                    // In a real application, we would want to log this.
-                    return null;
-                }
-            }
+        String processedSql = sql;
+        if (sql.toUpperCase().contains("WITH DATA")) {
+            processedSql = sql.replaceAll("(?i)WITH DATA", "");
         }
-        return null;
+        try {
+            return sqlParser.parse(processedSql);
+        } catch (Exception e) {
+            // For now, just return null if parsing fails.
+            // In a real application, we would want to log this.
+            return null;
+        }
     }
 
     private BteqControlCommand parseBteqControlCommand(String line) {

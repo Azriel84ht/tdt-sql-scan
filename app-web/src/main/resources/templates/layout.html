@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en" class="dark" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common-head :: head}">
+</head>
+<body class="antialiased">
+    <div id="particles-js"></div>
+    <div class="flex flex-col h-screen">
+        <header th:replace="~{fragments/header :: header}"></header>
+
+        <main th:with="finalMainClass=${mainClass ?: 'pt-32 pb-16 px-4 max-w-6xl mx-auto'}" th:class="${finalMainClass} + ' flex-grow'">
+            <th:block th:replace="${view}"></th:block>
+        </main>
+
+        <footer th:replace="~{fragments/footer :: footer}" class="mt-auto"></footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        // Configuración de Particles.js
+        particlesJS('particles-js', {
+            "particles": {
+                "number": {
+                    "value": 50,
+                    "density": {
+                        "enable": true,
+                        "value_area": 800
+                    }
+                },
+                "color": {
+                    "value": "#ffffff"
+                },
+                "shape": {
+                    "type": "circle",
+                },
+                "opacity": {
+                    "value": 0.2,
+                    "random": true,
+                },
+                "size": {
+                    "value": 3,
+                    "random": true,
+                },
+                "line_linked": {
+                    "enable": true,
+                    "distance": 150,
+                    "color": "#ffffff",
+                    "opacity": 0.1,
+                    "width": 1
+                },
+                "move": {
+                    "enable": true,
+                    "speed": 1,
+                    "direction": "none",
+                    "random": false,
+                    "straight": false,
+                    "out_mode": "out",
+                    "bounce": false,
+                }
+            },
+            "interactivity": {
+                "detect_on": "canvas",
+                "events": {
+                    "onhover": {
+                        "enable": true,
+                        "mode": "repulse"
+                    },
+                    "onclick": {
+                        "enable": false
+                    },
+                    "resize": true
+                },
+                "modes": {
+                     "repulse": {
+                        "distance": 100,
+                        "duration": 0.4
+                    }
+                }
+            },
+            "retina_detect": true
+        });
+
+        // Menú móvil
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        if (mobileMenuButton) {
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
+
+        // Ocultar header al hacer scroll hacia abajo, mostrar al subir
+        let lastScrollTop = 0;
+        const header = document.getElementById('main-header');
+        if (header) {
+            window.addEventListener('scroll', function() {
+                let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                if (scrollTop > lastScrollTop && scrollTop > 100) {
+                    // Scroll hacia abajo
+                    header.style.top = '-100px';
+                } else {
+                    // Scroll hacia arriba
+                    header.style.top = '1rem';
+                }
+                lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+            }, false);
+        }
+    </script>
+</body>
+</html>

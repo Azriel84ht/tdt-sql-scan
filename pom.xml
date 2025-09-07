@@ -11,9 +11,6 @@
 
   <modules>
     <module>parser-core</module>
-    <module>parser-select</module>
-    <module>parser-ddl</module>
-    <module>parser-dml</module>
     <module>parser-etl</module>
     <module>scanner</module>
     <module>graph</module>

@@ -1,32 +1,14 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: html(view=~{::content})}">
 <head>
-    <title>Submit a Suggestion</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-        }
-    </script>
-    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
+    <title>Suggestions</title>
 </head>
-<body class="bg-white dark:bg-gray-900">
-    <div th:replace="~{fragments/header :: header}"></div>
-    <div class="form-container">
-        <h1>Submit a Suggestion</h1>
-        <p>We appreciate your feedback! Please let us know how we can improve the application.</p>
-
-        <div th:if="${message}" class="alert-success" th:text="${message}"></div>
-
-        <form th:action="@{/suggestions}" method="post">
-            <div class="form-group">
-                <label for="suggestionText">Your Suggestion:</label>
-                <textarea id="suggestionText" name="suggestionText" required></textarea>
-            </div>
-            <button type="submit" class="btn-primary">Submit</button>
-        </form>
+<body>
+<div th:fragment="content" class="glassmorphism rounded-3xl p-8 md:p-16">
+    <h2 class="text-2xl font-bold text-center mb-6">Suggestions</h2>
+    <div class="text-gray-300">
+        <p>Here you can leave your suggestions to improve the application.</p>
     </div>
-    <div th:replace="~{fragments/footer :: footer}"></div>
-    <script th:src="@{/js/theme.js}"></script>
+</div>
 </body>
 </html>

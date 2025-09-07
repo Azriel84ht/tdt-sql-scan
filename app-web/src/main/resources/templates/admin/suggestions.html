@@ -2,12 +2,6 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Admin - View Suggestions</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-        }
-    </script>
     <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
 </head>
 <body class="bg-white dark:bg-gray-900">
@@ -17,7 +11,6 @@
             <h2>Admin Panel</h2>
             <ul>
                 <li><a th:href="@{/admin}">Dashboard</a></li>
-                <li><a th:href="@{/admin/content}">Manage Homepage</a></li>
                 <li><a th:href="@{/admin/users}">User Management</a></li>
                 <li><a th:href="@{/admin/suggestions}" class="active">View Suggestions</a></li>
                 <li><a th:href="@{/admin/posts}">Blog Management</a></li>
@@ -28,11 +21,9 @@
         </nav>
         <main class="main-content">
             <h1>User Suggestions</h1>
-
             <div th:if="${suggestions.isEmpty()}">
                 <p>No suggestions have been submitted yet.</p>
             </div>
-
             <div class="suggestion-card" th:each="suggestion : ${suggestions}">
                 <div class="suggestion-meta">
                     <div>

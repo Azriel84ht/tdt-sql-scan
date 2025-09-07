@@ -26,3 +26,6 @@ Thumbs.db
 
 # Compiled files
 **/*.class
+
+# Ficheros de variables de entorno locales
+.env

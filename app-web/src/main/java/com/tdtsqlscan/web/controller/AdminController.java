@@ -2,9 +2,7 @@ package com.tdtsqlscan.web.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import com.tdtsqlscan.web.domain.HomepageContent;
 import com.tdtsqlscan.web.repository.SuggestionRepository;
-import com.tdtsqlscan.web.service.ContentService;
 import com.tdtsqlscan.web.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
@@ -19,9 +17,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class AdminController {
 
     @Autowired
-    private ContentService contentService;
-
-    @Autowired
     private UserService userService;
 
     @Autowired
@@ -30,20 +25,6 @@ public class AdminController {
     @GetMapping
     public String adminHome() {
         return "admin/dashboard";
-    }
-
-    @GetMapping("/content")
-    public String showContentForm(Model model) {
-        model.addAttribute("content", contentService.getContent());
-        return "admin/content";
-    }
-
-    @PostMapping("/content")
-    public String saveContent(@ModelAttribute HomepageContent content, Model model) {
-        contentService.saveContent(content);
-        model.addAttribute("message", "Homepage content updated successfully!");
-        model.addAttribute("content", content);
-        return "admin/content";
     }
 
     @GetMapping("/users")
