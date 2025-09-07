@@ -1,6 +1,6 @@
 # --- Fase de Construcción (Build Stage) ---
 # Usamos una imagen oficial de Maven con OpenJDK 21.
-FROM maven:3-openjdk-21 AS build
+FROM maven:3.9.11-openjdk-21 AS build
 
 # Establecemos el directorio de trabajo dentro del contenedor
 WORKDIR /app
