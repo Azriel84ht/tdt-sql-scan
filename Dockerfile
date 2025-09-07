@@ -1,6 +1,24 @@
 # --- Fase de Construcción (Build Stage) ---
-# Usamos una imagen oficial de Maven con Java 21 para compilar el proyecto.
-FROM maven:3.8.7-eclipse-temurin-21 AS build
+# Usamos una imagen base de OpenJDK 21
+FROM openjdk:21-jdk-slim AS build
+
+# Variables de entorno para Maven
+ENV MAVEN_VERSION 3.8.7
+ENV MAVEN_HOME /usr/share/maven
+ENV MAVEN_BIN_URL https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz
+
+# Instalamos wget, desempaquetamos Maven y lo limpiamos
+RUN apt-get update && \
+    apt-get install -y wget && \
+    wget -q -O /tmp/maven.tar.gz ${MAVEN_BIN_URL} && \
+    tar -xzf /tmp/maven.tar.gz -C /usr/share && \
+    mv /usr/share/apache-maven-${MAVEN_VERSION} ${MAVEN_HOME} && \
+    rm /tmp/maven.tar.gz && \
+    apt-get purge -y --auto-remove wget && \
+    rm -rf /var/lib/apt/lists/*
+
+# Agregamos Maven al PATH
+ENV PATH="${MAVEN_HOME}/bin:${PATH}"
 
 # Establecemos el directorio de trabajo dentro del contenedor
 WORKDIR /app
@@ -9,8 +27,7 @@ WORKDIR /app
 COPY . .
 
 # Ahora que todos los módulos están presentes, compilamos el proyecto.
-# Usamos el comando 'mvn' de la imagen base para mayor robustez.
-RUN ["mvn", "clean", "package", "-DskipTests"]
+RUN mvn clean package -DskipTests
 
 
 # --- Fase de Ejecución (Run Stage) ---
