@@ -1,6 +1,6 @@
 package com.tdtsqlscan.web.domain;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
