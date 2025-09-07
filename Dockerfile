@@ -1,6 +1,6 @@
 # --- Fase de Construcción (Build Stage) ---
-# Usamos una imagen oficial de Maven con Java 21 para compilar el proyecto.
-FROM maven:3.9.6-eclipse-temurin-21 AS build
+# Usamos la imagen oficial de Maven con OpenJDK 21 que ha sido verificada por el usuario.
+FROM maven:3.9-eclipse-temurin-21 AS build
 
 # Establecemos el directorio de trabajo dentro del contenedor
 WORKDIR /app
@@ -8,13 +8,12 @@ WORKDIR /app
 # Copiamos todo el código fuente del proyecto primero
 COPY . .
 
-# Ahora que todos los módulos están presentes, compilamos el proyecto.
-# Usamos el comando 'mvn' de la imagen base para mayor robustez.
-RUN ["mvn", "clean", "package", "-DskipTests"]
+# Compilamos el proyecto.
+RUN mvn clean package -DskipTests
 
 
 # --- Fase de Ejecución (Run Stage) ---
-# Usamos una imagen ligera de Java 21 para ejecutar la aplicación
+# Usamos una imagen de Eclipse Temurin con JRE 21 para mantener la consistencia.
 FROM eclipse-temurin:21-jre
 
 # Establecemos el directorio de trabajo
