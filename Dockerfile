@@ -13,8 +13,8 @@ RUN mvn clean package -DskipTests
 
 
 # --- Fase de Ejecución (Run Stage) ---
-# Usamos una imagen ligera de Java 21 para ejecutar la aplicación
-FROM openjdk:21-jre-slim
+# Usamos una imagen de Eclipse Temurin con JRE 21 para mantener la consistencia.
+FROM eclipse-temurin:21-jre
 
 # Establecemos el directorio de trabajo
 WORKDIR /app
