@@ -2,18 +2,18 @@ package com.tdtsqlscan.web;
 
 import com.tdtsqlscan.core.SQLJoin;
 import com.tdtsqlscan.core.SQLTableRef;
-import com.tdtsqlscan.ddl.ColumnDefinition;
-import com.tdtsqlscan.ddl.CreateIndexQuery;
-import com.tdtsqlscan.ddl.CreateTableQuery;
-import com.tdtsqlscan.ddl.DropTableQuery;
-import com.tdtsqlscan.dml.DeleteQuery;
-import com.tdtsqlscan.dml.InsertQuery;
-import com.tdtsqlscan.dml.UpdateQuery;
+import com.tdtsqlscan.core.ColumnDefinition;
+import com.tdtsqlscan.core.CreateIndexQuery;
+import com.tdtsqlscan.core.CreateTableQuery;
+import com.tdtsqlscan.core.DropTableQuery;
+import com.tdtsqlscan.core.DeleteQuery;
+import com.tdtsqlscan.core.InsertQuery;
+import com.tdtsqlscan.core.UpdateQuery;
 import com.tdtsqlscan.etl.*;
 import com.tdtsqlscan.graph.Edge;
 import com.tdtsqlscan.graph.Graph;
 import com.tdtsqlscan.graph.Node;
-import com.tdtsqlscan.select.SelectQuery;
+import com.tdtsqlscan.core.SelectQuery;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -288,10 +288,17 @@ public class DataFlowGraphConverter {
             Object query = ((BteqSqlCommand) command).getQuery();
             if (query instanceof CreateTableQuery) {
                 tables.add(((CreateTableQuery) query).getTableName());
+                if (((CreateTableQuery) query).getSourceTables() != null) {
+                    for (SQLTableRef tableRef : ((CreateTableQuery) query).getSourceTables()) {
+                        tables.add(tableRef.getName());
+                    }
+                }
             } else if (query instanceof InsertQuery) {
                 tables.add(((InsertQuery) query).getTableName());
                 if (((InsertQuery) query).isSelect()) {
-                    tables.addAll(((InsertQuery) query).getSourceTables());
+                    for (SQLTableRef tableRef : ((InsertQuery) query).getSourceTables()) {
+                        tables.add(tableRef.getName());
+                    }
                 }
             } else if (query instanceof UpdateQuery) {
                 tables.add(((UpdateQuery) query).getTargetTable());
@@ -440,7 +447,7 @@ public class DataFlowGraphConverter {
             metadata.put("Tipo de Tabla", q.isVolatile() ? "Volatile" : "Permanente");
             metadata.put("Tabla Creada", q.getTableName());
             if (q.getSourceTables() != null && !q.getSourceTables().isEmpty()) {
-                metadata.put("Tablas Origen (CTAS)", q.getSourceTables());
+                metadata.put("Tablas Origen (CTAS)", q.getSourceTables().stream().map(SQLTableRef::getName).collect(Collectors.toList()));
             }
             if (q.getColumns() != null && !q.getColumns().isEmpty()) {
                 List<String> columnNames = q.getColumns().stream()
@@ -452,7 +459,7 @@ public class DataFlowGraphConverter {
             InsertQuery q = (InsertQuery) query;
             metadata.put("Tabla Destino", q.getTableName());
             if (q.isSelect()) {
-                metadata.put("Tablas Origen", q.getSourceTables());
+                metadata.put("Tablas Origen", q.getSourceTables().stream().map(SQLTableRef::getName).collect(Collectors.toList()));
             }
             if (q.getColumns() != null && !q.getColumns().isEmpty()) {
                 metadata.put("Columnas Afectadas", q.getColumns());
@@ -461,7 +468,7 @@ public class DataFlowGraphConverter {
             UpdateQuery q = (UpdateQuery) query;
             metadata.put("Tabla Modificada", q.getTargetTable());
             if (q.getSourceTables() != null && !q.getSourceTables().isEmpty()) {
-                metadata.put("Tablas Origen", q.getSourceTables());
+                metadata.put("Tablas Origen", q.getSourceTables().stream().map(SQLTableRef::getName).collect(Collectors.toList()));
             }
         } else if (query instanceof DeleteQuery) {
             DeleteQuery q = (DeleteQuery) query;
@@ -475,12 +482,7 @@ public class DataFlowGraphConverter {
                 metadata.put("Columnas", q.getColumns());
             }
             if (q.getTables() != null && !q.getTables().isEmpty()) {
-                // NOTE: This is a naive way to get the table name, but SQLTableRef does not provide a direct getter.
-                // This will work for simple cases like "TABLE as ALIAS" or "TABLE".
-                List<String> tableNames = q.getTables().stream()
-                        .map(s -> s.getExpression().split("\\s+")[0])
-                        .collect(Collectors.toList());
-                metadata.put("Tablas", tableNames);
+                metadata.put("Tablas", q.getTables().stream().map(SQLTableRef::getName).collect(Collectors.toList()));
             }
             if (q.getJoins() != null && !q.getJoins().isEmpty()) {
                 List<String> joinConditions = q.getJoins().stream()

@@ -52,9 +52,9 @@ public class JsqlAstConverter {
                 if (plainSelect.getFromItem() instanceof Table) {
                     Table table = (Table) plainSelect.getFromItem();
                     String alias = table.getAlias() != null ? table.getAlias().getName() : null;
-                    selectQuery.addTable(new SQLTableRef(table.getFullyQualifiedName(), table.toString(), alias));
+                    selectQuery.addTable(new SQLTableRef(table.getFullyQualifiedName(), alias));
                 } else {
-                    selectQuery.addTable(new SQLTableRef(plainSelect.getFromItem().toString()));
+                    selectQuery.addTable(new SQLTableRef(plainSelect.getFromItem().toString(), null));
                 }
             }
             // joins
@@ -71,9 +71,9 @@ public class JsqlAstConverter {
                     if (j.getRightItem() instanceof Table) {
                         Table table = (Table) j.getRightItem();
                         String alias = table.getAlias() != null ? table.getAlias().getName() : null;
-                        rightTable = new SQLTableRef(table.getFullyQualifiedName(), table.toString(), alias);
+                        rightTable = new SQLTableRef(table.getFullyQualifiedName(), alias);
                     } else {
-                        rightTable = new SQLTableRef(j.getRightItem().toString());
+                        rightTable = new SQLTableRef(j.getRightItem().toString(), null);
                     }
 
                     String onCondition = j.getOnExpression() != null ? j.getOnExpression().toString() : null;
@@ -134,6 +134,7 @@ public class JsqlAstConverter {
                 if (selectSql.startsWith("(") && selectSql.endsWith(")")) {
                     selectSql = selectSql.substring(1, selectSql.length() - 1);
                 }
+                System.out.println("Parsing SELECT part: " + selectSql);
                 try {
                     Statement selectStatement = net.sf.jsqlparser.parser.CCJSqlParserUtil.parse(selectSql);
                     if (selectStatement instanceof Select) {
@@ -199,9 +200,9 @@ public class JsqlAstConverter {
             if (update.getFromItem() instanceof Table) {
                 Table table = (Table) update.getFromItem();
                 String alias = table.getAlias() != null ? table.getAlias().getName() : null;
-                sourceTables.add(new SQLTableRef(table.getFullyQualifiedName(), table.toString(), alias));
+                sourceTables.add(new SQLTableRef(table.getFullyQualifiedName(), alias));
             } else {
-                sourceTables.add(new SQLTableRef(update.getFromItem().toString()));
+                sourceTables.add(new SQLTableRef(update.getFromItem().toString(), null));
             }
         }
 

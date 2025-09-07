@@ -20,6 +20,14 @@ public class SQLTableRef {
         return alias;
     }
 
+    public String getName() {
+        if (alias != null) {
+            return alias;
+        }
+        String[] parts = expression.split("\\s+");
+        return parts[0];
+    }
+
     @Override
     public String toString() {
         return alias != null ? expression + " AS " + alias : expression;
