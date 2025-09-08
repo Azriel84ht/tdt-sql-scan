@@ -1,0 +1,37 @@
+.hero {
+  position: relative;
+  text-align: center;
+  padding: 5rem 1rem;
+  color: $color-text-light;
+
+  &__content {
+    position: relative;
+    z-index: 10;
+  }
+
+  &__title {
+    font-size: 3rem;
+    font-weight: 900;
+    letter-spacing: -0.05em;
+    margin-bottom: $spacing-md;
+  }
+
+  &__subtitle {
+    font-size: $font-size-lg;
+    max-width: 48rem;
+    margin: 0 auto $spacing-lg;
+  }
+
+  .cta-button {
+    background-color: $color-primary;
+    color: $color-text-dark;
+    font-weight: $font-weight-bold;
+    padding: $spacing-md $spacing-xl;
+    border-radius: 9999px;
+    transition: background-color 0.3s ease-in-out;
+
+    &:hover {
+      background-color: lighten($color-primary, 10%);
+    }
+  }
+}

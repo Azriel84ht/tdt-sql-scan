@@ -1,0 +1,73 @@
+.section {
+  padding: 5rem 1rem;
+
+  &__title {
+    font-size: 2.25rem;
+    font-weight: $font-weight-bold;
+    text-align: center;
+    color: $color-text-light;
+    margin-bottom: 3rem;
+  }
+
+  &--features {
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+      gap: 2rem;
+
+      @media (min-width: 768px) {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+  }
+
+  &--how-it-works {
+    text-align: center;
+    color: $color-text-light;
+
+    .flex {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 2rem;
+
+      @media (min-width: 768px) {
+        flex-direction: row;
+      }
+    }
+
+    .step {
+      &__number {
+        width: 3rem;
+        height: 3rem;
+        border-radius: 9999px;
+        background-color: $color-primary;
+        color: $color-text-dark;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        font-weight: $font-weight-bold;
+        margin: 0 auto;
+      }
+
+      &__title {
+        font-size: 1.25rem;
+        font-weight: $font-weight-bold;
+        margin-top: 1rem;
+      }
+    }
+
+    .step-arrow {
+      font-size: 2rem;
+      color: $color-primary;
+    }
+  }
+
+  &--news {
+    .prose {
+      color: $color-text-light;
+    }
+  }
+}

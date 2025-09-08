@@ -122,74 +122,68 @@
         <div th:replace="~{fragments/header :: header}"></div>
         <main class="flex-grow">
           <!-- Hero Section -->
-          <section class="hero-section relative text-white text-center py-20 px-4">
-            <div class="relative z-10">
-              <h1 class="text-5xl font-black tracking-tighter mb-4" th:text="${content.heroTitle}">Untangle Your Teradata BTEQ Scripts</h1>
-              <p class="text-lg max-w-3xl mx-auto mb-8" th:utext="${content.heroSubtitle}">Transform complex Teradata BTEQ scripts into interactive data flow diagrams with Data Flow Visualizer. Visualize your data's journey, understand dependencies, and optimize your processes effortlessly.</p>
-              <a th:href="@{/register}" class="cta-button bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-full transition duration-300 ease-in-out">Get Started for Free</a>
+          <section class="hero">
+            <div class="hero__content">
+              <h1 class="hero__title" th:text="${content.heroTitle}">Untangle Your Teradata BTEQ Scripts</h1>
+              <p class="hero__subtitle" th:utext="${content.heroSubtitle}">Transform complex Teradata BTEQ scripts into interactive data flow diagrams with Data Flow Visualizer. Visualize your data's journey, understand dependencies, and optimize your processes effortlessly.</p>
+              <a th:href="@{/register}" class="cta-button">Get Started for Free</a>
             </div>
           </section>
 
           <!-- Features Section -->
-          <section class="features-section py-20 px-4">
-            <div class="max-w-7xl mx-auto">
-              <h2 class="text-4xl font-bold text-center text-white mb-12">Main Features</h2>
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- Feature Card 1 -->
-                <div class="card card--feature">
-                  <div class="card__icon">&#128279;</div>
-                  <h3 class="card__title">Interactive Visualization</h3>
-                  <p>Engage with your data lineage through a dynamic and interactive graph. Zoom, pan, and click on nodes to explore dependencies.</p>
-                </div>
-                <!-- Feature Card 2 -->
-                <div class="card card--feature">
-                  <div class="card__icon">&#128206;</div>
-                  <h3 class="card__title">Effortless Script Parsing</h3>
-                  <p>Our intelligent parser automatically analyzes your Teradata BTEQ scripts, saving you hours of manual work.</p>
-                </div>
-                <!-- Feature Card 3 -->
-                <div class="card card--feature">
-                  <div class="card__icon">&#128228;</div>
-                  <h3 class="card__title">Export and Share</h3>
-                  <p>Export your data flow diagrams as images or JSON to share with your team and stakeholders, improving collaboration.</p>
-                </div>
+          <section class="section section--features">
+            <h2 class="section__title">Main Features</h2>
+            <div class="grid">
+              <!-- Feature Card 1 -->
+              <div class="card card--feature">
+                <div class="card__icon">&#128279;</div>
+                <h3 class="card__title">Interactive Visualization</h3>
+                <p>Engage with your data lineage through a dynamic and interactive graph. Zoom, pan, and click on nodes to explore dependencies.</p>
+              </div>
+              <!-- Feature Card 2 -->
+              <div class="card card--feature">
+                <div class="card__icon">&#128206;</div>
+                <h3 class="card__title">Effortless Script Parsing</h3>
+                <p>Our intelligent parser automatically analyzes your Teradata BTEQ scripts, saving you hours of manual work.</p>
+              </div>
+              <!-- Feature Card 3 -->
+              <div class="card card--feature">
+                <div class="card__icon">&#128228;</div>
+                <h3 class="card__title">Export and Share</h3>
+                <p>Export your data flow diagrams as images or JSON to share with your team and stakeholders, improving collaboration.</p>
               </div>
             </div>
           </section>
 
           <!-- How It Works Section -->
-          <section class="how-it-works-section py-20 px-4">
-            <div class="max-w-7xl mx-auto text-center text-white">
-              <h2 class="text-4xl font-bold mb-12">How It Works</h2>
-              <div class="flex flex-col md:flex-row justify-center items-center gap-8">
-                <div class="step">
-                  <div class="step-number">1</div>
-                  <h3 class="text-xl font-bold mt-4">Upload Your Scripts</h3>
-                  <p>Drag and drop your Teradata BTEQ files into the application.</p>
-                </div>
-                <div class="step-arrow">&rarr;</div>
-                <div class="step">
-                  <div class="step-number">2</div>
-                  <h3 class="text-xl font-bold mt-4">Visualize the Flow</h3>
-                  <p>Watch as the application instantly generates a clear data flow diagram.</p>
-                </div>
-                <div class="step-arrow">&rarr;</div>
-                <div class="step">
-                  <div class="step-number">3</div>
-                  <h3 class="text-xl font-bold mt-4">Analyze and Optimize</h3>
-                  <p>Explore the graph to understand dependencies and identify optimization opportunities.</p>
-                </div>
+          <section class="section section--how-it-works">
+            <h2 class="section__title">How It Works</h2>
+            <div class="flex">
+              <div class="step">
+                <div class="step__number">1</div>
+                <h3 class="step__title">Upload Your Scripts</h3>
+                <p>Drag and drop your Teradata BTEQ files into the application.</p>
+              </div>
+              <div class="step-arrow">&rarr;</div>
+              <div class="step">
+                <div class="step__number">2</div>
+                <h3 class="step__title">Visualize the Flow</h3>
+                <p>Watch as the application instantly generates a clear data flow diagram.</p>
+              </div>
+              <div class="step-arrow">&rarr;</div>
+              <div class="step">
+                <div class="step__number">3</div>
+                <h3 class="step__title">Analyze and Optimize</h3>
+                <p>Explore the graph to understand dependencies and identify optimization opportunities.</p>
               </div>
             </div>
           </section>
 
           <!-- News and Updates Section -->
-          <section class="news-section py-20 px-4">
-            <div class="max-w-7xl mx-auto">
-              <h2 class="text-4xl font-bold text-center text-white mb-12">News and Updates</h2>
-              <div class="news-content prose prose-invert max-w-none" th:utext="${content.newsSection}">
-                <!-- Dynamic content will be injected here -->
-              </div>
+          <section class="section section--news">
+            <h2 class="section__title">News and Updates</h2>
+            <div class="prose" th:utext="${content.newsSection}">
+              <!-- Dynamic content will be injected here -->
             </div>
           </section>
         </main>
