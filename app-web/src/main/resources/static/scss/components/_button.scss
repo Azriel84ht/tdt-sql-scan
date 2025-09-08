@@ -1,0 +1,48 @@
+// ==========================================================================
+// # COMPONENT: BUTTON
+// ==========================================================================
+// -- Modifiers --
+// .btn--secondary : For secondary, less prominent actions.
+// .btn--danger    : For destructive actions (e.g., delete).
+// .btn--sm        : Smaller version for tight spaces.
+// ==========================================================================
+.btn {
+  width: 100%;
+  padding: $spacing-md $spacing-xl;
+  font-weight: $font-weight-bold;
+  border-radius: $border-radius-base;
+  color: $color-text-dark;
+  background-color: $color-primary;
+  transition-property: all;
+  transition-duration: 300ms;
+  cursor: pointer;
+
+  &:hover {
+    background-color: lighten($color-primary, 10%);
+    transform: scale(1.05);
+  }
+
+  &--secondary {
+    background-color: transparent;
+    border: 1px solid $color-border;
+    color: $color-text-light;
+
+    &:hover {
+      background-color: $color-background-dark;
+    }
+  }
+
+  &--danger {
+    background-color: $color-danger;
+    color: white;
+
+    &:hover {
+      background-color: $color-danger-dark;
+    }
+  }
+
+  &--sm {
+    padding: $spacing-sm $spacing-md;
+    font-size: $font-size-sm;
+  }
+}

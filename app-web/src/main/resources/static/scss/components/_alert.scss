@@ -1,0 +1,32 @@
+// ==========================================================================
+// # COMPONENT: ALERT
+// ==========================================================================
+// -- Modifiers --
+// .alert--success : For success messages.
+// .alert--danger  : For error messages.
+// .alert--info    : For informational messages.
+// ==========================================================================
+.alert {
+  padding: $spacing-md;
+  margin-bottom: $spacing-lg;
+  border: 1px solid transparent;
+  border-radius: $border-radius-sm;
+
+  &--success {
+    background-color: lighten($color-success, 55%);
+    border-color: lighten($color-success, 40%);
+    color: darken($color-success, 20%);
+  }
+
+  &--danger {
+    background-color: lighten($color-danger, 35%);
+    border-color: lighten($color-danger, 25%);
+    color: darken($color-danger, 20%);
+  }
+
+  &--info {
+    background-color: lighten($color-info, 55%);
+    border-color: lighten($color-info, 40%);
+    color: darken($color-info, 20%);
+  }
+}

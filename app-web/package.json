@@ -1,0 +1,15 @@
+{
+  "name": "app-web",
+  "version": "1.0.0",
+  "description": "Frontend for tdt-sql-scan",
+  "main": "index.js",
+  "scripts": {
+    "build:scss": "sass src/main/resources/static/scss/main.scss src/main/resources/static/css/style.css --style=compressed",
+    "watch:scss": "sass --watch src/main/resources/static/scss:src/main/resources/static/css"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "sass": "^1.77.4"
+  }
+}

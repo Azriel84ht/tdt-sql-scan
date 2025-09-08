@@ -1,0 +1,76 @@
+// ==========================================================================
+// # COMPONENT: CARD
+// ==========================================================================
+// -- Modifiers --
+// .card--glow    : Adds a hero glow effect.
+// .card--feature : For feature cards on the home page.
+// .card--news    : For news cards.
+// ==========================================================================
+.card {
+  background-color: rgba($color-background-dark, 0.5);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(white, 0.1);
+  border-radius: $border-radius-lg;
+  padding: $spacing-xl;
+  color: $color-text-light;
+
+  &--glow {
+    box-shadow: 0 0 20px rgba($color-primary, 0.3), 0 0 40px rgba($color-primary, 0.2);
+  }
+
+  &__faq-question {
+    width: 100%;
+    text-align: left;
+    padding: $spacing-lg;
+    font-weight: $font-weight-bold;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: $color-text-light;
+    background: none;
+    border: none;
+  }
+
+  &__faq-answer {
+    padding: 0 $spacing-lg $spacing-lg $spacing-lg;
+    display: none;
+    color: $color-text-light;
+  }
+
+  &--feature {
+    text-align: center;
+    transition: transform 0.3s ease-in-out;
+
+    &:hover {
+      transform: translateY(-10px);
+    }
+  }
+
+  &__icon {
+    font-size: 3rem;
+    margin-bottom: $spacing-md;
+  }
+
+  &__title {
+    font-size: 1.5rem;
+    font-weight: $font-weight-bold;
+    margin-bottom: $spacing-md;
+  }
+
+  &--news {
+    overflow: hidden;
+
+    &:hover {
+      .card__news-image img {
+        transform: scale(1.05);
+      }
+    }
+  }
+
+  &__news-image {
+    img {
+      transition: transform 0.3s ease-in-out;
+    }
+  }
+}

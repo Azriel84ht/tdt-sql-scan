@@ -1,0 +1,45 @@
+// ==========================================================================
+// # COMPONENT: DATA TABLE
+// ==========================================================================
+// Used for displaying tabular data in the admin panel.
+// ==========================================================================
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: $spacing-xl;
+  color: $color-text-light;
+
+  thead {
+    background-color: $color-background-dark;
+
+    th {
+      padding: $spacing-md $spacing-lg;
+      text-align: left;
+      font-weight: $font-weight-bold;
+    }
+  }
+
+  tbody {
+    tr {
+      border-bottom: 1px solid $color-border;
+
+      &:nth-child(odd) {
+        background-color: darken($color-background-dark, 5%);
+      }
+
+      &:hover {
+        background-color: $color-border;
+      }
+
+      td {
+        padding: $spacing-md $spacing-lg;
+      }
+    }
+  }
+
+  .action-links {
+    a {
+      margin-right: $spacing-sm;
+    }
+  }
+}

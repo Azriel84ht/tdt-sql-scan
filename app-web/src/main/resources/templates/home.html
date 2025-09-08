@@ -13,12 +13,6 @@
     <meta name="description" content="Visualize complex Teradata BTEQ scripts instantly. Our tool transforms convoluted SQL into clear, interactive data flow diagrams to untangle your ETL processes." />
     <meta name="keywords" content="Data Flow, Visualizer, Teradata, BTEQ, SQL, ETL, Data Lineage, Stitch Design" />
 
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <script>
-      tailwind.config = {
-        darkMode: 'class',
-      }
-    </script>
     <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
     <style>
       .popup-overlay {
@@ -142,18 +136,21 @@
               <h2 class="text-4xl font-bold text-center text-white mb-12">Main Features</h2>
               <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <!-- Feature Card 1 -->
-                <div class="feature-card">
-                  <h3 class="text-2xl font-bold mb-4">Interactive Visualization</h3>
+                <div class="card card--feature">
+                  <div class="card__icon">&#128279;</div>
+                  <h3 class="card__title">Interactive Visualization</h3>
                   <p>Engage with your data lineage through a dynamic and interactive graph. Zoom, pan, and click on nodes to explore dependencies.</p>
                 </div>
                 <!-- Feature Card 2 -->
-                <div class="feature-card">
-                  <h3 class="text-2xl font-bold mb-4">Effortless Script Parsing</h3>
+                <div class="card card--feature">
+                  <div class="card__icon">&#128206;</div>
+                  <h3 class="card__title">Effortless Script Parsing</h3>
                   <p>Our intelligent parser automatically analyzes your Teradata BTEQ scripts, saving you hours of manual work.</p>
                 </div>
                 <!-- Feature Card 3 -->
-                <div class="feature-card">
-                  <h3 class="text-2xl font-bold mb-4">Export and Share</h3>
+                <div class="card card--feature">
+                  <div class="card__icon">&#128228;</div>
+                  <h3 class="card__title">Export and Share</h3>
                   <p>Export your data flow diagrams as images or JSON to share with your team and stakeholders, improving collaboration.</p>
                 </div>
               </div>

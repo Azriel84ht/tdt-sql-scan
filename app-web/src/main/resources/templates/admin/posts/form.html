@@ -2,7 +2,6 @@
 <html xmlns:th="http://www.thymeleaf.org" class="dark">
 <head>
     <title>Admin - Manage Post</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
     <!-- TinyMCE Script -->
     <script th:src="@{'https://cdn.tiny.cloud/1/' + ${tinymceApiKey} + '/tinymce/6/tinymce.min.js'}" referrerpolicy="origin"></script>
@@ -29,7 +28,7 @@
 <body class="bg-gray-900">
 <div th:replace="~{fragments/header :: header}"></div>
 <div class="admin-wrapper">
-    <nav class="sidebar">
+    <nav class="admin-wrapper__sidebar">
         <h2>Admin Panel</h2>
         <ul>
             <li><a th:href="@{/admin}">Dashboard</a></li>
@@ -42,19 +41,21 @@
             <li><a th:href="@{/app}">Back to App</a></li>
         </ul>
     </nav>
-    <main class="main-content">
+    <main class="admin-wrapper__main-content">
         <h1 th:text="${post.id == null} ? 'Create New Post' : 'Edit Post'">Manage Post</h1>
         <form th:object="${post}" th:action="${post.id == null} ? @{/admin/posts} : @{/admin/posts/edit/{id}(id=${post.id})}" method="post">
             <div class="form-group">
-                <label for="title">Title</label>
+                <label for="title" class="form-label">Title</label>
                 <input type="text" id="title" th:field="*{title}" class="form-control" required>
             </div>
             <div class="form-group">
-                <label for="content-editor">Content</label>
+                <label for="content-editor" class="form-label">Content</label>
                 <textarea id="content-editor" th:field="*{content}" class="form-control"></textarea>
             </div>
-            <button type="submit" class="btn btn-primary">Save Post</button>
-            <a th:href="@{/admin/posts}" class="btn btn-secondary">Cancel</a>
+            <div class="form-group">
+                <button type="submit" class="btn">Save Post</button>
+                <a th:href="@{/admin/posts}" class="btn btn--secondary">Cancel</a>
+            </div>
         </form>
     </main>
 </div>

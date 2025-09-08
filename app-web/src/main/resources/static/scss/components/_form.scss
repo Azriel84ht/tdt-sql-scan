@@ -1,0 +1,35 @@
+.form-container {
+  max-width: 400px;
+  margin: $spacing-xl auto;
+  padding: $spacing-xl;
+  background-color: $color-background-dark;
+  border-radius: $border-radius-base;
+  color: $color-text-light;
+}
+
+.form-group {
+  margin-bottom: $spacing-lg;
+}
+
+.form-label {
+  display: block;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-normal;
+  margin-bottom: $spacing-sm;
+}
+
+.form-control {
+  display: block;
+  width: 100%;
+  padding: $spacing-md;
+  background-color: lighten($color-background-dark, 10%);
+  border: 1px solid $color-border;
+  border-radius: $border-radius-sm;
+  color: $color-text-light;
+
+  &:focus {
+    outline: none;
+    border-color: $color-primary;
+    box-shadow: 0 0 0 3px rgba($color-primary, 0.5);
+  }
+}

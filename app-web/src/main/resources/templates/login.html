@@ -2,36 +2,35 @@
 <html xmlns:th="http://www.thymeleaf.org" class="dark">
 <head>
     <title>Login</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
 </head>
 <body>
     <div th:replace="~{fragments/header :: header}"></div>
-    <div class="form-container">
+    <div class="card card--glow">
         <h2 class="text-2xl font-bold text-center mb-6">Login</h2>
-        <div th:if="${param.error}" class="alert alert-danger">
+        <div th:if="${param.error}" class="alert alert--danger">
             Invalid username or password.
         </div>
-        <div th:if="${param.logout}" class="alert alert-info">
+        <div th:if="${param.logout}" class="alert alert--info">
             You have been logged out.
         </div>
-        <div th:if="${param.verified == 'true'}" class="alert alert-success">
+        <div th:if="${param.verified == 'true'}" class="alert alert--success">
             Your account has been successfully verified. Please log in.
         </div>
-        <div th:if="${param.verified == 'false'}" class="alert alert-danger">
+        <div th:if="${param.verified == 'false'}" class="alert alert--danger">
             There was an error during your account verification. Please contact support or try registering again.
         </div>
-        <form th:action="@{/login}" method="post" class="space-y-6">
-            <div>
-                <label for="username" class="block text-sm font-medium">Username:</label>
-                <input type="text" id="username" name="username" autofocus="autofocus" class="w-full"/>
+        <form th:action="@{/login}" method="post">
+            <div class="form-group">
+                <label for="username" class="form-label">Username:</label>
+                <input type="text" id="username" name="username" autofocus="autofocus" class="form-control"/>
             </div>
-            <div>
-                <label for="password" class="block text-sm font-medium">Password:</label>
-                <input type="password" id="password" name="password" class="w-full"/>
+            <div class="form-group">
+                <label for="password" class="form-label">Password:</label>
+                <input type="password" id="password" name="password" class="form-control"/>
             </div>
-            <div>
-                <input type="submit" value="Log In" class="w-full"/>
+            <div class="form-group">
+                <input type="submit" value="Log In" class="btn"/>
             </div>
         </form>
         <div class="mt-6 text-center">

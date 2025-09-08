@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
-<footer th:fragment="footer" class="flex justify-center border-t border-solid border-t-[#f0f3f4] dark:bg-gray-900 dark:border-gray-700 mt-10">
-    <div class="flex max-w-[960px] flex-1 flex-col items-center">
-        <div class="flex gap-6 py-5 text-center">
-            <a th:href="@{/blog}" class="text-sm font-bold leading-normal tracking-[0.015em] text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">Blog</a>
-            <a th:href="@{/faq}" class="text-sm font-bold leading-normal tracking-[0.015em] text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">FAQ</a>
-            <a th:href="@{/whats-new}" class="text-sm font-bold leading-normal tracking-[0.015em] text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">What's New</a>
-        </div>
-        <div class="flex flex-col gap-6 px-5 pb-10 text-center">
-            <p class="text-[#618089] dark:text-gray-400 text-base font-normal leading-normal">© 2025 azprojs.net. All rights reserved.</p>
+<footer th:fragment="footer" class="footer">
+    <div class="footer__container">
+        <nav class="footer__nav">
+            <a th:href="@{/blog}" class="footer__link">Blog</a>
+            <a th:href="@{/faq}" class="footer__link">FAQ</a>
+            <a th:href="@{/whats-new}" class="footer__link">What's New</a>
+        </nav>
+        <div class="footer__copyright">
+            <p>© 2025 azprojs.net. All rights reserved.</p>
         </div>
     </div>
 </footer>

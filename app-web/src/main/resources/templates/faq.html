@@ -4,7 +4,6 @@
     <title>FAQ | Data Flow Visualizer</title>
     <meta name="description" content="Frequently Asked Questions about the Data Flow Visualizer tool." />
     <meta name="keywords" content="FAQ, Data Flow Visualizer, Teradata, BTEQ, SQL, ETL, Data Lineage, Support, Help" />
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
     <link
@@ -50,15 +49,12 @@
                 <div class="max-w-4xl mx-auto">
                     <h1 class="text-4xl font-bold text-center text-white mb-12">Frequently Asked Questions</h1>
 
-                    <div class="space-y-4">
-                        <div th:each="faq : ${faqs}" class="faq-item">
-                            <button class="faq-question">
-                                <span th:text="${faq.question}"></span>
-                                <span>&#9660;</span>
-                            </button>
-                            <div class="faq-answer prose prose-invert max-w-none" th:utext="${faq.answer}">
+                    <div class="accordion">
+                        <details th:each="faq : ${faqs}">
+                            <summary th:text="${faq.question}"></summary>
+                            <div class="accordion__content prose prose-invert max-w-none" th:utext="${faq.answer}">
                             </div>
-                        </div>
+                        </details>
 
                         <div th:if="${faqs.isEmpty()}" class="text-center py-10">
                             <p class="text-gray-400">No FAQs have been published yet. Check back soon!</p>

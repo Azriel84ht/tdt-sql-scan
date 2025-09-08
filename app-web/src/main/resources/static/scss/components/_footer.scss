@@ -1,0 +1,47 @@
+// ==========================================================================
+// # COMPONENT: FOOTER
+// ==========================================================================
+// The main site footer.
+// ==========================================================================
+.footer {
+  display: flex;
+  justify-content: center;
+  border-top: 1px solid $color-border;
+  background-color: $color-background-dark;
+  margin-top: $spacing-xxl;
+
+  &__container {
+    display: flex;
+    max-width: 960px;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  &__nav {
+    display: flex;
+    gap: $spacing-lg;
+    padding: $spacing-lg 0;
+    text-align: center;
+  }
+
+  &__link {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-bold;
+    letter-spacing: 0.015em;
+    color: $color-text-light;
+    text-decoration: none;
+
+    &:hover {
+      color: white;
+    }
+  }
+
+  &__copyright {
+    padding-bottom: $spacing-xl;
+    text-align: center;
+    color: $color-secondary;
+    font-size: $font-size-base;
+    font-weight: $font-weight-normal;
+  }
+}

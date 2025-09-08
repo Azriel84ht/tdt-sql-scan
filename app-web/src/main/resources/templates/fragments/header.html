@@ -5,33 +5,27 @@
 </head>
 <body>
 
-<header th:fragment="header" class="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-solid border-white/20 px-10 py-3 bg-gray-900/50 backdrop-blur-lg">
-    <div class="flex items-center gap-4 text-white">
-        <a th:href="@{/}" class="flex items-center gap-4">
-            <img th:src="@{/main-images/icon_full_200x200.png}" alt="Data Flow Visualizer Logo" class="h-8 w-8">
-            <h2 class="text-lg font-bold leading-tight tracking-[-0.015em]">Data Flow Visualizer</h2>
+<header th:fragment="header" class="header">
+    <a th:href="@{/}" class="header__logo">
+        <img th:src="@{/main-images/icon_full_200x200.png}" alt="Data Flow Visualizer Logo">
+        <h2>Data Flow Visualizer</h2>
+    </a>
+    <nav class="header__nav" sec:authorize="isAuthenticated()">
+        <span class="text-gray-300">Welcome, <span sec:authentication="name">User</span>!</span>
+        <a th:href="@{/app}" class="header__link">App</a>
+        <a th:href="@{/suggestions}" class="header__link">Suggestions</a>
+        <a sec:authorize="hasAuthority('ROLE_ADMIN')" th:href="@{/admin}" class="header__link">Admin Panel</a>
+        <form th:action="@{/logout}" method="post" style="display: inline;">
+            <button type="submit" class="header__link" style="background: none; border: none; cursor: pointer;">Logout</button>
+        </form>
+    </nav>
+    <div class="header__actions" sec:authorize="!isAuthenticated()">
+        <a th:href="@{/register}" class="header__button header__button--primary">
+            <span class="truncate">Register</span>
         </a>
-    </div>
-    <div class="flex items-center gap-4">
-        <!-- Dynamic Nav Links -->
-        <div sec:authorize="isAuthenticated()" class="flex items-center gap-4">
-            <span class="text-gray-300">Welcome, <span sec:authentication="name">User</span>!</span>
-            <a th:href="@{/app}" class="text-sm font-bold leading-normal tracking-[0.015em] text-gray-300 hover:text-white">App</a>
-            <a th:href="@{/suggestions}" class="text-sm font-bold leading-normal tracking-[0.015em] text-gray-300 hover:text-white">Suggestions</a>
-            <a sec:authorize="hasAuthority('ROLE_ADMIN')" th:href="@{/admin}" class="text-sm font-bold leading-normal tracking-[0.015em] text-gray-300 hover:text-white">Admin Panel</a>
-            <form th:action="@{/logout}" method="post" style="display: inline;">
-                <button type="submit" class="text-sm font-bold leading-normal tracking-[0.015em] text-gray-300 hover:text-white bg-transparent border-none cursor-pointer">Logout</button>
-            </form>
-        </div>
-
-        <div sec:authorize="!isAuthenticated()" class="flex gap-2">
-            <a th:href="@{/register}" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#21bded] text-[#111618] text-sm font-bold leading-normal tracking-[0.015em]">
-                <span class="truncate">Register</span>
-            </a>
-            <a th:href="@{/login}" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-gray-700 text-white text-sm font-bold leading-normal tracking-[0.015em]">
-                <span class="truncate">Login</span>
-            </a>
-        </div>
+        <a th:href="@{/login}" class="header__button header__button--secondary">
+            <span class="truncate">Login</span>
+        </a>
     </div>
 </header>
 

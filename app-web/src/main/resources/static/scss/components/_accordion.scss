@@ -1,0 +1,44 @@
+// ==========================================================================
+// # COMPONENT: ACCORDION
+// ==========================================================================
+// Used for the FAQ page.
+// ==========================================================================
+.accordion {
+  details {
+    margin-bottom: $spacing-md;
+    border-radius: $border-radius-base;
+    overflow: hidden;
+
+    summary {
+      padding: $spacing-lg;
+      font-weight: $font-weight-bold;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: rgba($color-background-dark, 0.7);
+      color: $color-text-light;
+      list-style: none; // Remove default marker
+
+      &::-webkit-details-marker {
+        display: none; // Remove default marker for Chrome
+      }
+
+      &::after {
+        content: '+';
+        font-size: 1.5rem;
+        transition: transform 0.2s ease-in-out;
+      }
+    }
+
+    .accordion__content {
+      padding: $spacing-lg;
+      background-color: rgba($color-background-dark, 0.5);
+      color: $color-text-light;
+    }
+
+    &[open] > summary::after {
+      transform: rotate(45deg);
+    }
+  }
+}
