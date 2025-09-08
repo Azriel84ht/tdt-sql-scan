@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" class="dark">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" class="dark">
 <head>
     <title>What's New | Data Flow Visualizer</title>
     <meta name="description" content="Latest updates and new features of the Data Flow Visualizer tool." />
@@ -17,7 +17,8 @@
     <div class="relative flex size-full min-h-screen flex-col group/design-root overflow-x-hidden">
         <canvas class="background"></canvas>
         <div class="layout-container flex h-full grow flex-col">
-            <div th:replace="~{fragments/header_guest :: header_guest}"></div>
+            <div th:replace="~{fragments/header_guest :: header_guest}" sec:authorize="!isAuthenticated()"></div>
+            <div th:replace="~{fragments/header_authenticated :: header_authenticated}" sec:authorize="isAuthenticated()"></div>
 
             <main class="flex-1 justify-center py-20 px-4 sm:px-6 lg:px-8">
                 <div class="max-w-4xl mx-auto">
@@ -44,6 +45,7 @@
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/particlesjs/2.2.3/particles.min.js"></script>
     <script th:src="@{/js/particles-config.js}"></script>
-    <script th:src="@{/js/header.js}"></script>
+    <script th:src="@{/js/header.js}" sec:authorize="!isAuthenticated()"></script>
+    <script th:src="@{/js/header_authenticated.js}" sec:authorize="isAuthenticated()"></script>
 </body>
 </html>
