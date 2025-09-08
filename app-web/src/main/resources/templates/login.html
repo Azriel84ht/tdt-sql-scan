@@ -5,8 +5,10 @@
     <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
 </head>
 <body>
+    <!-- Conditional Header -->
     <div th:replace="~{fragments/header_guest :: header_guest}" sec:authorize="!isAuthenticated()"></div>
     <div th:replace="~{fragments/header_authenticated :: header_authenticated}" sec:authorize="isAuthenticated()"></div>
+
     <div class="card card--glow">
         <h2 class="text-2xl font-bold text-center mb-6">Login</h2>
         <div th:if="${param.error}" class="alert alert--danger">
@@ -44,6 +46,8 @@
         </div>
     </div>
     <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <!-- Conditional Scripts -->
     <script th:src="@{/js/header.js}" sec:authorize="!isAuthenticated()"></script>
     <script th:src="@{/js/header_authenticated.js}" sec:authorize="isAuthenticated()"></script>
 </body>

@@ -16,6 +16,7 @@
     <div class="relative flex size-full min-h-screen flex-col group/design-root overflow-x-hidden">
         <canvas class="background"></canvas>
         <div class="layout-container flex h-full grow flex-col">
+            <!-- Conditional Header -->
             <div th:replace="~{fragments/header_guest :: header_guest}" sec:authorize="!isAuthenticated()"></div>
             <div th:replace="~{fragments/header_authenticated :: header_authenticated}" sec:authorize="isAuthenticated()"></div>
 
@@ -48,6 +49,7 @@
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/particlesjs/2.2.3/particles.min.js"></script>
     <script th:src="@{/js/particles-config.js}"></script>
+    <!-- Conditional Scripts -->
     <script th:src="@{/js/header.js}" sec:authorize="!isAuthenticated()"></script>
     <script th:src="@{/js/header_authenticated.js}" sec:authorize="isAuthenticated()"></script>
 </body>

@@ -2,8 +2,6 @@
 @import 'base/typography';
 @import 'components/button';
 @import 'components/header';
-@import 'components/header_guest';
-@import 'components/header_authenticated';
 @import 'components/layout';
 @import 'components/admin';
 @import 'components/form';
@@ -14,3 +12,5 @@
 @import 'components/footer';
 @import 'components/hero';
 @import 'components/section';
+@import 'components/header_guest';
+@import 'components/header_authenticated';
