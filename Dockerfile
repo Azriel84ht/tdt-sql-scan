@@ -11,7 +11,7 @@ FROM maven:3.9-eclipse-temurin-21 AS backend
 WORKDIR /app
 COPY . .
 COPY --from=frontend /app/app-web/src/main/resources/static/css/style.css ./app-web/src/main/resources/static/css/style.css
-RUN mvn clean package -DskipTests
+RUN mvn clean package -DskipTests -Pskip-frontend-build
 
 # Stage 3: Final Image
 FROM eclipse-temurin:21-jre
