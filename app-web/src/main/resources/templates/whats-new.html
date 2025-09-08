@@ -17,7 +17,7 @@
     <div class="relative flex size-full min-h-screen flex-col group/design-root overflow-x-hidden">
         <canvas class="background"></canvas>
         <div class="layout-container flex h-full grow flex-col">
-            <div th:replace="~{fragments/header :: header}"></div>
+            <div th:replace="~{fragments/header_guest :: header_guest}"></div>
 
             <main class="flex-1 justify-center py-20 px-4 sm:px-6 lg:px-8">
                 <div class="max-w-4xl mx-auto">
@@ -44,5 +44,6 @@
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/particlesjs/2.2.3/particles.min.js"></script>
     <script th:src="@{/js/particles-config.js}"></script>
+    <script th:src="@{/js/header.js}"></script>
 </body>
 </html>

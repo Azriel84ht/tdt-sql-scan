@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<header th:fragment="header_guest" class="header-guest">
+    <div class="header-guest__container">
+        <!-- Left Section: Logo and Title -->
+        <div class="header-guest__brand">
+            <a th:href="@{/}" class="header-guest__logo-link">
+                <img th:src="@{/main-images/icon_full_200x200.png}" alt="Data Flow Visualizer Logo" class="header-guest__logo-img">
+                <span class="header-guest__title">Data Flow Visualizer</span>
+            </a>
+        </div>
+
+        <!-- Center Section: Navigation -->
+        <nav class="header-guest__nav">
+            <a th:href="@{/blog}" class="header-guest__link">Blog</a>
+            <a th:href="@{/faq}" class="header-guest__link">FAQ</a>
+            <a th:href="@{/whats-new}" class="header-guest__link">What's New</a>
+        </nav>
+
+        <!-- Right Section: Actions -->
+        <div class="header-guest__actions">
+            <a th:href="@{/login}" class="header-guest__button header-guest__button--secondary">Login</a>
+            <a th:href="@{/register}" class="header-guest__button header-guest__button--primary">Register</a>
+        </div>
+
+        <!-- Mobile Menu: Hamburger Icon -->
+        <div class="header-guest__mobile-menu-icon">
+            <button id="mobile-menu-toggle" class="header-guest__hamburger">
+                &#9776; <!-- Hamburger Icon -->
+            </button>
+        </div>
+    </div>
+
+    <!-- Mobile Menu: Panel (Initially Hidden) -->
+    <div id="mobile-menu-panel" class="header-guest__mobile-panel">
+        <nav class="header-guest__mobile-nav">
+            <a th:href="@{/blog}" class="header-guest__mobile-link">Blog</a>
+            <a th:href="@{/faq}" class="header-guest__mobile-link">FAQ</a>
+            <a th:href="@{/whats-new}" class="header-guest__mobile-link">What's New</a>
+        </nav>
+        <div class="header-guest__mobile-actions">
+            <a th:href="@{/login}" class="header-guest__mobile-button header-guest__mobile-button--secondary">Login</a>
+            <a th:href="@{/register}" class="header-guest__mobile-button header-guest__mobile-button--primary">Register</a>
+        </div>
+    </div>
+</header>
+
+</body>
+</html>
