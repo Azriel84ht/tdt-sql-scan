@@ -1,53 +1,41 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" class="dark">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/content-layout}">
+
 <head>
     <title>What's New | Data Flow Visualizer</title>
-    <meta name="description" content="Latest updates and new features of the Data Flow Visualizer tool." />
-    <meta name="keywords" content="What's New, Updates, Features, Data Flow Visualizer, Teradata, BTEQ, SQL, ETL, Data Lineage" />
-    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
-    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
-    <link
-      rel="stylesheet"
-      as="style"
-      onload="this.rel='stylesheet'"
-      href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900"
-    />
 </head>
-<body style='font-family: Inter, "Noto Sans", sans-serif;'>
-    <div class="relative flex size-full min-h-screen flex-col group/design-root overflow-x-hidden">
-        <canvas class="background"></canvas>
-        <div class="layout-container flex h-full grow flex-col">
-            <!-- Conditional Header -->
-            <div th:replace="~{fragments/header_guest :: header_guest}" sec:authorize="!isAuthenticated()"></div>
-            <div th:replace="~{fragments/header_authenticated :: header_authenticated}" sec:authorize="isAuthenticated()"></div>
 
-            <main class="flex-1 justify-center py-20 px-4 sm:px-6 lg:px-8">
-                <div class="max-w-4xl mx-auto">
-                    <h1 class="text-4xl font-bold text-center text-white mb-12">What's New</h1>
+<body>
 
-                    <div class="space-y-12">
-                        <div th:each="item : ${whatsnews}" class="feature-card">
-                            <h2 class="text-2xl font-bold text-white mb-2" th:text="${item.title}"></h2>
-                            <div class="text-sm text-gray-400 mb-4">
-                                <span>Published on <span th:text="${#temporals.format(item.createdAt, 'MMMM dd, yyyy')}">Date</span></span>
-                            </div>
-                            <div class="prose prose-invert max-w-none" th:utext="${item.content}"></div>
-                        </div>
+<div layout:fragment="hero_content">
+    <h1 class="hero__title">What's New</h1>
+    <p class="hero__subtitle">Discover the latest features, improvements, and updates to the Data Flow Visualizer.</p>
+</div>
 
-                        <div th:if="${whatsnews.isEmpty()}" class="text-center py-10">
-                            <p class="text-gray-400">No updates have been published yet. Check back soon!</p>
-                        </div>
-                    </div>
-                </div>
-            </main>
+<nav layout:fragment="breadcrumbs" aria-label="Breadcrumb">
+    <ol>
+        <li><a th:href="@{/}">Home</a></li>
+        <li><span>What's New</span></li>
+    </ol>
+</nav>
 
-            <div th:replace="~{fragments/footer :: footer}"></div>
+<div layout:fragment="content">
+    <div class="space-y-12">
+        <div th:each="item : ${whatsnews}" class="feature-card">
+            <h2 class="text-2xl font-bold text-white mb-2" th:text="${item.title}"></h2>
+            <div class="text-sm text-gray-400 mb-4">
+                <span>Published on <span th:text="${#temporals.format(item.createdAt, 'MMMM dd, yyyy')}">Date</span></span>
+            </div>
+            <div class="prose prose-invert max-w-none" th:utext="${item.content}"></div>
+        </div>
+
+        <div th:if="${whatsnews.isEmpty()}" class="text-center py-10">
+            <p class="text-gray-400">No updates have been published yet. Check back soon!</p>
         </div>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/particlesjs/2.2.3/particles.min.js"></script>
-    <script th:src="@{/js/particles-config.js}"></script>
-    <!-- Conditional Scripts -->
-    <script th:src="@{/js/header.js}" sec:authorize="!isAuthenticated()"></script>
-    <script th:src="@{/js/header_authenticated.js}" sec:authorize="isAuthenticated()"></script>
+</div>
+
 </body>
 </html>

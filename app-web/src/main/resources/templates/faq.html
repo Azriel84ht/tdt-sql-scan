@@ -1,85 +1,84 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" class="dark">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/content-layout}">
+
 <head>
     <title>FAQ | Data Flow Visualizer</title>
-    <meta name="description" content="Frequently Asked Questions about the Data Flow Visualizer tool." />
-    <meta name="keywords" content="FAQ, Data Flow Visualizer, Teradata, BTEQ, SQL, ETL, Data Lineage, Support, Help" />
-    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
-    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
-    <link
-      rel="stylesheet"
-      as="style"
-      onload="this.rel='stylesheet'"
-      href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900"
-    />
-    <style>
-        .faq-item {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            margin-bottom: 1rem;
-            overflow: hidden;
-        }
-        .faq-question {
-            width: 100%;
-            text-align: left;
-            padding: 1.5rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: white;
-        }
-        .faq-answer {
-            padding: 0 1.5rem 1.5rem 1.5rem;
-            display: none;
-            color: #e2e8f0;
-        }
-    </style>
+    <th:block layout:fragment="head">
+        <style>
+            .faq-item {
+                background: rgba(255, 255, 255, 0.05);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 16px;
+                margin-bottom: 1rem;
+                overflow: hidden;
+            }
+            .faq-question {
+                width: 100%;
+                text-align: left;
+                padding: 1.5rem;
+                font-weight: 600;
+                cursor: pointer;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                color: white;
+            }
+            .faq-answer {
+                padding: 0 1.5rem 1.5rem 1.5rem;
+                display: none;
+                color: #e2e8f0;
+            }
+        </style>
+    </th:block>
 </head>
-<body style='font-family: Inter, "Noto Sans", sans-serif;'>
-    <div class="relative flex size-full min-h-screen flex-col group/design-root overflow-x-hidden">
-        <canvas class="background"></canvas>
-        <div class="layout-container flex h-full grow flex-col">
-            <!-- Conditional Header -->
-            <div th:replace="~{fragments/header_guest :: header_guest}" sec:authorize="!isAuthenticated()"></div>
-            <div th:replace="~{fragments/header_authenticated :: header_authenticated}" sec:authorize="isAuthenticated()"></div>
 
-            <main class="section">
-                <div class="max-w-4xl mx-auto">
-                    <h1 class="section__title">Frequently Asked Questions</h1>
+<body>
 
-                    <div class="accordion">
-                        <details th:each="faq : ${faqs}">
-                            <summary th:text="${faq.question}"></summary>
-                            <div class="accordion__content prose prose-invert max-w-none" th:utext="${faq.answer}">
-                            </div>
-                        </details>
+<div layout:fragment="hero_content">
+    <h1 class="hero__title">Frequently Asked Questions</h1>
+    <p class="hero__subtitle">Find answers to the most common questions about the Data Flow Visualizer.</p>
+</div>
 
-                        <div th:if="${faqs.isEmpty()}" class="text-center py-10">
-                            <p class="text-gray-400">No FAQs have been published yet. Check back soon!</p>
-                        </div>
-                    </div>
-                </div>
-            </main>
+<nav layout:fragment="breadcrumbs" aria-label="Breadcrumb">
+    <ol>
+        <li><a th:href="@{/}">Home</a></li>
+        <li><span>FAQ</span></li>
+    </ol>
+</nav>
 
-            <div th:replace="~{fragments/footer :: footer}"></div>
+<div layout:fragment="content">
+    <div class="accordion">
+        <details th:each="faq : ${faqs}" class="faq-item">
+            <summary class="faq-question" th:text="${faq.question}"></summary>
+            <div class="faq-answer prose prose-invert max-w-none" th:utext="${faq.answer}">
+            </div>
+        </details>
+
+        <div th:if="${faqs.isEmpty()}" class="text-center py-10">
+            <p class="text-gray-400">No FAQs have been published yet. Check back soon!</p>
         </div>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/particlesjs/2.2.3/particles.min.js"></script>
-    <script th:src="@{/js/particles-config.js}"></script>
     <script>
         document.querySelectorAll('.faq-question').forEach(button => {
             button.addEventListener('click', () => {
                 const answer = button.nextElementSibling;
-                answer.style.display = answer.style.display === 'block' ? 'none' : 'block';
+                // Simple toggle for the accordion content
+                if (answer.style.display === 'block') {
+                    answer.style.display = 'none';
+                } else {
+                    // Hide other open answers
+                    document.querySelectorAll('.faq-answer').forEach(ans => {
+                        ans.style.display = 'none';
+                    });
+                    answer.style.display = 'block';
+                }
             });
         });
     </script>
-    <!-- Conditional Scripts -->
-    <script th:src="@{/js/header.js}" sec:authorize="!isAuthenticated()"></script>
-    <script th:src="@{/js/header_authenticated.js}" sec:authorize="isAuthenticated()"></script>
+</div>
+
 </body>
 </html>

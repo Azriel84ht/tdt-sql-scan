@@ -1,1 +1,68 @@
 // General layout styles
+
+.with-fixed-header {
+    padding-top: 120px; // Adjust this value to match header height
+}
+
+main.section {
+    flex-grow: 1;
+}
+
+.main-content-container {
+  max-width: 80rem; // Equivalent to max-w-7xl, plus some room
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 1.5rem; // Spacing
+}
+
+.title-banner {
+  background: rgba(30, 41, 59, 0.2); // slate-800 with 20% opacity
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.5rem 2rem;
+  margin-bottom: 1rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 30px 8px rgba(0, 255, 255, 0.9); // Cyan glow effect
+  min-height: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.breadcrumbs {
+  padding: 0;
+  margin: 0 0 1.5rem 0;
+  font-size: 0.875rem;
+
+  ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  li {
+    display: inline;
+  }
+
+  a {
+    color: $color-secondary;
+    text-decoration: none;
+    &:hover {
+      color: $color-primary;
+    }
+  }
+
+  li:not(:last-child)::after {
+    content: '>';
+    margin: 0 0.5rem;
+    color: $color-secondary;
+  }
+}

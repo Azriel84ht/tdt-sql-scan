@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      class="dark">
+<head>
+    <title layout:title-pattern="$CONTENT_TITLE | $LAYOUT_TITLE">Data Flow Visualizer</title>
+    <meta name="description" content="Visualize complex Teradata BTEQ scripts instantly. Our tool transforms convoluted SQL into clear, interactive data flow diagrams to untangle your ETL processes." />
+    <meta name="keywords" content="Data Flow, Visualizer, Teradata, BTEQ, SQL, ETL, Data Lineage, Stitch Design" />
+    <link rel="icon" type="image/png" th:href="@{/main-images/icon_full_200x200.png}" />
+    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
+    <link
+            rel="stylesheet"
+            as="style"
+            onload="this.rel='stylesheet'"
+            href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900"
+    />
+    <!-- Page-specific head elements -->
+    <th:block layout:fragment="head"></th:block>
+</head>
+<body style='font-family: Inter, "Noto Sans", sans-serif;'>
+<!-- Root container for positioning context -->
+<div class="relative">
+    <!-- Particle background container -->
+    <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;">
+        <canvas class="background"></canvas>
+    </div>
+
+    <!-- Main flex container for layout -->
+    <div class="relative flex flex-col min-h-screen with-fixed-header">
+        <!-- Header -->
+        <div th:replace="~{fragments/header_guest :: header_guest}" sec:authorize="!isAuthenticated()"></div>
+        <div th:replace="~{fragments/header_authenticated :: header_authenticated}" sec:authorize="isAuthenticated()"></div>
+
+        <!-- Hero Section -->
+        <div class="title-banner hero">
+            <div layout:fragment="hero_content">
+                <!-- Default hero content, can be replaced by specific pages -->
+                <h1 class="hero__title" layout:fragment="title">Default Title</h1>
+            </div>
+        </div>
+
+        <!-- Breadcrumbs -->
+        <nav class="breadcrumbs main-content-container" aria-label="Breadcrumb" layout:fragment="breadcrumbs">
+            <!-- Breadcrumb content will be injected here -->
+        </nav>
+
+        <!-- Main content area that grows to push the footer down -->
+        <main class="section">
+            <div class="main-content-container">
+                <div layout:fragment="content">
+                    <p>This is the default content.</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <div th:replace="~{fragments/footer :: footer}"></div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/particlesjs/2.2.3/particles.min.js"></script>
+<script th:src="@{/js/particles-config.js}"></script>
+<!-- Conditional Scripts -->
+<script th:src="@{/js/header.js}" sec:authorize="!isAuthenticated()"></script>
+<script th:src="@{/js/header_authenticated.js}" sec:authorize="isAuthenticated()"></script>
+</body>
+</html>

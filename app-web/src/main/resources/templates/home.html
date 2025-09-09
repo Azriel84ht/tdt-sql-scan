@@ -1,19 +1,9 @@
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-  <head>
-    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
-    <link
-      rel="stylesheet"
-      as="style"
-      onload="this.rel='stylesheet'"
-      href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900"
-    />
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/content-layout}">
 
+<head>
     <title>Data Flow Visualizer | Teradata BTEQ & ETL Lineage Tool</title>
-    <link rel="icon" type="image/png" th:href="@{/main-images/icon_full_200x200.png}" />
-    <meta name="description" content="Visualize complex Teradata BTEQ scripts instantly. Our tool transforms convoluted SQL into clear, interactive data flow diagrams to untangle your ETL processes." />
-    <meta name="keywords" content="Data Flow, Visualizer, Teradata, BTEQ, SQL, ETL, Data Lineage, Stitch Design" />
-
-    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
     <style>
       .popup-overlay {
         position: fixed;
@@ -96,8 +86,21 @@
         color: #ffffff;
       }
     </style>
-  </head>
-  <body>
+</head>
+
+<body>
+
+<!-- The hero content goes into the title banner -->
+<div layout:fragment="hero_content">
+    <h1 class="hero__title" th:text="${content.heroTitle}">Untangle Your Teradata BTEQ Scripts</h1>
+    <p class="hero__subtitle" th:utext="${content.heroSubtitle}">Transform complex Teradata BTEQ scripts into interactive data flow diagrams with Data Flow Visualizer. Visualize your data's journey, understand dependencies, and optimize your processes effortlessly.</p>
+    <a th:href="@{/register}" class="hero__cta-button">Get Started for Free</a>
+</div>
+
+<!-- No breadcrumbs for the home page -->
+<nav layout:fragment="breadcrumbs"></nav>
+
+<div layout:fragment="content">
     <div th:if="${content.showPopup}" id="popup-overlay" class="popup-overlay">
         <div class="popup-content">
             <div class="popup-header">
@@ -117,82 +120,62 @@
         </div>
     </div>
 
-    <div class="relative flex size-full min-h-screen flex-col group/design-root overflow-x-hidden" style='font-family: Inter, "Noto Sans", sans-serif;'>
-      <div class="layout-container flex h-full grow flex-col">
-        <!-- Conditional Header -->
-        <div th:replace="~{fragments/header_guest :: header_guest}" sec:authorize="!isAuthenticated()"></div>
-        <div th:replace="~{fragments/header_authenticated :: header_authenticated}" sec:authorize="isAuthenticated()"></div>
-        <main class="flex-grow">
-          <!-- Hero Section -->
-          <section class="hero">
-            <div class="hero__content">
-              <h1 class="hero__title" th:text="${content.heroTitle}">Untangle Your Teradata BTEQ Scripts</h1>
-              <p class="hero__subtitle" th:utext="${content.heroSubtitle}">Transform complex Teradata BTEQ scripts into interactive data flow diagrams with Data Flow Visualizer. Visualize your data's journey, understand dependencies, and optimize your processes effortlessly.</p>
-              <a th:href="@{/register}" class="cta-button">Get Started for Free</a>
-            </div>
-          </section>
-
-          <!-- Features Section -->
-          <section class="section section--features">
-            <h2 class="section__title">Main Features</h2>
-            <div class="grid">
-              <!-- Feature Card 1 -->
-              <div class="card card--feature">
+    <!-- Features Section -->
+    <section class="section section--features">
+        <h2 class="section__title">Main Features</h2>
+        <div class="grid">
+            <!-- Feature Card 1 -->
+            <div class="card card--feature">
                 <div class="card__icon">&#128279;</div>
                 <h3 class="card__title">Interactive Visualization</h3>
                 <p>Engage with your data lineage through a dynamic and interactive graph. Zoom, pan, and click on nodes to explore dependencies.</p>
-              </div>
-              <!-- Feature Card 2 -->
-              <div class="card card--feature">
+            </div>
+            <!-- Feature Card 2 -->
+            <div class="card card--feature">
                 <div class="card__icon">&#128206;</div>
                 <h3 class="card__title">Effortless Script Parsing</h3>
                 <p>Our intelligent parser automatically analyzes your Teradata BTEQ scripts, saving you hours of manual work.</p>
-              </div>
-              <!-- Feature Card 3 -->
-              <div class="card card--feature">
+            </div>
+            <!-- Feature Card 3 -->
+            <div class="card card--feature">
                 <div class="card__icon">&#128228;</div>
                 <h3 class="card__title">Export and Share</h3>
                 <p>Export your data flow diagrams as images or JSON to share with your team and stakeholders, improving collaboration.</p>
-              </div>
             </div>
-          </section>
+        </div>
+    </section>
 
-          <!-- How It Works Section -->
-          <section class="section section--how-it-works">
-            <h2 class="section__title">How It Works</h2>
-            <div class="flex">
-              <div class="step">
+    <!-- How It Works Section -->
+    <section class="section section--how-it-works">
+        <h2 class="section__title">How It Works</h2>
+        <div class="flex">
+            <div class="step">
                 <div class="step__number">1</div>
                 <h3 class="step__title">Upload Your Scripts</h3>
                 <p>Drag and drop your Teradata BTEQ files into the application.</p>
-              </div>
-              <div class="step-arrow">&rarr;</div>
-              <div class="step">
+            </div>
+            <div class="step-arrow">&rarr;</div>
+            <div class="step">
                 <div class="step__number">2</div>
                 <h3 class="step__title">Visualize the Flow</h3>
                 <p>Watch as the application instantly generates a clear data flow diagram.</p>
-              </div>
-              <div class="step-arrow">&rarr;</div>
-              <div class="step">
+            </div>
+            <div class="step-arrow">&rarr;</div>
+            <div class="step">
                 <div class="step__number">3</div>
                 <h3 class="step__title">Analyze and Optimize</h3>
                 <p>Explore the graph to understand dependencies and identify optimization opportunities.</p>
-              </div>
             </div>
-          </section>
+        </div>
+    </section>
 
-          <!-- News and Updates Section -->
-          <section class="section section--news">
-            <h2 class="section__title">News and Updates</h2>
-            <div class="prose" th:utext="${content.newsSection}">
-              <!-- Dynamic content will be injected here -->
-            </div>
-          </section>
-        </main>
-        <div th:replace="~{fragments/footer :: footer}"></div>
-      </div>
-    </div>
-    <canvas class="background"></canvas>
+    <!-- News and Updates Section -->
+    <section class="section section--news">
+        <h2 class="section__title">News and Updates</h2>
+        <div class="prose" th:utext="${content.newsSection}">
+            <!-- Dynamic content will be injected here -->
+        </div>
+    </section>
     <script>
       const popupOverlay = document.getElementById('popup-overlay');
       const popupClose = document.getElementById('popup-close');
@@ -212,10 +195,7 @@
         popupOk.addEventListener('click', closePopup);
       }
     </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/particlesjs/2.2.3/particles.min.js"></script>
-    <script th:src="@{/js/particles-config.js}"></script>
-    <!-- Conditional Scripts -->
-    <script th:src="@{/js/header.js}" sec:authorize="!isAuthenticated()"></script>
-    <script th:src="@{/js/header_authenticated.js}" sec:authorize="isAuthenticated()"></script>
-  </body>
+</div>
+
+</body>
 </html>
