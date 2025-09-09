@@ -108,7 +108,6 @@
     border: none;
     box-shadow: none;
     width: 100%;
-    max-width: 1200px; /* Or your preferred max-width for content */
-    margin: 0 auto;
+    /* No max-width or margin to allow full-width content */
   }
 }
