@@ -30,15 +30,17 @@
 
         <main class="section">
             <div class="main-content-container">
-                <!-- Title Banner -->
-                <div class="title-banner">
-                    <h1 layout:fragment="title">Default Title</h1>
-                </div>
+                <th:block layout:fragment="page-header">
+                    <!-- Title Banner -->
+                    <div class="title-banner">
+                        <h1 layout:fragment="title">Default Title</h1>
+                    </div>
 
-                <!-- Breadcrumbs -->
-                <nav class="breadcrumbs" aria-label="Breadcrumb" layout:fragment="breadcrumbs">
-                    <!-- Breadcrumb content will be injected here -->
-                </nav>
+                    <!-- Breadcrumbs -->
+                    <nav class="breadcrumbs" aria-label="Breadcrumb" layout:fragment="breadcrumbs">
+                        <!-- Breadcrumb content will be injected here -->
+                    </nav>
+                </th:block>
 
                 <!-- Main Content -->
                 <div class="content-placeholder">

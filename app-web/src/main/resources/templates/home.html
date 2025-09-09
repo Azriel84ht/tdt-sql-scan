@@ -195,11 +195,8 @@
     </script>
 </div>
 
-<!-- No title banner for the home page -->
-<div layout:fragment="title" th:remove="tag"></div>
-
-<!-- No breadcrumbs for the home page -->
-<div layout:fragment="breadcrumbs" th:remove="tag"></div>
+<!-- No page header (title banner and breadcrumbs) for the home page -->
+<th:block layout:fragment="page-header"></th:block>
 
 </body>
 </html>
