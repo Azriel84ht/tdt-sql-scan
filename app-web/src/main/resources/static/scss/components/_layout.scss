@@ -16,7 +16,7 @@ main.section {
 }
 
 .title-banner {
-  background: rgba(30, 41, 59, 0.4); // slate-800 with 40% opacity
+  background: rgba(30, 41, 59, 0.2); // slate-800 with 20% opacity
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-radius: 16px;
@@ -25,12 +25,12 @@ main.section {
   margin-bottom: 1.5rem;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 0 30px 5px rgba(0, 255, 255, 0.7); // Cyan glow effect
+  box-shadow: 0 0 30px 5px rgba(0, 255, 255, 0.9); // Cyan glow effect
   min-height: 400px;
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 95%;
+  width: 90%;
   margin-left: auto;
   margin-right: auto;
 
