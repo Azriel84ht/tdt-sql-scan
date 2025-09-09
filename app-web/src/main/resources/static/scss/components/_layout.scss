@@ -1,5 +1,9 @@
 // General layout styles
 
+main.section {
+    flex-grow: 0;
+}
+
 .main-content-container {
   max-width: 80rem; // Equivalent to max-w-7xl, plus some room
   margin-left: auto;
