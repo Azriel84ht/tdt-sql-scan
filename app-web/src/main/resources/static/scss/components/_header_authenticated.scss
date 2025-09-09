@@ -1,0 +1,224 @@
+// ==========================================================================
+// # AUTHENTICATED HEADER
+// ==========================================================================
+
+.header-authenticated {
+  position: fixed;
+  top: $spacing-md;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - #{$spacing-md * 2});
+  max-width: 1200px;
+  z-index: 1000;
+  transition: top 0.3s ease-in-out;
+
+  &__container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: $spacing-sm $spacing-lg;
+    background: rgba(40, 40, 40, 0.65);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: $border-radius-lg;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  }
+
+  &__brand {
+    display: flex;
+    align-items: center;
+  }
+
+  &__logo-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: $color-text-light;
+  }
+
+  &__logo-img {
+    height: 40px;
+    margin-right: $spacing-md;
+  }
+
+  &__title {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $color-text-light;
+  }
+
+  &__nav {
+    display: flex;
+    gap: $spacing-lg;
+
+    @media (max-width: 768px) {
+      display: none;
+    }
+  }
+
+  &__link {
+    color: $color-text-light;
+    text-decoration: none;
+    transition: color 0.3s ease;
+
+    &:hover {
+      color: $color-primary;
+    }
+  }
+
+  &__actions {
+    position: relative;
+  }
+
+  &__mobile-menu-icon {
+    display: none;
+
+    @media (max-width: 768px) {
+      display: block;
+    }
+  }
+
+  &__hamburger {
+    background: none;
+    border: none;
+    color: $color-text-light;
+    font-size: 24px;
+    cursor: pointer;
+  }
+
+  &__mobile-panel {
+    display: none;
+    flex-direction: column;
+    gap: $spacing-md;
+    background: rgba(40, 40, 40, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: $border-radius-lg;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: $spacing-lg;
+    margin-top: $spacing-sm;
+
+    &.is-open {
+      display: flex;
+    }
+  }
+
+  &__mobile-nav {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-md;
+    border-bottom: 1px solid $color-border;
+    padding-bottom: $spacing-md;
+  }
+
+  &__mobile-link {
+    color: $color-text-light;
+    text-decoration: none;
+    font-size: $font-size-lg;
+    text-align: center;
+  }
+
+  &__mobile-actions {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-md;
+    padding-top: $spacing-md;
+  }
+
+  &__mobile-button {
+    padding: $spacing-md;
+    border-radius: $border-radius-base;
+    text-decoration: none;
+    text-align: center;
+    font-weight: $font-weight-bold;
+
+    &--secondary {
+      background-color: transparent;
+      color: $color-text-light;
+      border: 1px solid $color-border;
+    }
+  }
+}
+
+// Class to hide header on scroll down
+.header-authenticated--hidden {
+  top: -200px;
+}
+
+// Profile Dropdown
+.profile-dropdown {
+  position: relative;
+
+  &__toggle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: $color-primary;
+    color: $color-text-dark;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease;
+
+    &:hover {
+      background-color: $color-primary-dark;
+    }
+  }
+
+  &__menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 200px;
+    background: rgba(40, 40, 40, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: $border-radius-base;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: $spacing-sm 0;
+    z-index: 1100;
+
+    &.is-open {
+      display: block;
+    }
+  }
+
+  &__link {
+    display: block;
+    padding: $spacing-sm $spacing-md;
+    color: $color-text-light;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  &__logout {
+    margin: 0;
+    padding: $spacing-sm $spacing-md;
+  }
+
+  &__logout-button {
+    width: 100%;
+    background: none;
+    border: none;
+    color: $color-text-light;
+    text-align: left;
+    padding: 0;
+    cursor: pointer;
+    font-size: inherit;
+    font-family: inherit;
+
+    &:hover {
+      color: $color-primary;
+    }
+  }
+}

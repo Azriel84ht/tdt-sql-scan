@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" class="dark">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" class="dark">
 <head>
     <title>FAQ | Data Flow Visualizer</title>
     <meta name="description" content="Frequently Asked Questions about the Data Flow Visualizer tool." />
@@ -43,7 +43,9 @@
     <div class="relative flex size-full min-h-screen flex-col group/design-root overflow-x-hidden">
         <canvas class="background"></canvas>
         <div class="layout-container flex h-full grow flex-col">
-            <div th:replace="~{fragments/header :: header}"></div>
+            <!-- Conditional Header -->
+            <div th:replace="~{fragments/header_guest :: header_guest}" sec:authorize="!isAuthenticated()"></div>
+            <div th:replace="~{fragments/header_authenticated :: header_authenticated}" sec:authorize="isAuthenticated()"></div>
 
             <main class="section">
                 <div class="max-w-4xl mx-auto">
@@ -76,5 +78,8 @@
             });
         });
     </script>
+    <!-- Conditional Scripts -->
+    <script th:src="@{/js/header.js}" sec:authorize="!isAuthenticated()"></script>
+    <script th:src="@{/js/header_authenticated.js}" sec:authorize="isAuthenticated()"></script>
 </body>
 </html>
