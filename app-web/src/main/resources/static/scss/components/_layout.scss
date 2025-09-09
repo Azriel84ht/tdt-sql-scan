@@ -1,5 +1,9 @@
 // General layout styles
 
+.with-fixed-header {
+    padding-top: 120px; // Adjust this value to match header height
+}
+
 main.section {
     flex-grow: 1;
 }
@@ -26,6 +30,9 @@ main.section {
   display: flex;
   justify-content: center;
   align-items: center;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
 
   h1 {
     position: relative;

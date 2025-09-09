@@ -28,7 +28,7 @@
     </div>
 
     <!-- Main flex container for layout -->
-    <div class="relative flex flex-col min-h-screen">
+    <div class="relative flex flex-col min-h-screen with-fixed-header">
         <!-- Header -->
         <div th:replace="~{fragments/header_guest :: header_guest}" sec:authorize="!isAuthenticated()"></div>
         <div th:replace="~{fragments/header_authenticated :: header_authenticated}" sec:authorize="isAuthenticated()"></div>
