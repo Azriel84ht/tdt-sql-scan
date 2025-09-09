@@ -6,7 +6,7 @@
   z-index: 1;
 
   &__title {
-    font-size: 3rem;
+    font-size: 6rem;
     font-weight: 900;
     letter-spacing: -0.05em;
     margin-bottom: $spacing-md;
@@ -14,7 +14,7 @@
   }
 
   &__subtitle {
-    font-size: $font-size-lg;
+    font-size: $font-size-xl;
     max-width: 48rem;
     margin: 0 auto $spacing-lg;
     color: rgba(255, 255, 255, 0.8);

@@ -22,11 +22,11 @@ main.section {
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   padding: 1.5rem 2rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 0 30px 8px rgba(0, 255, 255, 0.7); // Cyan glow effect
-  min-height: 400px;
+  box-shadow: 0 0 30px 8px rgba(0, 255, 255, 0.8); // Cyan glow effect
+  min-height: 300px;
   display: flex;
   justify-content: center;
   align-items: center;
