@@ -33,9 +33,12 @@
         <div th:replace="~{fragments/header_guest :: header_guest}" sec:authorize="!isAuthenticated()"></div>
         <div th:replace="~{fragments/header_authenticated :: header_authenticated}" sec:authorize="isAuthenticated()"></div>
 
-        <!-- Title Banner -->
-        <div class="title-banner">
-            <h1 layout:fragment="title">Default Title</h1>
+        <!-- Hero Section -->
+        <div class="title-banner hero">
+            <div layout:fragment="hero_content">
+                <!-- Default hero content, can be replaced by specific pages -->
+                <h1 class="hero__title" layout:fragment="title">Default Title</h1>
+            </div>
         </div>
 
         <!-- Breadcrumbs -->

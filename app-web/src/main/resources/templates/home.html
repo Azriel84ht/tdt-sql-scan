@@ -91,12 +91,10 @@
 <body>
 
 <!-- The hero content goes into the title banner -->
-<div layout:fragment="title">
-    <div class="hero__content" style="text-align: center;">
-        <h1 class="hero__title" th:text="${content.heroTitle}">Untangle Your Teradata BTEQ Scripts</h1>
-        <p class="hero__subtitle" th:utext="${content.heroSubtitle}">Transform complex Teradata BTEQ scripts into interactive data flow diagrams with Data Flow Visualizer. Visualize your data's journey, understand dependencies, and optimize your processes effortlessly.</p>
-        <a th:href="@{/register}" class="cta-button">Get Started for Free</a>
-    </div>
+<div layout:fragment="hero_content">
+    <h1 class="hero__title" th:text="${content.heroTitle}">Untangle Your Teradata BTEQ Scripts</h1>
+    <p class="hero__subtitle" th:utext="${content.heroSubtitle}">Transform complex Teradata BTEQ scripts into interactive data flow diagrams with Data Flow Visualizer. Visualize your data's journey, understand dependencies, and optimize your processes effortlessly.</p>
+    <a th:href="@{/register}" class="hero__cta-button">Get Started for Free</a>
 </div>
 
 <!-- No breadcrumbs for the home page -->
