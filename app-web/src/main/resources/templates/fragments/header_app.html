@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+
+<header th:fragment="header" class="header-authenticated header--app">
+    <div class="header-authenticated__container">
+        <!-- Left Section: Logo and Title -->
+        <div class="header-authenticated__brand">
+            <a th:href="@{/}" class="header-authenticated__logo-link">
+                <img th:src="@{/main-images/icon_full_200x200.png}" alt="Data Flow Visualizer Logo" class="header-authenticated__logo-img">
+                <span class="header-authenticated__title">Data Flow Visualizer</span>
+            </a>
+        </div>
+
+        <!-- Center Section: Navigation -->
+        <nav class="header-authenticated__nav">
+            <a th:href="@{/blog}" class="header-authenticated__link">Blog</a>
+            <a th:href="@{/faq}" class="header-authenticated__link">FAQ</a>
+            <a th:href="@{/whats-new}" class="header-authenticated__link">What's New</a>
+        </nav>
+
+        <!-- Right Section: Profile Dropdown -->
+        <div class="header-authenticated__actions">
+            <div class="profile-dropdown">
+                <button id="profile-toggle" class="profile-dropdown__toggle">
+                    <span th:text="${#authentication.name != 'anonymousUser' ? #strings.substring(#authentication.name, 0, 1).toUpperCase() : ''}"></span>
+                </button>
+                <div id="profile-menu" class="profile-dropdown__menu">
+                    <a th:href="@{/app}" class="profile-dropdown__link">App</a>
+                    <a th:href="@{/suggestions}" class="profile-dropdown__link">Contact</a>
+                    <a th:href="@{/admin}" class="profile-dropdown__link" sec:authorize="hasAuthority('ROLE_ADMIN')">Admin Panel</a>
+                    <form th:action="@{/logout}" method="post" class="profile-dropdown__logout">
+                        <button type="submit" class="profile-dropdown__logout-button">Logout</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu: Hamburger Icon -->
+        <div class="header-authenticated__mobile-menu-icon">
+            <button id="mobile-menu-toggle-auth" class="header-authenticated__hamburger">
+                &#9776; <!-- Hamburger Icon -->
+            </button>
+        </div>
+    </div>
+
+    <!-- Mobile Menu: Panel (Initially Hidden) -->
+    <div id="mobile-menu-panel-auth" class="header-authenticated__mobile-panel">
+        <nav class="header-authenticated__mobile-nav">
+            <a th:href="@{/blog}" class="header-authenticated__mobile-link">Blog</a>
+            <a th:href="@{/faq}" class="header-authenticated__mobile-link">FAQ</a>
+            <a th:href="@{/whats-new}" class="header-authenticated__mobile-link">What's New</a>
+        </nav>
+        <div class="header-authenticated__mobile-actions">
+            <a th:href="@{/app}" class="header-authenticated__mobile-link">App</a>
+            <a th:href="@{/suggestions}" class="header-authenticated__mobile-link">Contact</a>
+            <a th:href="@{/admin}" class="header-authenticated__mobile-link" sec:authorize="hasAuthority('ROLE_ADMIN')">Admin Panel</a>
+            <form th:action="@{/logout}" method="post" style="width: 100%;">
+                <button type="submit" class="header-authenticated__mobile-button header-authenticated__mobile-button--secondary" style="width: 100%;">Logout</button>
+            </form>
+        </div>
+    </div>
+</header>
+
+</body>
+</html>
