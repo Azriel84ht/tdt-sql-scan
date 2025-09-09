@@ -5,7 +5,7 @@
     <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
 </head>
 <body class="bg-white dark:bg-gray-900">
-    <div th:replace="~{fragments/header :: header}"></div>
+    <div th:replace="~{fragments/header_app :: header}"></div>
     <div class="admin-wrapper">
         <nav class="admin-wrapper__sidebar">
             <h2>Admin Panel</h2>
@@ -26,5 +26,6 @@
         </main>
     </div>
     <script th:src="@{/js/theme.js}"></script>
+    <script th:src="@{/js/header_authenticated.js}"></script>
 </body>
 </html>
