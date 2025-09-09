@@ -8,7 +8,6 @@
     <meta name="description" content="Visualize complex Teradata BTEQ scripts instantly. Our tool transforms convoluted SQL into clear, interactive data flow diagrams to untangle your ETL processes." />
     <meta name="keywords" content="Data Flow, Visualizer, Teradata, BTEQ, SQL, ETL, Data Lineage, Stitch Design" />
     <link rel="icon" type="image/png" th:href="@{/main-images/icon_full_200x200.png}" />
-
     <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
     <link
@@ -21,36 +20,39 @@
     <th:block layout:fragment="head"></th:block>
 </head>
 <body style='font-family: Inter, "Noto Sans", sans-serif;'>
-<div class="relative flex size-full min-h-screen flex-col group/design-root overflow-x-hidden">
-    <canvas class="background"></canvas>
-    <div class="layout-container flex h-full flex-col">
-        <!-- Conditional Header -->
+<!-- Root container for positioning context -->
+<div class="relative">
+    <!-- Particle background container -->
+    <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;">
+        <canvas class="background"></canvas>
+    </div>
+
+    <!-- Main flex container for layout -->
+    <div class="relative flex flex-col min-h-screen">
+        <!-- Header -->
         <div th:replace="~{fragments/header_guest :: header_guest}" sec:authorize="!isAuthenticated()"></div>
         <div th:replace="~{fragments/header_authenticated :: header_authenticated}" sec:authorize="isAuthenticated()"></div>
 
+        <!-- Title Banner -->
+        <div class="title-banner">
+            <h1 layout:fragment="title">Default Title</h1>
+        </div>
+
+        <!-- Breadcrumbs -->
+        <nav class="breadcrumbs main-content-container" aria-label="Breadcrumb" layout:fragment="breadcrumbs">
+            <!-- Breadcrumb content will be injected here -->
+        </nav>
+
+        <!-- Main content area that grows to push the footer down -->
         <main class="section">
             <div class="main-content-container">
-                <th:block layout:fragment="page-header">
-                    <!-- Title Banner -->
-                    <div class="title-banner">
-                        <h1 layout:fragment="title">Default Title</h1>
-                    </div>
-
-                    <!-- Breadcrumbs -->
-                    <nav class="breadcrumbs" aria-label="Breadcrumb" layout:fragment="breadcrumbs">
-                        <!-- Breadcrumb content will be injected here -->
-                    </nav>
-                </th:block>
-
-                <!-- Main Content -->
-                <div class="content-placeholder">
-                    <div layout:fragment="content">
-                        <p>This is the default content.</p>
-                    </div>
+                <div layout:fragment="content">
+                    <p>This is the default content.</p>
                 </div>
             </div>
         </main>
 
+        <!-- Footer -->
         <div th:replace="~{fragments/footer :: footer}"></div>
     </div>
 </div>
