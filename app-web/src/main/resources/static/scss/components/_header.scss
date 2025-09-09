@@ -87,13 +87,28 @@
   }
 }
 
-.header--app {
+/* This targets the header only when it's for the app view, overriding .header-authenticated styles */
+.header-authenticated.header--app {
+  /* Layout Overrides */
   position: sticky;
+  top: 0;
+  left: 0;
+  transform: none;
   width: 100%;
   max-width: 100%;
+
+  /* Visual Overrides */
   border-radius: 0;
-  border: none;
-  border-bottom: 1px solid $color-border;
-  background-color: rgba($color-background-dark, 0.5);
-  backdrop-filter: blur(16px);
+  border: none; /* Remove the original border from .header-authenticated__container */
+  border-bottom: 1px solid $color-border; /* Add only the bottom border */
+
+  /* Ensure container inside also behaves */
+  .header-authenticated__container {
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+    width: 100%;
+    max-width: 1200px; /* Or your preferred max-width for content */
+    margin: 0 auto;
+  }
 }
