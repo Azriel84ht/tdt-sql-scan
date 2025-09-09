@@ -23,7 +23,7 @@
         <div class="header-authenticated__actions">
             <div class="profile-dropdown">
                 <button id="profile-toggle" class="profile-dropdown__toggle">
-                    <span th:text="${principal != null ? #strings.substring(principal.username, 0, 1).toUpperCase() : ''}"></span>
+                    <span th:text="${#authentication.name != 'anonymousUser' ? #strings.substring(#authentication.name, 0, 1).toUpperCase() : ''}"></span>
                 </button>
                 <div id="profile-menu" class="profile-dropdown__menu">
                     <a th:href="@{/app}" class="profile-dropdown__link">App</a>
