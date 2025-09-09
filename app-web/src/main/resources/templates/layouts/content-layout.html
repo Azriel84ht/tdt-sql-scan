@@ -17,50 +17,6 @@
             onload="this.rel='stylesheet'"
             href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900"
     />
-    <style>
-        .title-banner {
-            background: rgba(30, 41, 59, 0.6); /* slate-800 with 60% opacity */
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 1.5rem 2rem;
-            margin-bottom: 1rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .title-banner::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: conic-gradient(
-                transparent,
-                rgba(0, 255, 255, 0.3), /* Adjusted cyan glow */
-                transparent 30%
-            );
-            animation: rotate 6s linear infinite;
-        }
-
-        @keyframes rotate {
-            from {
-                transform: rotate(0deg);
-            }
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        .title-banner h1 {
-            position: relative;
-            z-index: 1;
-            margin: 0;
-            color: #f0f8ff; /* AliceBlue for soft white */
-        }
-    </style>
     <!-- Page-specific head elements -->
     <th:block layout:fragment="head"></th:block>
 </head>
@@ -73,7 +29,7 @@
         <div th:replace="~{fragments/header_authenticated :: header_authenticated}" sec:authorize="isAuthenticated()"></div>
 
         <main class="section">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="main-content-container">
                 <!-- Title Banner -->
                 <div class="title-banner">
                     <h1 layout:fragment="title">Default Title</h1>

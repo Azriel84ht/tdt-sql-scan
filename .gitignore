@@ -24,5 +24,9 @@ data/
 .DS_Store
 Thumbs.db
 
+# Node
+node_modules/
+app-web/node_modules/
+
 # Compiled files
 **/*.class

@@ -1,1 +1,30 @@
 // General layout styles
+
+.main-content-container {
+  max-width: 80rem; // Equivalent to max-w-7xl, plus some room
+  margin-left: auto;
+  margin-right: auto;
+  padding: 1rem 1.5rem; // Spacing
+}
+
+.title-banner {
+  background: rgba(30, 41, 59, 0.6); // slate-800 with 60% opacity
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.5rem 2rem;
+  margin-bottom: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 20px 2px rgba(0, 255, 255, 0.2); // Cyan glow effect
+
+  h1 {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    font-size: 2.25rem; // text-4xl
+    font-weight: 900;
+    color: #f0f8ff; // AliceBlue for soft white
+  }
+}
