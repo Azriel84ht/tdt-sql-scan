@@ -1,35 +1,80 @@
 .form-container {
-  max-width: 400px;
+  max-width: 450px;
   margin: $spacing-xl auto;
   padding: $spacing-xl;
-  background-color: $color-background-dark;
+  background-color: rgba(17, 24, 39, 0.75);
   border-radius: $border-radius-base;
   color: $color-text-light;
-}
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.7);
+  border: 1px solid hsla(0,0%,100%,.1);
+  backdrop-filter: blur(10px);
 
-.form-group {
-  margin-bottom: $spacing-lg;
-}
+  h2 {
+    font-size: 1.5rem;
+    font-weight: $font-weight-bold;
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
 
-.form-label {
-  display: block;
-  font-size: $font-size-sm;
-  font-weight: $font-weight-normal;
-  margin-bottom: $spacing-sm;
-}
+  .form-group {
+    margin-bottom: 1.25rem;
+  }
 
-.form-control {
-  display: block;
-  width: 100%;
-  padding: $spacing-md;
-  background-color: lighten($color-background-dark, 10%);
-  border: 1px solid $color-border;
-  border-radius: $border-radius-sm;
-  color: $color-text-light;
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+  }
 
-  &:focus {
-    outline: none;
-    border-color: $color-primary;
-    box-shadow: 0 0 0 3px rgba($color-primary, 0.5);
+  input[type="text"],
+  input[type="email"],
+  input[type="password"] {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background-color: rgba(10, 12, 16, 0.7);
+    border: 1px solid $color-border;
+    border-radius: $border-radius-sm;
+    color: $color-text-light;
+    transition: all 0.2s ease-in-out;
+
+    &:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+    }
+  }
+
+  .btn,
+  input[type="submit"] {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-weight: $font-weight-bold;
+    border-radius: $border-radius-sm;
+    color: #fff;
+    background-color: #3b82f6;
+    transition: background-color 0.2s ease-in-out;
+    border: none;
+    cursor: pointer;
+
+    &:hover {
+      background-color: #2563eb;
+    }
+  }
+
+  .mt-6 {
+    margin-top: 1.5rem;
+  }
+
+  .text-center {
+    text-align: center;
+  }
+
+  a {
+    color: #60a5fa;
+    text-decoration: none;
+    transition: color 0.2s ease-in-out;
+
+    &:hover {
+      color: #93c5fd;
+    }
   }
 }

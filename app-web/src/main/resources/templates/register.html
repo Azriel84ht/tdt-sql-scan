@@ -6,7 +6,7 @@
     <title>Create an Account</title>
 </head>
 <body>
-<div layout:fragment="content" class="card card--glow">
+<div layout:fragment="content" class="form-container">
     <h2 class="text-2xl font-bold text-center mb-6">Create an Account</h2>
     <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
     <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
