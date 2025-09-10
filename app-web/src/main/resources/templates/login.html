@@ -20,7 +20,7 @@
     <div th:if="${param.verified == 'false'}" class="alert alert--danger">
         There was an error during your account verification. Please contact support or try registering again.
     </div>
-    <form th:action="@{/login}" method="post" class="w-full">
+    <form th:action="@{/login}" method="post">
         <div class="form-group">
             <label for="username" class="form-label">Username:</label>
             <input type="text" id="username" name="username" autofocus="autofocus" class="form-control"/>
@@ -33,10 +33,10 @@
             <button type="submit" class="btn btn-primary w-100">Log In</button>
         </div>
     </form>
-    <p>
+    <p class="mt-3 text-center">
         No account yet? <a th:href="@{/register}">Create an account</a>
     </p>
-    <p>
+    <p class="text-center">
         <a th:href="@{/forgot-password}">Forgot Password?</a>
     </p>
 </div>
