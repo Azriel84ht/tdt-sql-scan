@@ -11,7 +11,7 @@
     <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
     <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-    <form th:action="@{/register}" th:object="${user}" method="post">
+    <form th:action="@{/register}" th:object="${user}" method="post" class="w-full">
         <div th:if="${#fields.hasGlobalErrors()}">
             <p th:each="err : ${#fields.globalErrors()}" th:text="${err}" class="alert alert--danger"></p>
         </div>
@@ -41,7 +41,7 @@
             <button type="submit" class="btn btn-primary w-100">Register</button>
         </div>
     </form>
-    <p class="mt-3 text-center">
+    <p>
         Already have an account? <a th:href="@{/login}">Login</a>
     </p>
 </div>
