@@ -1,46 +1,28 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" class="dark">
-<head>
-    <title>Register</title>
-    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
-</head>
-<body>
-    <!-- Conditional Header -->
-    <div th:replace="~{fragments/header_guest :: header_guest}" sec:authorize="!isAuthenticated()"></div>
-    <div th:replace="~{fragments/header_authenticated :: header_authenticated}" sec:authorize="isAuthenticated()"></div>
+<div th:replace="~{layouts/user_management_layout :: layout(~{::self}, 'Create an Account')}" class="card card--glow">
+    <h2 class="text-2xl font-bold text-center mb-6">Create an Account</h2>
+    <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-    <div class="card card--glow">
-        <h2 class="text-2xl font-bold text-center mb-6">Create an Account</h2>
-        <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
-        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
-
-        <form th:action="@{/register}" th:object="${user}" method="post">
-            <div class="form-group">
-                <label for="username" class="form-label">Username:</label>
-                <input type="text" id="username" th:field="*{username}" required autofocus="autofocus" class="form-control"/>
-            </div>
-            <div class="form-group">
-                <label for="email" class="form-label">Email:</label>
-                <input type="email" id="email" th:field="*{email}" required class="form-control"/>
-            </div>
-            <div class="form-group">
-                <label for="password" class="form-label">Password:</label>
-                <input type="password" id="password" th:field="*{password}" required class="form-control"/>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Register" class="btn"/>
-            </div>
-        </form>
-        <div class="mt-6 text-center">
-            <p>
-                Already have an account? <a th:href="@{/login}" class="font-medium text-blue-400 hover:text-blue-300">Log in</a>
-            </p>
+    <form th:action="@{/register}" th:object="${user}" method="post">
+        <div class="form-group">
+            <label for="username" class="form-label">Username:</label>
+            <input type="text" id="username" th:field="*{username}" required autofocus="autofocus" class="form-control"/>
         </div>
+        <div class="form-group">
+            <label for="email" class="form-label">Email:</label>
+            <input type="email" id="email" th:field="*{email}" required class="form-control"/>
+        </div>
+        <div class="form-group">
+            <label for="password" class="form-label">Password:</label>
+            <input type="password" id="password" th:field="*{password}" required class="form-control"/>
+        </div>
+        <div class="form-group">
+            <input type="submit" value="Register" class="btn"/>
+        </div>
+    </form>
+    <div class="mt-6 text-center">
+        <p>
+            Already have an account? <a th:href="@{/login}" class="font-medium text-blue-400 hover:text-blue-300">Log in</a>
+        </p>
     </div>
-    <div th:replace="~{fragments/footer :: footer}"></div>
-
-    <!-- Conditional Scripts -->
-    <script th:src="@{/js/header.js}" sec:authorize="!isAuthenticated()"></script>
-    <script th:src="@{/js/header_authenticated.js}" sec:authorize="isAuthenticated()"></script>
-</body>
-</html>
+</div>

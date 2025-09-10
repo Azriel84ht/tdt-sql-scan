@@ -1,54 +1,36 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" class="dark">
-<head>
-    <title>Login</title>
-    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
-</head>
-<body>
-    <!-- Conditional Header -->
-    <div th:replace="~{fragments/header_guest :: header_guest}" sec:authorize="!isAuthenticated()"></div>
-    <div th:replace="~{fragments/header_authenticated :: header_authenticated}" sec:authorize="isAuthenticated()"></div>
-
-    <div class="card card--glow">
-        <h2 class="text-2xl font-bold text-center mb-6">Login</h2>
-        <div th:if="${param.error}" class="alert alert--danger">
-            Invalid username or password.
-        </div>
-        <div th:if="${param.logout}" class="alert alert--info">
-            You have been logged out.
-        </div>
-        <div th:if="${param.verified == 'true'}" class="alert alert--success">
-            Your account has been successfully verified. Please log in.
-        </div>
-        <div th:if="${param.verified == 'false'}" class="alert alert--danger">
-            There was an error during your account verification. Please contact support or try registering again.
-        </div>
-        <form th:action="@{/login}" method="post">
-            <div class="form-group">
-                <label for="username" class="form-label">Username:</label>
-                <input type="text" id="username" name="username" autofocus="autofocus" class="form-control"/>
-            </div>
-            <div class="form-group">
-                <label for="password" class="form-label">Password:</label>
-                <input type="password" id="password" name="password" class="form-control"/>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Log In" class="btn"/>
-            </div>
-        </form>
-        <div class="mt-6 text-center">
-            <p>
-                No account yet? <a th:href="@{/register}" class="font-medium text-blue-400 hover:text-blue-300">Create an account</a>
-            </p>
-            <p>
-                <a th:href="@{/forgot-password}" class="font-medium text-blue-400 hover:text-blue-300">Forgot Password?</a>
-            </p>
-        </div>
+<div th:replace="~{layouts/user_management_layout :: layout(~{::self}, 'Login')}" class="card card--glow">
+    <h2 class="text-2xl font-bold text-center mb-6">Login</h2>
+    <div th:if="${param.error}" class="alert alert--danger">
+        Invalid username or password.
     </div>
-    <div th:replace="~{fragments/footer :: footer}"></div>
-
-    <!-- Conditional Scripts -->
-    <script th:src="@{/js/header.js}" sec:authorize="!isAuthenticated()"></script>
-    <script th:src="@{/js/header_authenticated.js}" sec:authorize="isAuthenticated()"></script>
-</body>
-</html>
+    <div th:if="${param.logout}" class="alert alert--info">
+        You have been logged out.
+    </div>
+    <div th:if="${param.verified == 'true'}" class="alert alert--success">
+        Your account has been successfully verified. Please log in.
+    </div>
+    <div th:if="${param.verified == 'false'}" class="alert alert--danger">
+        There was an error during your account verification. Please contact support or try registering again.
+    </div>
+    <form th:action="@{/login}" method="post">
+        <div class="form-group">
+            <label for="username" class="form-label">Username:</label>
+            <input type="text" id="username" name="username" autofocus="autofocus" class="form-control"/>
+        </div>
+        <div class="form-group">
+            <label for="password" class="form-label">Password:</label>
+            <input type="password" id="password" name="password" class="form-control"/>
+        </div>
+        <div class="form-group">
+            <input type="submit" value="Log In" class="btn"/>
+        </div>
+    </form>
+    <div class="mt-6 text-center">
+        <p>
+            No account yet? <a th:href="@{/register}" class="font-medium text-blue-400 hover:text-blue-300">Create an account</a>
+        </p>
+        <p>
+            <a th:href="@{/forgot-password}" class="font-medium text-blue-400 hover:text-blue-300">Forgot Password?</a>
+        </p>
+    </div>
+</div>

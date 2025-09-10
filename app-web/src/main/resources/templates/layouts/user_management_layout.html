@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html th:fragment="layout(content, title)" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" class="dark">
+<head>
+    <title th:text="${title} + ' | Data Flow Visualizer'">User Management</title>
+    <link rel="icon" type="image/png" th:href="@{/main-images/icon_full_200x200.png}" />
+    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body style='font-family: Inter, "Noto Sans", sans-serif;' class="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
+
+    <!-- Header -->
+    <div th:replace="~{fragments/header_guest :: header_guest}" sec:authorize="!isAuthenticated()"></div>
+    <div th:replace="~{fragments/header_authenticated :: header_authenticated}" sec:authorize="isAuthenticated()"></div>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div th:replace="${content}"></div>
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <!-- Conditional Scripts -->
+    <script th:src="@{/js/header.js}" sec:authorize="!isAuthenticated()"></script>
+    <script th:src="@{/js/header_authenticated.js}" sec:authorize="isAuthenticated()"></script>
+</body>
+</html>
