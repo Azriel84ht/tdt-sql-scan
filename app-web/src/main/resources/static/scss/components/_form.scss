@@ -1,5 +1,5 @@
 .form-container {
-  max-width: 450px;
+  max-width: 600px;
   margin: $spacing-xl auto;
   padding: $spacing-xl;
   background-color: rgba(17, 24, 39, 0.75);
@@ -27,12 +27,19 @@
 
   input[type="text"],
   input[type="email"],
-  input[type="password"] {
+  input[type="password"],
+  input[type="submit"] {
     width: 100%;
-    padding: 0.75rem 1rem;
+    box-sizing: border-box;
+    padding: 12px 15px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="password"] {
     background-color: rgba(10, 12, 16, 0.7);
-    border: 1px solid $color-border;
-    border-radius: $border-radius-sm;
     color: $color-text-light;
     transition: all 0.2s ease-in-out;
 
@@ -45,14 +52,10 @@
 
   .btn,
   input[type="submit"] {
-    width: 100%;
-    padding: 0.75rem 1rem;
     font-weight: $font-weight-bold;
-    border-radius: $border-radius-sm;
     color: #fff;
     background-color: #3b82f6;
     transition: background-color 0.2s ease-in-out;
-    border: none;
     cursor: pointer;
 
     &:hover {
