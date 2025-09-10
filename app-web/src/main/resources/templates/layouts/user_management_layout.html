@@ -1,7 +1,10 @@
 <!DOCTYPE html>
-<html th:fragment="layout(content, title)" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" class="dark">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      class="dark">
 <head>
-    <title th:text="${title} + ' | Data Flow Visualizer'">User Management</title>
+    <title layout:title-pattern="$CONTENT_TITLE | Data Flow Visualizer">User Management</title>
     <link rel="icon" type="image/png" th:href="@{/main-images/icon_full_200x200.png}" />
     <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -14,7 +17,9 @@
 
     <!-- Main Content -->
     <main class="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div th:replace="${content}"></div>
+        <div layout:fragment="content">
+            <!-- Content will be inserted here -->
+        </div>
     </main>
 
     <!-- Footer -->
