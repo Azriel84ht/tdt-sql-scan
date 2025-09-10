@@ -1,5 +1,6 @@
 .form-container {
-  max-width: $form-container-width; // Usa la variable de _variables.scss
+  width: $form-container-width; // Usa la variable de _variables.scss
+  max-width: 100%;
   margin: $spacing-xl auto;
   padding: $spacing-xl;
   background-color: rgba(17, 24, 39, 0.75);
