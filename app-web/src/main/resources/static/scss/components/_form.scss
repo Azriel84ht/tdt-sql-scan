@@ -1,10 +1,15 @@
 .form-container {
-  max-width: 400px;
+  width: $form-container-width; // Usa la variable de _variables.scss
+  max-width: 100%;
   margin: $spacing-xl auto;
   padding: $spacing-xl;
-  background-color: $color-background-dark;
+  background-color: rgba(17, 24, 39, 0.75);
   border-radius: $border-radius-base;
   color: $color-text-light;
+  border: 1px solid hsla(0,0%,100%,.1);
+  backdrop-filter: blur(10px);
+  // ESTA LÍNEA RESTAURA EL BRILLO
+  box-shadow: 0 0 20px rgba(34, 211, 238, 0.5), 0 0 40px rgba(34, 211, 238, 0.3);
 }
 
 .form-group {
