@@ -29,14 +29,14 @@
             <label for="password" class="form-label">Password:</label>
             <input type="password" id="password" name="password" class="form-control"/>
         </div>
-        <div class="form-group">
-            <input type="submit" value="Log In" class="btn"/>
+        <div>
+            <button type="submit" class="btn btn-primary w-100">Log In</button>
         </div>
     </form>
-    <p>
+    <p class="mt-3 text-center">
         No account yet? <a th:href="@{/register}">Create an account</a>
     </p>
-    <p>
+    <p class="text-center">
         <a th:href="@{/forgot-password}">Forgot Password?</a>
     </p>
 </div>
