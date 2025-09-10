@@ -7,7 +7,7 @@
 </head>
 <body>
 <div layout:fragment="content" class="form-container">
-    <h2 class="text-2xl font-bold text-center mb-6">Create an Account</h2>
+    <h2>Create an Account</h2>
     <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
     <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
@@ -30,7 +30,7 @@
     </form>
     <div class="mt-6 text-center">
         <p>
-            Already have an account? <a th:href="@{/login}" class="font-medium text-blue-400 hover:text-blue-300">Log in</a>
+            Already have an account? <a th:href="@{/login}">Log in</a>
         </p>
     </div>
 </div>
