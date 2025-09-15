@@ -43,8 +43,8 @@ public class ChainFlowGraphConverter {
                                 Node node = new Node(script.getScriptName(), script.getScriptName());
                                 int x = entry.getKey() * 400;
                                 int y = (i * y_gap) - yOffset + max_y_offset;
-                                node.getProperties().put("x", String.valueOf(x));
-                                node.getProperties().put("y", String.valueOf(y));
+                                node.getProperties().put("x", x);
+                                node.getProperties().put("y", y);
                                 node.getProperties().put("shape", "image");
                                 node.getProperties().put("image", "images/bteq_script.png");
                                 node.getProperties().put("size", "50");
@@ -78,11 +78,11 @@ public class ChainFlowGraphConverter {
                     // Create an arrow node
                     String arrowId = "arrow-" + UUID.randomUUID().toString();
                     Node arrowNode = new Node(arrowId, "");
-                    int fromX = Integer.parseInt((String) fromNode.getProperties().get("x"));
-                    int toX = Integer.parseInt((String) toNode.getProperties().get("x"));
-                    int fromY = Integer.parseInt((String) fromNode.getProperties().get("y"));
-                    arrowNode.getProperties().put("x", String.valueOf(fromX + (toX - fromX) / 2));
-                    arrowNode.getProperties().put("y", String.valueOf(fromY));
+                    int fromX = (int) fromNode.getProperties().get("x");
+                    int toX = (int) toNode.getProperties().get("x");
+                    int fromY = (int) fromNode.getProperties().get("y");
+                    arrowNode.getProperties().put("x", fromX + (toX - fromX) / 2);
+                    arrowNode.getProperties().put("y", fromY);
                     arrowNode.getProperties().put("shape", "image");
                     arrowNode.getProperties().put("image", "images/right_arrow.png");
                     arrowNode.getProperties().put("size", "30");
