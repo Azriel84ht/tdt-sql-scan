@@ -236,9 +236,16 @@
                         graphContainer.style.height = '100%';
                         activeTabContent.appendChild(graphContainer);
 
-                        renderGraph(data.chainFlow, graphContainer);
-
-                        bteqFlowsData[tab.id] = data.bteqFlows;
+                        // Decide which graph to render
+                        if (data.chainFlow && data.chainFlow.nodes.length > 1) {
+                            renderGraph(data.chainFlow, graphContainer);
+                        } else if (data.bteqFlows) {
+                            // If only one script was uploaded, show its detailed graph instead
+                            const firstScriptName = Object.keys(data.bteqFlows)[0];
+                            if (firstScriptName) {
+                                renderGraph(data.bteqFlows[firstScriptName], graphContainer);
+                            }
+                        }
 
                         const tabButton = document.getElementById(tab.id);
                         tabButton.firstChild.textContent = "Schema " + schemaCounter;
