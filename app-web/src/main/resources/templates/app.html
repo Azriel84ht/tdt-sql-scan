@@ -237,15 +237,21 @@
                         activeTabContent.appendChild(graphContainer);
 
                         // Decide which graph to render
+                        let graphToRender = null;
                         if (data.chainFlow && data.chainFlow.nodes.length > 1) {
-                            renderGraph(data.chainFlow, graphContainer);
+                            graphToRender = data.chainFlow;
                         } else if (data.bteqFlows) {
                             // If only one script was uploaded, show its detailed graph instead
                             const firstScriptName = Object.keys(data.bteqFlows)[0];
                             if (firstScriptName) {
-                                renderGraph(data.bteqFlows[firstScriptName], graphContainer);
+                                graphToRender = data.bteqFlows[firstScriptName];
                             }
                         }
+
+                        // Delay rendering to allow the DOM to update
+                        setTimeout(() => {
+                            renderGraph(graphToRender, graphContainer);
+                        }, 0);
 
                         const tabButton = document.getElementById(tab.id);
                         tabButton.firstChild.textContent = "Schema " + schemaCounter;
@@ -295,8 +301,9 @@
     }
 
     function renderGraph(graphData, containerElement) {
-        if (!graphData) {
-            console.error("No data for graph rendering in container:", containerElement.id);
+        if (!graphData || !graphData.nodes || graphData.nodes.length === 0) {
+            console.error("No data or nodes for graph rendering in container:", containerElement.id);
+            containerElement.innerHTML = '<div class="p-4 text-gray-400">No graph data to display.</div>';
             return;
         }
 
