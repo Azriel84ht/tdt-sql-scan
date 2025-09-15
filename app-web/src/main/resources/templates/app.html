@@ -289,7 +289,9 @@
         }
 
         const nodes = new vis.DataSet(graphData.nodes);
-        const edges = new vis.DataSet(graphData.edges);
+        const edges = new vis.DataSet(
+            graphData.edges.map(edge => ({ from: edge.source, to: edge.target }))
+        );
 
         const networkData = {
             nodes: nodes,
