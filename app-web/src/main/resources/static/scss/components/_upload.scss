@@ -1,0 +1,131 @@
+// ==========================================================================
+// # COMPONENT: UPLOAD
+// ==========================================================================
+// Styles for the file upload interface, including the drop zone and file list.
+// ==========================================================================
+
+.upload-ui {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: $spacing-xl;
+    color: $color-text-light;
+    text-align: center;
+}
+
+.drop-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 50%;
+    margin: 0 auto;
+    min-height: 200px;
+    padding: $spacing-xl;
+    border: 2px dashed $color-border;
+    border-radius: $border-radius-lg;
+    cursor: pointer;
+    transition: border-color 0.3s, background-color 0.3s, color 0.3s;
+
+    &__icon {
+        width: 80px;
+        height: 80px;
+        fill: $color-text-light;
+        margin-bottom: $spacing-md;
+        transition: fill 0.3s;
+    }
+
+    &__text--primary {
+        font-weight: $font-weight-bold;
+        font-size: $font-size-lg;
+        transition: color 0.3s;
+    }
+
+    &__text--secondary {
+        font-size: $font-size-sm;
+        color: $color-secondary;
+    }
+
+    &:hover,
+    &.dragover {
+        border-color: $color-primary;
+        background-color: rgba($color-primary, 0.1);
+
+        .drop-zone__icon {
+            fill: $color-primary;
+        }
+
+        .drop-zone__text--primary {
+            color: $color-primary;
+        }
+    }
+}
+
+.upload-form-container {
+    width: 70%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: $spacing-lg;
+    background-color: lighten($color-background-dark, 5%);
+    border: 1px solid $color-border;
+    border-radius: $border-radius-lg;
+}
+
+.file-order-list {
+    list-style: none;
+    padding: 0;
+    margin: $spacing-lg 0;
+}
+
+.file-order-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: $spacing-md 0;
+    border-bottom: 1px solid $color-border;
+
+    &:last-child {
+        border-bottom: none;
+    }
+}
+
+#file-list {
+    list-style: none;
+    padding: 0;
+    margin: $spacing-lg 0;
+
+    li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: $spacing-sm;
+        background-color: lighten($color-background-dark, 10%);
+        border-radius: $border-radius-base;
+        margin-bottom: $spacing-sm;
+    }
+
+    .file-order {
+        width: 50px;
+        background-color: $color-background-dark;
+        color: $color-text-light;
+        border: 1px solid $color-border;
+        border-radius: $border-radius-sm;
+        text-align: center;
+    }
+}
+
+.upload-button {
+    background-color: $color-primary;
+    color: $color-text-dark;
+    padding: $spacing-md $spacing-lg;
+    border: none;
+    border-radius: $border-radius-base;
+    cursor: pointer;
+    font-weight: $font-weight-bold;
+
+    &:hover {
+        background-color: $color-primary-dark;
+    }
+}
