@@ -231,7 +231,9 @@
                         const contentContainer = document.getElementById(contentId);
                         contentContainer.innerHTML = '';
 
-                        renderGraph(data.chainFlow, contentContainer, true);
+                        renderGraph(data.chainFlow, contentContainer);
+
+                        bteqFlowsData[tab.id] = data.bteqFlows;
 
                         const tabButton = document.getElementById(tab.id);
                         tabButton.firstChild.textContent = "Schema " + schemaCounter;
@@ -280,81 +282,14 @@
         });
     }
 
-    function renderGraph(data, container, enableContextMenu) {
-        if (!data) {
-            console.error("No data for graph rendering in container:", container.id);
+    function renderGraph(graphData, containerElement) {
+        if (!graphData) {
+            console.error("No data for graph rendering in container:", containerElement.id);
             return;
         }
 
-        const isDarkMode = document.documentElement.classList.contains('dark');
-        const finalNodeCoordinates = new Map();
-
-        const nodes = new vis.DataSet(
-            data.nodes.map(node => {
-                finalNodeCoordinates.set(node.id, {
-                    x: parseInt(node.properties.x),
-                    y: parseInt(node.properties.y)
-                });
-
-                let nodeData = {
-                    id: node.id,
-                    label: node.label,
-                    shape: node.properties.shape,
-                    image: node.properties.image,
-                    size: node.properties.size,
-                    fullText: node.properties.fullText,
-                    fixed: false,
-                    fileName: node.properties.fileName,
-                    fileSize: node.properties.fileSize,
-                    fileEncoding: node.properties.fileEncoding,
-                    noContextMenu: node.properties.noContextMenu,
-                    metadata: node.properties.metadata,
-                    font: node.properties.font || {}
-                };
-
-                if (nodeData.image && nodeData.image.includes('bteq_script')) {
-                    nodeData.shapeProperties = { useBorderWithImage: true };
-                }
-
-                if (isDarkMode) {
-                    nodeData.font.color = '#d1d5db';
-
-                    if (nodeData.shape === 'image' || nodeData.shape === 'circularImage') {
-                        if (nodeData.shapeProperties?.useBorderWithImage) {
-                            nodeData.color = {
-                                background: '#1f2937',
-                                border: '#4b5563',
-                                highlight: { background: '#374151', border: '#6b7280' },
-                                hover: { background: '#374151', border: '#6b7280' }
-                            };
-                        }
-                    } else {
-                        nodeData.color = {
-                            background: '#374151',
-                            border: '#4b5563',
-                            highlight: { background: '#4b5563', border: '#6b7280' },
-                            hover: { background: '#4b5563', border: '#6b7280' }
-                        };
-                    }
-                }
-                return nodeData;
-            })
-        );
-
-        const edges = new vis.DataSet(data.edges.map(edge => {
-            let edgeData = { ...edge, width: 2, arrows: 'to' };
-            if (isDarkMode) {
-                edgeData.color = {
-                    color: '#6b7280',
-                    highlight: '#9ca3af',
-                    hover: '#9ca3af'
-                };
-                edgeData.font = {
-                    color: '#d1d5db'
-                };
-            }
-            return edgeData;
-        }));
+        const nodes = new vis.DataSet(graphData.nodes);
+        const edges = new vis.DataSet(graphData.edges);
 
         const networkData = {
             nodes: nodes,
@@ -363,64 +298,32 @@
 
         const options = {
             nodes: {
-                size: 25,
-                font: {
-                    size: 14,
-                    face: 'arial'
-                },
-                shapeProperties: {
-                    interpolation: false
-                }
+                shape: 'dot',
+                size: 16,
             },
             edges: {
-                arrows: {
-                    to: {
-                        enabled: true,
-                        scaleFactor: 0.5
-                    }
-                },
-                smooth: {
-                    type: 'dynamic'
-                }
+                arrows: 'to'
             },
             physics: {
                 enabled: true,
-                barnesHut: {
-                    gravitationalConstant: -4000,
-                    springConstant: 0.02,
-                    springLength: 150,
-                    damping: 0.1,
-                    centralGravity: 0.1
-                },
-                solver: 'barnesHut',
                 stabilization: {
                     iterations: 1000,
-                    fit: true
-                }
+                    fit: true,
+                },
+                barnesHut: {
+                    gravitationalConstant: -8000,
+                    springConstant: 0.04,
+                    springLength: 95
+                },
+                solver: 'barnesHut'
             }
         };
 
-        const network = new vis.Network(container, networkData, options);
-        networks[container.id] = network;
+        const network = new vis.Network(containerElement, networkData, options);
+        networks[containerElement.id] = network;
 
-        network.once('stabilizationIterationsDone', function() {
+        network.once("stabilizationIterationsDone", function () {
             network.setOptions({ physics: false });
-
-            finalNodeCoordinates.forEach((coords, id) => {
-                nodes.update({
-                    id: id,
-                    x: coords.x,
-                    y: coords.y,
-                    fixed: true
-                });
-            });
-
-            network.fit({
-                animation: {
-                    duration: 1200,
-                    easingFunction: 'easeInOutQuad'
-                }
-            });
         });
 
         network.on("selectNode", function (params) {
@@ -449,7 +352,6 @@
                         }
                     }
                     table.innerHTML = tableHtml;
-
                 }
             }
         });
@@ -457,17 +359,6 @@
         network.on("deselectNode", function (params) {
             document.getElementById('metadata-table').innerHTML = "";
         });
-
-        if (enableContextMenu) {
-            network.on("oncontext", function (params) {
-                params.event.preventDefault();
-                const nodeId = network.getNodeAt(params.pointer.DOM);
-
-                if (nodeId) {
-                    activeNode = nodes.get(nodeId);
-                }
-            });
-        }
     }
     /*]]>*/
     </script>
