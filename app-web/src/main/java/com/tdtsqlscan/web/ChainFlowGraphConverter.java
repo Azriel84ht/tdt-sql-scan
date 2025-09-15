@@ -29,41 +29,42 @@ public class ChainFlowGraphConverter {
         int y_gap = 150;
         int max_y_offset = 0;
 
-        Map<Integer, List<Node>> nodesByOrder = scriptsByOrder.entrySet().stream()
-                .sorted(Map.Entry.comparingByKey())
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        entry -> {
-                            List<Node> nodes = new java.util.ArrayList<>();
-                            int scriptCount = entry.getValue().size();
-                            int yOffset = (scriptCount > 1) ? (scriptCount - 1) * y_gap / 2 : 0;
+        Map<Integer, List<Node>> nodesByOrder = new java.util.LinkedHashMap<>();
+        List<Integer> sortedKeys = new java.util.ArrayList<>(scriptsByOrder.keySet());
+        java.util.Collections.sort(sortedKeys);
 
-                            for (int i = 0; i < scriptCount; i++) {
-                                BteqScript script = entry.getValue().get(i);
-                                Node node = new Node(script.getScriptName(), script.getScriptName());
-                                int x = entry.getKey() * 400;
-                                int y = (i * y_gap) - yOffset + max_y_offset;
-                                node.getProperties().put("x", x);
-                                node.getProperties().put("y", y);
-                                node.getProperties().put("shape", "image");
-                                node.getProperties().put("image", "images/bteq_script.png");
-                                node.getProperties().put("size", "50");
+        for (Integer order : sortedKeys) {
+            List<BteqScript> scriptsInOrder = scriptsByOrder.get(order);
+            List<Node> nodes = new java.util.ArrayList<>();
+            int scriptCount = scriptsInOrder.size();
+            int yOffset = (scriptCount > 1) ? (scriptCount - 1) * y_gap / 2 : 0;
 
-                                BteqScript originalScript = scriptsByName.get(script.getScriptName());
-                                if (originalScript != null) {
-                                    node.getProperties().put("fileName", originalScript.getScriptName());
-                                    node.getProperties().put("fileSize", String.valueOf(originalScript.getSize()));
-                                    node.getProperties().put("fileEncoding", originalScript.getEncoding());
-                                }
-                                nodes.add(node);
-                                graph.addNode(node);
-                            }
-                            if (scriptCount > 1) {
-                               // max_y_offset += (scriptCount -1) * y_gap;
-                            }
-                            return nodes;
-                        }
-                ));
+            for (int i = 0; i < scriptCount; i++) {
+                BteqScript script = scriptsInOrder.get(i);
+                Node node = new Node(script.getScriptName(), script.getScriptName());
+                int x = order * 400;
+                int y = (i * y_gap) - yOffset + max_y_offset;
+                node.getProperties().put("x", x);
+                node.getProperties().put("y", y);
+                node.getProperties().put("shape", "image");
+                node.getProperties().put("image", "images/bteq_script.png");
+                node.getProperties().put("size", "50");
+
+                BteqScript originalScript = scriptsByName.get(script.getScriptName());
+                if (originalScript != null) {
+                    node.getProperties().put("fileName", originalScript.getScriptName());
+                    node.getProperties().put("fileSize", String.valueOf(originalScript.getSize()));
+                    node.getProperties().put("fileEncoding", originalScript.getEncoding());
+                }
+                nodes.add(node);
+                graph.addNode(node);
+            }
+            nodesByOrder.put(order, nodes);
+
+            if (scriptCount > 1) {
+                max_y_offset += (scriptCount - 1) * y_gap;
+            }
+        }
 
         List<Integer> sortedOrders = nodesByOrder.keySet().stream().sorted().collect(Collectors.toList());
 

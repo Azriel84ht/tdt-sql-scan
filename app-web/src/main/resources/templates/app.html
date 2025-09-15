@@ -339,7 +339,9 @@
         const network = new vis.Network(containerElement, networkData, options);
         networks[containerElement.id] = network;
 
-        if (!coordinatesExist) {
+        if (coordinatesExist) {
+            network.fit();
+        } else {
             network.once("stabilizationIterationsDone", function () {
                 network.setOptions({ physics: false });
             });
