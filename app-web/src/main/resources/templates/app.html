@@ -34,32 +34,6 @@
       </div>
     </div>
 
-    <div id="context-menu">
-        <a href="#" id="show-schema">Show schema</a>
-        <a href="#" id="visualize-query">Visualizar Consulta</a>
-        <a href="#" id="view-text">View Text</a>
-        <a href="#" id="copy-code">Copy Code</a>
-    </div>
-
-    <div id="upload-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-upload-modal">&times;</span>
-            <div id="upload-container">
-                <div id="drop-zone" class="drop-zone">
-                    <p>Drag and drop your BTEQ files here, or click to select files.</p>
-                    <input type="file" id="file-input" multiple style="display: none;" />
-                </div>
-                <div id="file-list-container" style="display: none;">
-                    <h3>Selected Files:</h3>
-                    <form id="file-order-form">
-                        <ul id="file-list"></ul>
-                        <button type="submit">Upload and Visualize</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script type="text/javascript" th:inline="javascript">
     /*<![CDATA[*/
     let tabs = [];

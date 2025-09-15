@@ -4,6 +4,19 @@
 // This file contains the styles for the main application layout.
 // ==========================================================================
 
+html, body {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.flex.flex-col.h-screen {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
 #flow-container {
     display: flex;
     flex-direction: row;
@@ -48,6 +61,8 @@
 #graph-area {
     flex-grow: 1;
     position: relative;
+    display: flex;
+    flex-direction: column;
 }
 
 #graph-network {
@@ -92,27 +107,6 @@
             border-bottom: none;
         }
     }
-}
-
-html {
-    height: 100%;
-}
-
-body {
-    height: 100%;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-}
-
-.flex-flex-col.h-screen {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-}
-
-#flow-container {
-    flex-grow: 1;
 }
 
 #tabs-container {
