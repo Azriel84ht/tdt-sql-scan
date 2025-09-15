@@ -63,10 +63,32 @@
     }
 }
 
-.file-list-container {
-    width: 100%;
-    max-width: 600px;
-    margin-top: $spacing-lg;
+.upload-form-container {
+    width: 70%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: $spacing-lg;
+    background-color: lighten($color-background-dark, 5%);
+    border: 1px solid $color-border;
+    border-radius: $border-radius-lg;
+}
+
+.file-order-list {
+    list-style: none;
+    padding: 0;
+    margin: $spacing-lg 0;
+}
+
+.file-order-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: $spacing-md 0;
+    border-bottom: 1px solid $color-border;
+
+    &:last-child {
+        border-bottom: none;
+    }
 }
 
 #file-list {

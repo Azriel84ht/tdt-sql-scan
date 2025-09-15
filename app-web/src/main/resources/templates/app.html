@@ -43,6 +43,7 @@
     let graphData = {};
     let networks = {};
     let activeNode = null;
+    let schemaCounter = 1;
 
     const modal = document.getElementById("myModal");
     const modalText = document.getElementById("modal-text");
@@ -233,7 +234,8 @@
                         renderGraph(data.chainFlow, contentContainer, true);
 
                         const tabButton = document.getElementById(tab.id);
-                        tabButton.firstChild.textContent = data.chainFlow.nodes[0]?.label || 'Graph';
+                        tabButton.firstChild.textContent = "Schema " + schemaCounter;
+                        schemaCounter++;
 
                         document.getElementById('new-graph-button').disabled = false;
                     }
@@ -256,20 +258,20 @@
     function renderFileListForm(files, container) {
         const contentId = container.id;
         container.innerHTML = `
-            <div class="upload-ui">
-                <div class="file-list-container">
-                    <form id="file-order-form-${contentId}">
-                        <h3>Selected Files:</h3>
-                        <ul id="file-list-${contentId}" class="file-list"></ul>
-                        <button type="submit" class="upload-button">Upload and Visualize</button>
-                    </form>
-                </div>
+            <div class="upload-form-container">
+                <h3>Set Execution Order</h3>
+                <form id="file-order-form-${contentId}">
+                    <ul class="file-order-list">
+                    </ul>
+                    <button type="submit" class="upload-button">Upload and Visualize</button>
+                </form>
             </div>
         `;
 
-        const fileList = document.getElementById(`file-list-${contentId}`);
+        const fileList = container.querySelector('.file-order-list');
         Array.from(files).forEach((file, index) => {
             const li = document.createElement('li');
+            li.className = 'file-order-item';
             li.innerHTML = `
                 <span>${file.name}</span>
                 <input type="number" class="file-order" value="${index + 1}" min="1" />
