@@ -295,12 +295,15 @@
 
         const nodes = new vis.DataSet(
             graphData.nodes.map(node => {
-                // Combina las propiedades del nivel superior con las anidadas en 'properties'
-                return Object.assign({}, node, node.properties);
+                // Usamos el operador de propagación para combinar las propiedades de forma más limpia y segura
+                return { ...node, ...node.properties };
             })
         );
         const edges = new vis.DataSet(
-            graphData.edges.map(edge => ({ from: edge.source, to: edge.target }))
+            graphData.edges.map(edge => {
+                // Combinamos el origen y destino con las propiedades de estilo (dashes, arrows, etc.)
+                return { from: edge.source, to: edge.target, ...edge.properties };
+            })
         );
 
         const networkData = {
