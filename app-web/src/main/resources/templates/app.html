@@ -308,6 +308,8 @@
             edges: edges,
         };
 
+        const coordinatesExist = graphData.nodes && graphData.nodes.length > 0 && graphData.nodes[0].x !== undefined;
+
         const options = {
             nodes: {
                 shape: 'dot',
@@ -316,7 +318,7 @@
             edges: {
                 arrows: 'to'
             },
-            physics: {
+            physics: coordinatesExist ? { enabled: false } : {
                 enabled: true,
                 stabilization: {
                     iterations: 1000,
@@ -334,9 +336,11 @@
         const network = new vis.Network(containerElement, networkData, options);
         networks[containerElement.id] = network;
 
-        network.once("stabilizationIterationsDone", function () {
-            network.setOptions({ physics: false });
-        });
+        if (!coordinatesExist) {
+            network.once("stabilizationIterationsDone", function () {
+                network.setOptions({ physics: false });
+            });
+        }
 
         network.on("selectNode", function (params) {
             if (params.nodes.length > 0) {
