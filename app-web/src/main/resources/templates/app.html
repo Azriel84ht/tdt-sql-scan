@@ -47,20 +47,14 @@
     const modal = document.getElementById("myModal");
     const modalText = document.getElementById("modal-text");
     const span = document.getElementsByClassName("close")[0];
-    const contextMenu = document.getElementById('context-menu');
 
     function renderUploadUI(container) {
         container.innerHTML = `
             <div class="upload-ui">
                 <div class="drop-zone">
                     <h2>Drag and drop your BTEQ files here, or click to select files.</h2>
-                    <p>Define the execution order for your scripts.</p>
                     <input type="file" id="file-input-${container.id}" multiple style="display: none;" />
                 </div>
-                <form id="file-order-form-${container.id}">
-                    <ul id="file-list-${container.id}" class="file-list"></ul>
-                    <button type="submit" class="upload-button">Upload and Visualize</button>
-                </form>
             </div>
         `;
     }
@@ -86,7 +80,7 @@
         content.style.height = '100%';
         document.getElementById('graph-area').appendChild(content);
 
-        tabs.push({ id: tabId, contentId: contentId });
+        tabs.push({ id: tabId, contentId: contentId, selectedFiles: [] });
 
         renderUploadUI(content);
         switchTab(tabId);
@@ -141,8 +135,9 @@
         });
 
         graphArea.addEventListener('click', (e) => {
-            if (e.target.closest('.drop-zone')) {
-                const contentId = e.target.closest('.upload-ui').parentElement.id;
+            const dropZone = e.target.closest('.drop-zone');
+            if (dropZone) {
+                const contentId = dropZone.closest('.upload-ui').parentElement.id;
                 document.getElementById(`file-input-${contentId}`).click();
             }
         });
@@ -150,7 +145,11 @@
         graphArea.addEventListener('change', (e) => {
             if (e.target.matches('input[type="file"]')) {
                 const contentId = e.target.id.replace('file-input-', '');
-                handleFiles(e.target.files, contentId);
+                const tab = tabs.find(t => t.contentId === contentId);
+                if (tab) {
+                    tab.selectedFiles = e.target.files;
+                    handleFiles(tab.selectedFiles, contentId);
+                }
             }
         });
 
@@ -158,7 +157,7 @@
             e.preventDefault();
             const dropZone = e.target.closest('.drop-zone');
             if (dropZone) {
-                dropZone.parentElement.classList.add('dragover');
+                dropZone.classList.add('dragover');
             }
         });
 
@@ -166,7 +165,7 @@
             e.preventDefault();
             const dropZone = e.target.closest('.drop-zone');
             if (dropZone) {
-                dropZone.parentElement.classList.remove('dragover');
+                dropZone.classList.remove('dragover');
             }
         });
 
@@ -174,9 +173,13 @@
             e.preventDefault();
             const dropZone = e.target.closest('.drop-zone');
             if (dropZone) {
-                dropZone.parentElement.classList.remove('dragover');
-                const contentId = dropZone.parentElement.parentElement.id;
-                handleFiles(e.dataTransfer.files, contentId);
+                dropZone.classList.remove('dragover');
+                const contentId = dropZone.closest('.upload-ui').parentElement.id;
+                const tab = tabs.find(t => t.contentId === contentId);
+                if (tab) {
+                    tab.selectedFiles = e.dataTransfer.files;
+                    handleFiles(tab.selectedFiles, contentId);
+                }
             }
         });
 
@@ -184,8 +187,10 @@
             e.preventDefault();
             if (e.target.matches('form')) {
                 const contentId = e.target.id.replace('file-order-form-', '');
-                const fileInput = document.getElementById(`file-input-${contentId}`);
-                const files = fileInput.files;
+                const tab = tabs.find(t => t.contentId === contentId);
+                if (!tab) return;
+
+                const files = tab.selectedFiles;
                 const fileOrderInputs = e.target.querySelectorAll('.file-order');
 
                 const formData = new FormData();
@@ -240,8 +245,25 @@
     });
 
     function handleFiles(files, contentId) {
+        const container = document.getElementById(contentId);
+        renderFileListForm(files, container);
+    }
+
+    function renderFileListForm(files, container) {
+        const contentId = container.id;
+        container.innerHTML = `
+            <div class="upload-ui">
+                <div class="file-list-container">
+                    <form id="file-order-form-${contentId}">
+                        <h3>Selected Files:</h3>
+                        <ul id="file-list-${contentId}" class="file-list"></ul>
+                        <button type="submit" class="upload-button">Upload and Visualize</button>
+                    </form>
+                </div>
+            </div>
+        `;
+
         const fileList = document.getElementById(`file-list-${contentId}`);
-        fileList.innerHTML = '';
         Array.from(files).forEach((file, index) => {
             const li = document.createElement('li');
             li.innerHTML = `
@@ -437,72 +459,10 @@
 
                 if (nodeId) {
                     activeNode = nodes.get(nodeId);
-
-                    if (activeNode.noContextMenu) {
-                        return;
-                    }
-
-                    const showSchemaLink = document.getElementById('show-schema');
-                    const viewTextLink = document.getElementById('view-text');
-                    const copyCodeLink = document.getElementById('copy-code');
-                    const visualizeQueryLink = document.getElementById('visualize-query');
-
-                    showSchemaLink.style.display = 'none';
-                    viewTextLink.style.display = 'none';
-                    copyCodeLink.style.display = 'none';
-                    visualizeQueryLink.style.display = 'none';
-
-                    let menuHasItems = false;
-
-                    if (activeNode.image && activeNode.image.includes('bteq_script') && activeNode.fileName) {
-                        showSchemaLink.style.display = 'block';
-                        menuHasItems = true;
-                    }
-
-                    if (activeNode.fullText) {
-                        viewTextLink.style.display = 'block';
-                        copyCodeLink.style.display = 'block';
-                        menuHasItems = true;
-                    }
-
-                    if (activeNode.metadata && activeNode.metadata.hasSelectQuery) {
-                        visualizeQueryLink.style.display = 'block';
-                        menuHasItems = true;
-                    }
-
-                    if (menuHasItems) {
-                        contextMenu.style.left = params.event.pageX + 'px';
-                        contextMenu.style.top = params.event.pageY + 'px';
-                        contextMenu.style.display = 'block';
-                    }
                 }
             });
         }
     }
-
-    span.onclick = function() {
-        modal.style.display = "none";
-    }
-
-    window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = "none";
-        }
-        contextMenu.style.display = 'none';
-    }
-
-    document.getElementById('view-text').onclick = () => {
-        if (activeNode && activeNode.fullText) {
-            modalText.textContent = activeNode.fullText;
-            modal.style.display = "block";
-        }
-    };
-
-    document.getElementById('copy-code').onclick = () => {
-        if (activeNode && activeNode.fullText) {
-            navigator.clipboard.writeText(activeNode.fullText);
-        }
-    };
     /*]]>*/
     </script>
 </body>
