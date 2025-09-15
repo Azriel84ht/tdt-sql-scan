@@ -311,7 +311,7 @@
             edges: edges,
         };
 
-        const coordinatesExist = graphData.nodes && graphData.nodes.length > 0 && graphData.nodes[0].x !== undefined;
+        const coordinatesExist = graphData.nodes && graphData.nodes.length > 0 && graphData.nodes[0].properties.x !== undefined;
 
         const options = {
             nodes: {
