@@ -46,7 +46,7 @@ public class ChainFlowGraphConverter {
                                 node.getProperties().put("x", String.valueOf(x));
                                 node.getProperties().put("y", String.valueOf(y));
                                 node.getProperties().put("shape", "image");
-                                node.getProperties().put("image", "/images/bteq_script.png");
+                                node.getProperties().put("image", "images/bteq_script.png");
                                 node.getProperties().put("size", "50");
 
                                 BteqScript originalScript = scriptsByName.get(script.getScriptName());
@@ -84,7 +84,7 @@ public class ChainFlowGraphConverter {
                     arrowNode.getProperties().put("x", String.valueOf(fromX + (toX - fromX) / 2));
                     arrowNode.getProperties().put("y", String.valueOf(fromY));
                     arrowNode.getProperties().put("shape", "image");
-                    arrowNode.getProperties().put("image", "/images/right_arrow.png");
+                    arrowNode.getProperties().put("image", "images/right_arrow.png");
                     arrowNode.getProperties().put("size", "30");
                     graph.addNode(arrowNode);
 
