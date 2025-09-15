@@ -233,12 +233,26 @@
                         activeTabContent.innerHTML = '';
 
                         const graphContainer = document.createElement('div');
-                        graphContainer.style.height = '100%';
+                        graphContainer.style.height = '800px'; // Fixed height for diagnostics
+                        graphContainer.style.border = '1px solid red'; // Visible border for diagnostics
                         activeTabContent.appendChild(graphContainer);
 
-                        renderGraph(data.chainFlow, graphContainer);
+                        // Decide which graph to render
+                        let graphToRender = null;
+                        if (data.chainFlow && data.chainFlow.nodes.length > 1) {
+                            graphToRender = data.chainFlow;
+                        } else if (data.bteqFlows) {
+                            // If only one script was uploaded, show its detailed graph instead
+                            const firstScriptName = Object.keys(data.bteqFlows)[0];
+                            if (firstScriptName) {
+                                graphToRender = data.bteqFlows[firstScriptName];
+                            }
+                        }
 
-                        bteqFlowsData[tab.id] = data.bteqFlows;
+                        // Delay rendering to allow the DOM to update
+                        setTimeout(() => {
+                            renderGraph(graphToRender, graphContainer);
+                        }, 0);
 
                         const tabButton = document.getElementById(tab.id);
                         tabButton.firstChild.textContent = "Schema " + schemaCounter;
@@ -288,25 +302,31 @@
     }
 
     function renderGraph(graphData, containerElement) {
-        if (!graphData) {
-            console.error("No data for graph rendering in container:", containerElement.id);
+        if (!graphData || !graphData.nodes || graphData.nodes.length === 0) {
+            console.error("No data or nodes for graph rendering in container:", containerElement.id);
+            containerElement.innerHTML = '<div class="p-4 text-gray-400">No graph data to display.</div>';
             return;
         }
 
         const nodes = new vis.DataSet(
             graphData.nodes.map(node => {
-                // Combina las propiedades del nivel superior con las anidadas en 'properties'
-                return Object.assign({}, node, node.properties);
+                // Usamos el operador de propagación para combinar las propiedades de forma más limpia y segura
+                return { ...node, ...node.properties };
             })
         );
         const edges = new vis.DataSet(
-            graphData.edges.map(edge => ({ from: edge.source, to: edge.target }))
+            graphData.edges.map(edge => {
+                // Combinamos el origen y destino con las propiedades de estilo (dashes, arrows, etc.)
+                return { from: edge.source, to: edge.target, ...edge.properties };
+            })
         );
 
         const networkData = {
             nodes: nodes,
             edges: edges,
         };
+
+        const coordinatesExist = graphData.nodes && graphData.nodes.length > 0 && graphData.nodes[0].properties.x !== undefined;
 
         const options = {
             nodes: {
@@ -316,7 +336,7 @@
             edges: {
                 arrows: 'to'
             },
-            physics: {
+            physics: coordinatesExist ? { enabled: false } : {
                 enabled: true,
                 stabilization: {
                     iterations: 1000,
@@ -334,9 +354,13 @@
         const network = new vis.Network(containerElement, networkData, options);
         networks[containerElement.id] = network;
 
-        network.once("stabilizationIterationsDone", function () {
-            network.setOptions({ physics: false });
-        });
+        if (coordinatesExist) {
+            network.fit();
+        } else {
+            network.once("stabilizationIterationsDone", function () {
+                network.setOptions({ physics: false });
+            });
+        }
 
         network.on("selectNode", function (params) {
             if (params.nodes.length > 0) {
