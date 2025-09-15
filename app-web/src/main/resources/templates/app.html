@@ -288,7 +288,12 @@
             return;
         }
 
-        const nodes = new vis.DataSet(graphData.nodes);
+        const nodes = new vis.DataSet(
+            graphData.nodes.map(node => {
+                // Combina las propiedades del nivel superior con las anidadas en 'properties'
+                return Object.assign({}, node, node.properties);
+            })
+        );
         const edges = new vis.DataSet(
             graphData.edges.map(edge => ({ from: edge.source, to: edge.target }))
         );
