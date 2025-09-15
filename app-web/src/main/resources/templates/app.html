@@ -13,13 +13,10 @@
         <div id="flow-container" class="flex flex-row flex-grow overflow-hidden">
             <div id="flow-main" class="flex-grow flex flex-col">
                 <div id="navigation-controls">
-                    <button id="load-scripts-button">Load Scripts</button>
-                    <button id="home-button">Home</button>
-                    <button id="back-button">Back</button>
-                    <span id="current-view-title"></span>
+                    <button id="new-graph-button" disabled>New Graph</button>
+                    <div id="tabs-container"></div>
                 </div>
                 <div id="graph-area" class="flex-grow relative">
-                    <div id="graph-network"></div>
                 </div>
             </div>
             <div id="metadata-sidebar" class="w-1/4 p-4 border-l border-gray-700 bg-gray-800 overflow-y-auto">
@@ -29,5 +26,510 @@
             </div>
         </div>
     </div>
+
+    <div id="myModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <pre id="modal-text"></pre>
+      </div>
+    </div>
+
+    <div id="context-menu">
+        <a href="#" id="show-schema">Show schema</a>
+        <a href="#" id="visualize-query">Visualizar Consulta</a>
+        <a href="#" id="view-text">View Text</a>
+        <a href="#" id="copy-code">Copy Code</a>
+    </div>
+
+    <div id="upload-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-upload-modal">&times;</span>
+            <div id="upload-container">
+                <div id="drop-zone" class="drop-zone">
+                    <p>Drag and drop your BTEQ files here, or click to select files.</p>
+                    <input type="file" id="file-input" multiple style="display: none;" />
+                </div>
+                <div id="file-list-container" style="display: none;">
+                    <h3>Selected Files:</h3>
+                    <form id="file-order-form">
+                        <ul id="file-list"></ul>
+                        <button type="submit">Upload and Visualize</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript" th:inline="javascript">
+    /*<![CDATA[*/
+    let tabs = [];
+    let activeTabId = null;
+    let fileMetadata = {};
+    let bteqFlowsData = {};
+    let graphData = {};
+    let networks = {};
+    let activeNode = null;
+
+    const modal = document.getElementById("myModal");
+    const modalText = document.getElementById("modal-text");
+    const span = document.getElementsByClassName("close")[0];
+    const contextMenu = document.getElementById('context-menu');
+
+    function renderUploadUI(container) {
+        container.innerHTML = `
+            <div class="upload-ui">
+                <div class="drop-zone">
+                    <h2>Drag and drop your BTEQ files here, or click to select files.</h2>
+                    <p>Define the execution order for your scripts.</p>
+                    <input type="file" id="file-input-${container.id}" multiple style="display: none;" />
+                </div>
+                <form id="file-order-form-${container.id}">
+                    <ul id="file-list-${container.id}" class="file-list"></ul>
+                    <button type="submit" class="upload-button">Upload and Visualize</button>
+                </form>
+            </div>
+        `;
+    }
+
+    function createNewTab() {
+        const tabId = `tab-${Date.now()}`;
+        const contentId = `content-${tabId}`;
+
+        const tabButton = document.createElement('button');
+        tabButton.id = tabId;
+        tabButton.className = 'tab-button';
+        tabButton.textContent = 'New Tab';
+
+        const closeButton = document.createElement('span');
+        closeButton.className = 'close-tab';
+        closeButton.innerHTML = '&times;';
+        tabButton.appendChild(closeButton);
+
+        document.getElementById('tabs-container').appendChild(tabButton);
+
+        const content = document.createElement('div');
+        content.id = contentId;
+        content.style.height = '100%';
+        document.getElementById('graph-area').appendChild(content);
+
+        tabs.push({ id: tabId, contentId: contentId });
+
+        renderUploadUI(content);
+        switchTab(tabId);
+    }
+
+    function switchTab(tabId) {
+        activeTabId = tabId;
+        tabs.forEach(tab => {
+            const tabButton = document.getElementById(tab.id);
+            const content = document.getElementById(tab.contentId);
+            if (tab.id === tabId) {
+                tabButton.classList.add('active');
+                content.style.display = 'block';
+            } else {
+                tabButton.classList.remove('active');
+                content.style.display = 'none';
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const newGraphButton = document.getElementById('new-graph-button');
+        const graphArea = document.getElementById('graph-area');
+        const tabsContainer = document.getElementById('tabs-container');
+
+        newGraphButton.addEventListener('click', () => {
+            createNewTab();
+            newGraphButton.disabled = true;
+        });
+
+        tabsContainer.addEventListener('click', (e) => {
+            const tabButton = e.target.closest('.tab-button');
+            if (e.target.classList.contains('close-tab')) {
+                const tabId = tabButton.id;
+                const tabIndex = tabs.findIndex(t => t.id === tabId);
+
+                tabs.splice(tabIndex, 1);
+
+                const contentId = `content-${tabId}`;
+                document.getElementById(tabId).remove();
+                document.getElementById(contentId).remove();
+
+                if (tabs.length === 0) {
+                    createNewTab();
+                } else {
+                    const newActiveIndex = Math.max(0, tabIndex - 1);
+                    switchTab(tabs[newActiveIndex].id);
+                }
+            } else if (tabButton) {
+                switchTab(tabButton.id);
+            }
+        });
+
+        graphArea.addEventListener('click', (e) => {
+            if (e.target.closest('.drop-zone')) {
+                const contentId = e.target.closest('.upload-ui').parentElement.id;
+                document.getElementById(`file-input-${contentId}`).click();
+            }
+        });
+
+        graphArea.addEventListener('change', (e) => {
+            if (e.target.matches('input[type="file"]')) {
+                const contentId = e.target.id.replace('file-input-', '');
+                handleFiles(e.target.files, contentId);
+            }
+        });
+
+        graphArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            const dropZone = e.target.closest('.drop-zone');
+            if (dropZone) {
+                dropZone.parentElement.classList.add('dragover');
+            }
+        });
+
+        graphArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            const dropZone = e.target.closest('.drop-zone');
+            if (dropZone) {
+                dropZone.parentElement.classList.remove('dragover');
+            }
+        });
+
+        graphArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const dropZone = e.target.closest('.drop-zone');
+            if (dropZone) {
+                dropZone.parentElement.classList.remove('dragover');
+                const contentId = dropZone.parentElement.parentElement.id;
+                handleFiles(e.dataTransfer.files, contentId);
+            }
+        });
+
+        graphArea.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (e.target.matches('form')) {
+                const contentId = e.target.id.replace('file-order-form-', '');
+                const fileInput = document.getElementById(`file-input-${contentId}`);
+                const files = fileInput.files;
+                const fileOrderInputs = e.target.querySelectorAll('.file-order');
+
+                const formData = new FormData();
+                const fileOrder = [];
+
+                Array.from(files).forEach((file, index) => {
+                    formData.append('files', file);
+                    fileOrder.push({
+                        name: file.name,
+                        order: fileOrderInputs[index].value
+                    });
+                });
+                formData.append('fileOrder', JSON.stringify(fileOrder));
+
+                const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+                const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+                fetch('/upload', {
+                    method: 'POST',
+                    headers: {
+                        [header]: token
+                    },
+                    body: formData,
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const tab = tabs.find(t => t.contentId === contentId);
+                    if (tab) {
+                        fileMetadata[tab.id] = data.fileMetadata;
+                        bteqFlowsData[tab.id] = data.bteqFlows;
+                        graphData[tab.id] = data.chainFlow;
+
+                        const contentContainer = document.getElementById(contentId);
+                        contentContainer.innerHTML = '';
+
+                        renderGraph(data.chainFlow, contentContainer, true);
+
+                        const tabButton = document.getElementById(tab.id);
+                        tabButton.firstChild.textContent = data.chainFlow.nodes[0]?.label || 'Graph';
+
+                        document.getElementById('new-graph-button').disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while processing the file.');
+                });
+            }
+        });
+
+        createNewTab();
+    });
+
+    function handleFiles(files, contentId) {
+        const fileList = document.getElementById(`file-list-${contentId}`);
+        fileList.innerHTML = '';
+        Array.from(files).forEach((file, index) => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <span>${file.name}</span>
+                <input type="number" class="file-order" value="${index + 1}" min="1" />
+            `;
+            fileList.appendChild(li);
+        });
+    }
+
+    function renderGraph(data, container, enableContextMenu) {
+        if (!data) {
+            console.error("No data for graph rendering in container:", container.id);
+            return;
+        }
+
+        const isDarkMode = document.documentElement.classList.contains('dark');
+        const finalNodeCoordinates = new Map();
+
+        const nodes = new vis.DataSet(
+            data.nodes.map(node => {
+                finalNodeCoordinates.set(node.id, {
+                    x: parseInt(node.properties.x),
+                    y: parseInt(node.properties.y)
+                });
+
+                let nodeData = {
+                    id: node.id,
+                    label: node.label,
+                    shape: node.properties.shape,
+                    image: node.properties.image,
+                    size: node.properties.size,
+                    fullText: node.properties.fullText,
+                    fixed: false,
+                    fileName: node.properties.fileName,
+                    fileSize: node.properties.fileSize,
+                    fileEncoding: node.properties.fileEncoding,
+                    noContextMenu: node.properties.noContextMenu,
+                    metadata: node.properties.metadata,
+                    font: node.properties.font || {}
+                };
+
+                if (nodeData.image && nodeData.image.includes('bteq_script')) {
+                    nodeData.shapeProperties = { useBorderWithImage: true };
+                }
+
+                if (isDarkMode) {
+                    nodeData.font.color = '#d1d5db';
+
+                    if (nodeData.shape === 'image' || nodeData.shape === 'circularImage') {
+                        if (nodeData.shapeProperties?.useBorderWithImage) {
+                            nodeData.color = {
+                                background: '#1f2937',
+                                border: '#4b5563',
+                                highlight: { background: '#374151', border: '#6b7280' },
+                                hover: { background: '#374151', border: '#6b7280' }
+                            };
+                        }
+                    } else {
+                        nodeData.color = {
+                            background: '#374151',
+                            border: '#4b5563',
+                            highlight: { background: '#4b5563', border: '#6b7280' },
+                            hover: { background: '#4b5563', border: '#6b7280' }
+                        };
+                    }
+                }
+                return nodeData;
+            })
+        );
+
+        const edges = new vis.DataSet(data.edges.map(edge => {
+            let edgeData = { ...edge, width: 2, arrows: 'to' };
+            if (isDarkMode) {
+                edgeData.color = {
+                    color: '#6b7280',
+                    highlight: '#9ca3af',
+                    hover: '#9ca3af'
+                };
+                edgeData.font = {
+                    color: '#d1d5db'
+                };
+            }
+            return edgeData;
+        }));
+
+        const networkData = {
+            nodes: nodes,
+            edges: edges,
+        };
+
+        const options = {
+            nodes: {
+                size: 25,
+                font: {
+                    size: 14,
+                    face: 'arial'
+                },
+                shapeProperties: {
+                    interpolation: false
+                }
+            },
+            edges: {
+                arrows: {
+                    to: {
+                        enabled: true,
+                        scaleFactor: 0.5
+                    }
+                },
+                smooth: {
+                    type: 'dynamic'
+                }
+            },
+            physics: {
+                enabled: true,
+                barnesHut: {
+                    gravitationalConstant: -4000,
+                    springConstant: 0.02,
+                    springLength: 150,
+                    damping: 0.1,
+                    centralGravity: 0.1
+                },
+                solver: 'barnesHut',
+                stabilization: {
+                    iterations: 1000,
+                    fit: true
+                }
+            }
+        };
+
+        const network = new vis.Network(container, networkData, options);
+        networks[container.id] = network;
+
+        network.once('stabilizationIterationsDone', function() {
+            network.setOptions({ physics: false });
+
+            finalNodeCoordinates.forEach((coords, id) => {
+                nodes.update({
+                    id: id,
+                    x: coords.x,
+                    y: coords.y,
+                    fixed: true
+                });
+            });
+
+            network.fit({
+                animation: {
+                    duration: 1200,
+                    easingFunction: 'easeInOutQuad'
+                }
+            });
+        });
+
+        network.on("selectNode", function (params) {
+            if (params.nodes.length > 0) {
+                const nodeId = params.nodes[0];
+                const clickedNode = nodes.get(nodeId);
+                const table = document.getElementById('metadata-table');
+                table.innerHTML = "";
+
+                if (clickedNode.metadata) {
+                    let tableHtml = '<tr><th>Attribute</th><th>Value</th></tr>';
+                    for (const key in clickedNode.metadata) {
+                        const value = clickedNode.metadata[key];
+                        let displayValue = '';
+
+                        if (Array.isArray(value) && value.length > 0) {
+                            displayValue = '<ul>' + value.map(item => `<li>${item}</li>`).join('') + '</ul>';
+                        } else if (value !== null && value !== '' && (!Array.isArray(value) || value.length > 0)) {
+                            displayValue = value.toString();
+                        } else {
+                            displayValue = '-';
+                        }
+
+                        if (displayValue !== '-') {
+                             tableHtml += `<tr><td>${key}</td><td>${displayValue}</td></tr>`;
+                        }
+                    }
+                    table.innerHTML = tableHtml;
+
+                }
+            }
+        });
+
+        network.on("deselectNode", function (params) {
+            document.getElementById('metadata-table').innerHTML = "";
+        });
+
+        if (enableContextMenu) {
+            network.on("oncontext", function (params) {
+                params.event.preventDefault();
+                const nodeId = network.getNodeAt(params.pointer.DOM);
+
+                if (nodeId) {
+                    activeNode = nodes.get(nodeId);
+
+                    if (activeNode.noContextMenu) {
+                        return;
+                    }
+
+                    const showSchemaLink = document.getElementById('show-schema');
+                    const viewTextLink = document.getElementById('view-text');
+                    const copyCodeLink = document.getElementById('copy-code');
+                    const visualizeQueryLink = document.getElementById('visualize-query');
+
+                    showSchemaLink.style.display = 'none';
+                    viewTextLink.style.display = 'none';
+                    copyCodeLink.style.display = 'none';
+                    visualizeQueryLink.style.display = 'none';
+
+                    let menuHasItems = false;
+
+                    if (activeNode.image && activeNode.image.includes('bteq_script') && activeNode.fileName) {
+                        showSchemaLink.style.display = 'block';
+                        menuHasItems = true;
+                    }
+
+                    if (activeNode.fullText) {
+                        viewTextLink.style.display = 'block';
+                        copyCodeLink.style.display = 'block';
+                        menuHasItems = true;
+                    }
+
+                    if (activeNode.metadata && activeNode.metadata.hasSelectQuery) {
+                        visualizeQueryLink.style.display = 'block';
+                        menuHasItems = true;
+                    }
+
+                    if (menuHasItems) {
+                        contextMenu.style.left = params.event.pageX + 'px';
+                        contextMenu.style.top = params.event.pageY + 'px';
+                        contextMenu.style.display = 'block';
+                    }
+                }
+            });
+        }
+    }
+
+    span.onclick = function() {
+        modal.style.display = "none";
+    }
+
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+        contextMenu.style.display = 'none';
+    }
+
+    document.getElementById('view-text').onclick = () => {
+        if (activeNode && activeNode.fullText) {
+            modalText.textContent = activeNode.fullText;
+            modal.style.display = "block";
+        }
+    };
+
+    document.getElementById('copy-code').onclick = () => {
+        if (activeNode && activeNode.fullText) {
+            navigator.clipboard.writeText(activeNode.fullText);
+        }
+    };
+    /*]]>*/
+    </script>
 </body>
 </html>
