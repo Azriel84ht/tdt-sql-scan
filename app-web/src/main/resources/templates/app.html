@@ -378,15 +378,21 @@
 
                     keyOrder.forEach(key => {
                         const value = metadata[key];
-                        if (value !== null && value !== '' && (!Array.isArray(value) || value.length > 0)) {
-                            let displayValue = '';
-                            if (Array.isArray(value)) {
+                        let displayValue;
+
+                        if (Array.isArray(value)) {
+                            if (value.length > 0) {
                                 displayValue = '<ul>' + value.map(item => `<li>${item}</li>`).join('') + '</ul>';
                             } else {
-                                displayValue = value.toString();
+                                displayValue = '-';
                             }
-                            tableHtml += `<tr><td>${formatMetadataKey(key)}</td><td>${displayValue}</td></tr>`;
+                        } else if (value !== null && value !== '') {
+                            displayValue = value.toString();
+                        } else {
+                            displayValue = '-';
                         }
+
+                        tableHtml += `<tr><td>${formatMetadataKey(key)}</td><td>${displayValue}</td></tr>`;
                     });
 
                     table.innerHTML = tableHtml;
