@@ -108,6 +108,7 @@
     border: none;
     box-shadow: none;
     width: 100%;
+    box-sizing: border-box; /* Add this to include padding in the width calculation */
     /* No max-width or margin to allow full-width content */
   }
 }
