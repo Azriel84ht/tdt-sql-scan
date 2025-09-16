@@ -367,19 +367,28 @@
         function revealNode() {
             if (i < sortedNodes.length) {
                 const nodeData = sortedNodes[i];
-                nodes.update({
-                    id: nodeData.id,
-                    hidden: false,
-                    size: nodeData.properties.size || 16,
-                    animation: {
-                        duration: 500,
-                        easingFunction: 'easeInOutQuad'
+                nodes.update({ id: nodeData.id, hidden: false });
+
+                let currentSize = 0;
+                const targetSize = nodeData.properties.size || 16;
+                const animationSteps = 10;
+                const animationInterval = 20;
+
+                function animateSize() {
+                    currentSize += targetSize / animationSteps;
+                    if (currentSize <= targetSize) {
+                        nodes.update({ id: nodeData.id, size: currentSize });
+                        setTimeout(animateSize, animationInterval);
+                    } else {
+                        nodes.update({ id: nodeData.id, size: targetSize });
                     }
-                });
+                }
+                animateSize();
 
                 const originalEdges = graphData.edges || [];
                 originalEdges.forEach(edge => {
-                    if (edge.target === nodeData.id && nodes.get(edge.source) && !nodes.get(edge.source).hidden) {
+                    const sourceNode = nodes.get(edge.source);
+                    if (edge.target === nodeData.id && sourceNode && !sourceNode.hidden) {
                         edges.add({ from: edge.source, to: edge.target, ...edge.properties });
                     }
                 });
@@ -389,7 +398,7 @@
             }
                 }
 
-        setTimeout(revealNode, 500); // Initial delay before animation starts
+        setTimeout(revealNode, 500);
 
         network.on('oncontext', function(params) {
             params.event.preventDefault();
