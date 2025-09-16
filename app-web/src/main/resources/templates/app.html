@@ -24,8 +24,14 @@
                 <table id="metadata-table" class="w-full text-sm">
                 </table>
             </div>
-        </div>
-    </div>
+                </div>
+            </div>
+
+    <div id="context-menu" style="display: none; position: absolute; z-index: 1000; background-color: #2d3748; border: 1px solid #4a5568; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+        <ul style="list-style: none; padding: 5px 0; margin: 0;">
+            <li id="show-schema-btn" style="padding: 8px 15px; cursor: pointer; color: #e2e8f0;">Show schema</li>
+        </ul>
+            </div>
 
     <div id="myModal" class="modal">
       <div class="modal-content">
@@ -86,10 +92,12 @@
         content.style.height = '100%';
         document.getElementById('graph-area').appendChild(content);
 
-        tabs.push({ id: tabId, contentId: contentId, selectedFiles: [] });
+        const newTab = { id: tabId, contentId: contentId, selectedFiles: [] };
+        tabs.push(newTab);
 
         renderUploadUI(content);
         switchTab(tabId);
+        return newTab;
     }
 
     function switchTab(tabId) {
@@ -105,12 +113,21 @@
                 content.style.display = 'none';
             }
         });
-    }
+            }
 
     document.addEventListener('DOMContentLoaded', () => {
         const newGraphButton = document.getElementById('new-graph-button');
         const graphArea = document.getElementById('graph-area');
         const tabsContainer = document.getElementById('tabs-container');
+
+        document.addEventListener('mousedown', function(event) {
+            if (event.button === 0) { // Left click
+                const contextMenu = document.getElementById('context-menu');
+                if (contextMenu && event.target.closest('#context-menu') === null) {
+                    contextMenu.style.display = 'none';
+                }
+            }
+        });
 
         newGraphButton.addEventListener('click', () => {
             createNewTab();
@@ -258,7 +275,7 @@
                         schemaCounter++;
 
                         document.getElementById('new-graph-button').disabled = false;
-                    }
+                            }
                 })
                 .catch(error => {
                     console.error('Error:', error);
@@ -297,28 +314,18 @@
                 <input type="number" class="file-order" value="${index + 1}" min="1" />
             `;
             fileList.appendChild(li);
-        });
-    }
+                });
+            }
 
     function renderGraph(graphData, containerElement) {
-        if (!graphData || !graphData.nodes || graphData.nodes.length === 0) {
+        if (!graphData || !graphData.nodes || !graphData.nodes.length === 0) {
             console.error("No data or nodes for graph rendering in container:", containerElement.id);
             containerElement.innerHTML = '<div class="p-4 text-gray-400">No graph data to display.</div>';
             return;
         }
 
-        const nodes = new vis.DataSet(
-            graphData.nodes.map(node => {
-                // Usamos el operador de propagación para combinar las propiedades de forma más limpia y segura
-                return { ...node, ...node.properties };
-            })
-        );
-        const edges = new vis.DataSet(
-            graphData.edges.map(edge => {
-                // Combinamos el origen y destino con las propiedades de estilo (dashes, arrows, etc.)
-                return { from: edge.source, to: edge.target, ...edge.properties };
-            })
-        );
+        const nodes = new vis.DataSet();
+        const edges = new vis.DataSet();
 
         const networkData = {
             nodes: nodes,
@@ -338,31 +345,98 @@
             edges: {
                 arrows: 'to'
             },
-            physics: coordinatesExist ? { enabled: false } : {
-                enabled: true,
-                stabilization: {
-                    iterations: 1000,
-                    fit: true,
-                },
-                barnesHut: {
-                    gravitationalConstant: -8000,
-                    springConstant: 0.04,
-                    springLength: 95
-                },
-                solver: 'barnesHut'
-            }
+            physics: { enabled: false } // Disable physics during animation
         };
 
         const network = new vis.Network(containerElement, networkData, options);
         networks[containerElement.id] = network;
 
-        if (coordinatesExist) {
-            network.fit();
-        } else {
-            network.once("stabilizationIterationsDone", function () {
-                network.setOptions({ physics: false });
-            });
-        }
+        // Sort nodes by x-coordinate for left-to-right animation
+        const sortedNodes = [...graphData.nodes].sort((a, b) => a.properties.x - b.properties.x);
+
+        let i = 0;
+        function addNodeAndAssociatedEdges() {
+            if (i < sortedNodes.length) {
+                const nodeData = sortedNodes[i];
+                const nodeToAdd = { ...nodeData, ...nodeData.properties };
+                nodes.add(nodeToAdd);
+
+                // Find and add edges connected to the new node from already existing nodes
+                const originalEdges = graphData.edges || [];
+                originalEdges.forEach(edge => {
+                    if ((edge.target === nodeToAdd.id && nodes.get(edge.source)) || (edge.source === nodeToAdd.id && nodes.get(edge.target))) {
+                        edges.add({ from: edge.source, to: edge.target, ...edge.properties });
+                    }
+                });
+
+                i++;
+                setTimeout(addNodeAndAssociatedEdges, 200); // 200ms delay
+            } else {
+                // Animation finished
+                network.fit();
+                if (!coordinatesExist) {
+                    network.setOptions({
+                        physics: {
+                            enabled: true,
+                            stabilization: {
+                                iterations: 1000,
+                                fit: true,
+                            },
+                            barnesHut: {
+                                gravitationalConstant: -8000,
+                                springConstant: 0.04,
+                                springLength: 95
+                            },
+                            solver: 'barnesHut'
+                        }
+                    });
+                    network.once("stabilizationIterationsDone", function () {
+                        network.setOptions({ physics: false });
+                    });
+                }
+            }
+                }
+
+        addNodeAndAssociatedEdges();
+
+        network.on('oncontext', function(params) {
+            params.event.preventDefault();
+            const nodeId = network.getNodeAt(params.pointer.DOM);
+            const contextMenu = document.getElementById('context-menu');
+
+            if (!nodeId) {
+                contextMenu.style.display = 'none';
+                return;
+            }
+
+            contextMenu.style.left = params.event.pageX + 'px';
+            contextMenu.style.top = params.event.pageY + 'px';
+            contextMenu.style.display = 'block';
+
+            const showSchemaBtn = document.getElementById('show-schema-btn');
+            showSchemaBtn.onclick = function() {
+                contextMenu.style.display = 'none';
+                const activeTab = tabs.find(t => t.contentId === containerElement.id);
+                if (!activeTab) return;
+
+                const bteqFlows = bteqFlowsData[activeTab.id];
+                if (bteqFlows && bteqFlows[nodeId]) {
+                    const newTabInfo = createNewTab();
+                    const newTabContent = document.getElementById(newTabInfo.contentId);
+                    newTabContent.innerHTML = ''; // Clear upload UI
+
+                    const graphContainer = document.createElement('div');
+                    graphContainer.style.height = '100%';
+                    newTabContent.appendChild(graphContainer);
+
+                    const newTabButton = document.getElementById(newTabInfo.id);
+                    const node = nodes.get(nodeId);
+                    newTabButton.firstChild.textContent = node.label || `Schema ${schemaCounter++}`;
+
+                    renderGraph(bteqFlows[nodeId], graphContainer);
+                }
+            };
+                });
 
         network.on("selectNode", function (params) {
             if (params.nodes.length > 0) {
@@ -396,14 +470,14 @@
                     });
 
                     table.innerHTML = tableHtml;
-                }
+                        }
             }
         });
 
         network.on("deselectNode", function (params) {
             document.getElementById('metadata-table').innerHTML = "";
         });
-    }
+            }
 
     function formatMetadataKey(key) {
         const result = key.replace(/([A-Z])/g, " $1");
