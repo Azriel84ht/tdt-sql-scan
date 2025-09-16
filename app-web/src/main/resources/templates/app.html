@@ -234,7 +234,6 @@
 
                         const graphContainer = document.createElement('div');
                         graphContainer.style.height = '800px'; // Fixed height for diagnostics
-                        graphContainer.style.border = '1px solid red'; // Visible border for diagnostics
                         activeTabContent.appendChild(graphContainer);
 
                         // Decide which graph to render
@@ -332,6 +331,9 @@
             nodes: {
                 shape: 'dot',
                 size: 16,
+                font: {
+                    color: '#ffffff'
+                }
             },
             edges: {
                 arrows: 'to'
