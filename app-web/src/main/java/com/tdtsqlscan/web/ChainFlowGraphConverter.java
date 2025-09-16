@@ -27,7 +27,6 @@ public class ChainFlowGraphConverter {
                 .collect(Collectors.groupingBy(script -> orderByName.get(script.getScriptName())));
 
         int y_gap = 150;
-        int max_y_offset = 0;
 
         Map<Integer, List<Node>> nodesByOrder = new java.util.LinkedHashMap<>();
         List<Integer> sortedKeys = new java.util.ArrayList<>(scriptsByOrder.keySet());
@@ -43,7 +42,7 @@ public class ChainFlowGraphConverter {
                 BteqScript script = scriptsInOrder.get(i);
                 Node node = new Node(script.getScriptName(), script.getScriptName());
                 int x = order * 400;
-                int y = (i * y_gap) - yOffset + max_y_offset;
+                int y = (i * y_gap) - yOffset;
                 node.getProperties().put("x", x);
                 node.getProperties().put("y", y);
                 node.getProperties().put("shape", "image");
@@ -60,10 +59,6 @@ public class ChainFlowGraphConverter {
                 graph.addNode(node);
             }
             nodesByOrder.put(order, nodes);
-
-            if (scriptCount > 1) {
-                max_y_offset += (scriptCount - 1) * y_gap;
-            }
         }
 
         List<Integer> sortedOrders = nodesByOrder.keySet().stream().sorted().collect(Collectors.toList());
@@ -76,21 +71,7 @@ public class ChainFlowGraphConverter {
 
             for (Node fromNode : currentNodes) {
                 for (Node toNode : nextNodes) {
-                    // Create an arrow node
-                    String arrowId = "arrow-" + UUID.randomUUID().toString();
-                    Node arrowNode = new Node(arrowId, "");
-                    int fromX = (int) fromNode.getProperties().get("x");
-                    int toX = (int) toNode.getProperties().get("x");
-                    int fromY = (int) fromNode.getProperties().get("y");
-                    arrowNode.getProperties().put("x", fromX + (toX - fromX) / 2);
-                    arrowNode.getProperties().put("y", fromY);
-                    arrowNode.getProperties().put("shape", "image");
-                    arrowNode.getProperties().put("image", "images/right_arrow.png");
-                    arrowNode.getProperties().put("size", "30");
-                    graph.addNode(arrowNode);
-
-                    graph.addEdge(new Edge(fromNode.getId(), arrowNode.getId(), ""));
-                    graph.addEdge(new Edge(arrowNode.getId(), toNode.getId(), ""));
+                    graph.addEdge(new Edge(fromNode.getId(), toNode.getId(), ""));
                 }
             }
         }
