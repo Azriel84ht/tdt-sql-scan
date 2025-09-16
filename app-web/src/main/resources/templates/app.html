@@ -354,8 +354,6 @@
         // Sort nodes by x-coordinate for left-to-right animation
         const sortedNodes = [...graphData.nodes].sort((a, b) => a.properties.x - b.properties.x);
 
-        console.log("Datos de nodos para animar:", sortedNodes);
-
         let i = 0;
         function addNodeAndAssociatedEdges() {
             if (i < sortedNodes.length) {
@@ -363,7 +361,6 @@
                 const nodeToAdd = { ...nodeData, ...nodeData.properties };
                 nodes.add(nodeToAdd);
 
-                // Find and add edges connected to the new node from already existing nodes
                 const originalEdges = graphData.edges || [];
                 originalEdges.forEach(edge => {
                     if ((edge.target === nodeToAdd.id && nodes.get(edge.source)) || (edge.source === nodeToAdd.id && nodes.get(edge.target))) {
@@ -371,31 +368,35 @@
                     }
                 });
 
+                network.focus(nodeToAdd.id, {
+                    scale: 1.2,
+                    animation: {
+                        duration: 800,
+                        easingFunction: 'easeInOutQuad'
+                    }
+                });
+
                 i++;
-                setTimeout(addNodeAndAssociatedEdges, 200); // 200ms delay
+                setTimeout(addNodeAndAssociatedEdges, 500);
             } else {
-                // Animation finished
-                // network.fit(); // Temporarily commented for debugging
-                if (!coordinatesExist) {
-                    network.setOptions({
-                        physics: {
-                            enabled: true,
-                            stabilization: {
-                                iterations: 1000,
-                                fit: true,
-                            },
-                            barnesHut: {
-                                gravitationalConstant: -8000,
-                                springConstant: 0.04,
-                                springLength: 95
-                            },
-                            solver: 'barnesHut'
-                        }
-                    });
-                    network.once("stabilizationIterationsDone", function () {
-                        network.setOptions({ physics: false });
-                    });
-                }
+                setTimeout(() => {
+                    network.fit();
+                    if (!coordinatesExist) {
+                        network.setOptions({
+                            physics: {
+                                enabled: true,
+                                stabilization: { iterations: 1000, fit: true },
+                                barnesHut: {
+                                    gravitationalConstant: -8000,
+                                    springConstant: 0.04,
+                                    springLength: 95
+                                },
+                                solver: 'barnesHut'
+                            }
+                        });
+                        network.once("stabilizationIterationsDone", () => network.setOptions({ physics: false }));
+                    }
+                }, 1000);
             }
                 }
 
