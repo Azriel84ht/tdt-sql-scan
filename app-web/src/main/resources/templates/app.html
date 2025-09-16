@@ -354,6 +354,8 @@
         // Sort nodes by x-coordinate for left-to-right animation
         const sortedNodes = [...graphData.nodes].sort((a, b) => a.properties.x - b.properties.x);
 
+        console.log("Datos de nodos para animar:", sortedNodes);
+
         let i = 0;
         function addNodeAndAssociatedEdges() {
             if (i < sortedNodes.length) {
@@ -373,7 +375,7 @@
                 setTimeout(addNodeAndAssociatedEdges, 200); // 200ms delay
             } else {
                 // Animation finished
-                network.fit();
+                // network.fit(); // Temporarily commented for debugging
                 if (!coordinatesExist) {
                     network.setOptions({
                         physics: {
