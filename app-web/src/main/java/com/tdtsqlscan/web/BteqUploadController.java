@@ -164,8 +164,8 @@ public class BteqUploadController {
             FileMetadata metadata = new FileMetadata();
             metadata.setFileName(script.getScriptName());
             metadata.setExecutionOrder(fileOrderMap.getOrDefault(script.getScriptName(), Integer.MAX_VALUE));
-            metadata.setFileFormat("BTEQ");
-            metadata.setFileSize(script.getSize());
+            metadata.setFileFormat(script.getEncoding());
+            metadata.setFileSize(formatFileSize(script.getSize()));
             metadata.setTransactions(transactionCount);
 
             Set<String> finalInputTables = new HashSet<>(readTables);
@@ -208,6 +208,15 @@ public class BteqUploadController {
     @GetMapping("/hello")
     public String hello() {
         return "Hello from BTEQ Flow Visualizer!";
+    }
+
+    private String formatFileSize(long size) {
+        if (size <= 0) {
+            return "0 B";
+        }
+        final String[] units = new String[]{"B", "KB", "MB", "GB", "TB"};
+        int digitGroups = (int) (Math.log10(size) / Math.log10(1024));
+        return new java.text.DecimalFormat("#,##0.#").format(size / Math.pow(1024, digitGroups)) + " " + units[digitGroups];
     }
 
     /*

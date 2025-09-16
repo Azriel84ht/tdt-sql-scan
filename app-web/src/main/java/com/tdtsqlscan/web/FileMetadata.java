@@ -9,7 +9,7 @@ public class FileMetadata {
     private String fileName;
     private int executionOrder;
     private String fileFormat;
-    private long fileSize;
+    private String fileSize;
     private int transactions;
     private final Set<String> inputTables = new HashSet<>();
     private final Set<String> outputTables = new HashSet<>();
@@ -38,11 +38,11 @@ public class FileMetadata {
         this.fileFormat = fileFormat;
     }
 
-    public long getFileSize() {
+    public String getFileSize() {
         return fileSize;
     }
 
-    public void setFileSize(long fileSize) {
+    public void setFileSize(String fileSize) {
         this.fileSize = fileSize;
     }
 
