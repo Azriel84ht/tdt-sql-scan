@@ -76,21 +76,7 @@ public class ChainFlowGraphConverter {
 
             for (Node fromNode : currentNodes) {
                 for (Node toNode : nextNodes) {
-                    // Create an arrow node
-                    String arrowId = "arrow-" + UUID.randomUUID().toString();
-                    Node arrowNode = new Node(arrowId, "");
-                    int fromX = (int) fromNode.getProperties().get("x");
-                    int toX = (int) toNode.getProperties().get("x");
-                    int fromY = (int) fromNode.getProperties().get("y");
-                    arrowNode.getProperties().put("x", fromX + (toX - fromX) / 2);
-                    arrowNode.getProperties().put("y", fromY);
-                    arrowNode.getProperties().put("shape", "image");
-                    arrowNode.getProperties().put("image", "images/right_arrow.png");
-                    arrowNode.getProperties().put("size", "30");
-                    graph.addNode(arrowNode);
-
-                    graph.addEdge(new Edge(fromNode.getId(), arrowNode.getId(), ""));
-                    graph.addEdge(new Edge(arrowNode.getId(), toNode.getId(), ""));
+                    graph.addEdge(new Edge(fromNode.getId(), toNode.getId(), ""));
                 }
             }
         }
