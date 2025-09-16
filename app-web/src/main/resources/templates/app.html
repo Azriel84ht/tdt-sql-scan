@@ -372,23 +372,23 @@
                 table.innerHTML = "";
 
                 if (clickedNode.metadata) {
+                    const metadata = clickedNode.metadata;
                     let tableHtml = '<tr><th>Attribute</th><th>Value</th></tr>';
-                    for (const key in clickedNode.metadata) {
-                        const value = clickedNode.metadata[key];
-                        let displayValue = '';
+                    const keyOrder = ["fileName", "executionOrder", "fileFormat", "fileSize", "transactions", "inputTables", "outputTables"];
 
-                        if (Array.isArray(value) && value.length > 0) {
-                            displayValue = '<ul>' + value.map(item => `<li>${item}</li>`).join('') + '</ul>';
-                        } else if (value !== null && value !== '' && (!Array.isArray(value) || value.length > 0)) {
-                            displayValue = value.toString();
-                        } else {
-                            displayValue = '-';
+                    keyOrder.forEach(key => {
+                        const value = metadata[key];
+                        if (value !== null && value !== '' && (!Array.isArray(value) || value.length > 0)) {
+                            let displayValue = '';
+                            if (Array.isArray(value)) {
+                                displayValue = '<ul>' + value.map(item => `<li>${item}</li>`).join('') + '</ul>';
+                            } else {
+                                displayValue = value.toString();
+                            }
+                            tableHtml += `<tr><td>${formatMetadataKey(key)}</td><td>${displayValue}</td></tr>`;
                         }
+                    });
 
-                        if (displayValue !== '-') {
-                             tableHtml += `<tr><td>${key}</td><td>${displayValue}</td></tr>`;
-                        }
-                    }
                     table.innerHTML = tableHtml;
                 }
             }
@@ -397,6 +397,11 @@
         network.on("deselectNode", function (params) {
             document.getElementById('metadata-table').innerHTML = "";
         });
+    }
+
+    function formatMetadataKey(key) {
+        const result = key.replace(/([A-Z])/g, " $1");
+        return result.charAt(0).toUpperCase() + result.slice(1);
     }
     /*]]>*/
     </script>

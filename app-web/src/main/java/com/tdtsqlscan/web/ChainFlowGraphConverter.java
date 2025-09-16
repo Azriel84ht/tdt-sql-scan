@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 public class ChainFlowGraphConverter {
 
-    public Graph convert(List<BteqScript> scripts, List<Map<String, String>> fileOrder) {
+    public Graph convert(List<BteqScript> scripts, List<Map<String, String>> fileOrder, Map<String, FileMetadata> fileMetadataMap) {
         Graph graph = new Graph();
         Map<String, Integer> orderByName = fileOrder.stream()
                 .collect(Collectors.toMap(
@@ -49,11 +49,9 @@ public class ChainFlowGraphConverter {
                 node.getProperties().put("image", "images/bteq_script.png");
                 node.getProperties().put("size", "50");
 
-                BteqScript originalScript = scriptsByName.get(script.getScriptName());
-                if (originalScript != null) {
-                    node.getProperties().put("fileName", originalScript.getScriptName());
-                    node.getProperties().put("fileSize", String.valueOf(originalScript.getSize()));
-                    node.getProperties().put("fileEncoding", originalScript.getEncoding());
+                FileMetadata metadata = fileMetadataMap.get(script.getScriptName());
+                if (metadata != null) {
+                    node.getProperties().put("metadata", metadata);
                 }
                 nodes.add(node);
                 graph.addNode(node);

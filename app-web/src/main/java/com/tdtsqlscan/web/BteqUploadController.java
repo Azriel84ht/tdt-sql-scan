@@ -1,5 +1,7 @@
 package com.tdtsqlscan.web;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tdtsqlscan.core.QueryParser;
 import com.tdtsqlscan.ddl.CreateIndexParser;
 import com.tdtsqlscan.ddl.CreateTableParser;
@@ -7,23 +9,33 @@ import com.tdtsqlscan.ddl.DropTableParser;
 import com.tdtsqlscan.dml.DeleteParser;
 import com.tdtsqlscan.dml.InsertParser;
 import com.tdtsqlscan.dml.UpdateParser;
+import com.tdtsqlscan.etl.BteqCommand;
 import com.tdtsqlscan.etl.BteqScript;
 import com.tdtsqlscan.etl.BteqScriptParser;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tdtsqlscan.core.SQLParserUtils;
-import com.tdtsqlscan.core.SQLQuery;
-import com.tdtsqlscan.core.SQLTableRef;
-import com.tdtsqlscan.ddl.CreateTableQuery;
-import com.tdtsqlscan.ddl.DropTableQuery;
-import com.tdtsqlscan.dml.DeleteQuery;
-import com.tdtsqlscan.dml.InsertQuery;
-import com.tdtsqlscan.dml.UpdateQuery;
-import com.tdtsqlscan.etl.BteqCommand;
 import com.tdtsqlscan.etl.BteqSqlCommand;
 import com.tdtsqlscan.graph.Graph;
 import com.tdtsqlscan.select.SelectParser;
-import com.tdtsqlscan.select.SelectQuery;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.statement.Statement;
+import net.sf.jsqlparser.statement.create.table.CreateTable;
+import net.sf.jsqlparser.statement.delete.Delete;
+import net.sf.jsqlparser.statement.drop.Drop;
+import net.sf.jsqlparser.statement.insert.Insert;
+import net.sf.jsqlparser.statement.select.Select;
+import net.sf.jsqlparser.statement.update.Update;
+import net.sf.jsqlparser.util.TablesNamesFinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,18 +43,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
 public class BteqUploadController {
@@ -102,20 +102,6 @@ public class BteqUploadController {
                 .comparing((BteqScript s) -> fileOrderMap.getOrDefault(s.getScriptName(), Integer.MAX_VALUE))
                 .thenComparing(BteqScript::getScriptName));
 
-
-        Graph chainFlowGraph = chainFlowGraphConverter.convert(scripts, fileOrderList);
-        logger.info("Generated chain flow graph with {} nodes and {} edges", chainFlowGraph.getNodes().size(), chainFlowGraph.getEdges().size());
-
-        Map<String, Graph> bteqFlows = new LinkedHashMap<>();
-        for (BteqScript script : scripts) {
-            // Important: Create a new converter for each script as it's stateful
-            DataFlowGraphConverter dataFlowGraphConverter = new DataFlowGraphConverter();
-            Graph bteqFlowGraph = dataFlowGraphConverter.convert(script);
-            bteqFlows.put(script.getScriptName(), bteqFlowGraph);
-            logger.info("Generated data flow graph for {} with {} nodes and {} edges",
-                    script.getScriptName(), bteqFlowGraph.getNodes().size(), bteqFlowGraph.getEdges().size());
-        }
-
         Map<String, FileMetadata> fileMetadataMap = new LinkedHashMap<>();
         for (BteqScript script : scripts) {
             Set<String> createdTables = new HashSet<>();
@@ -128,56 +114,58 @@ public class BteqUploadController {
                 if (command instanceof BteqSqlCommand) {
                     transactionCount++;
                     try {
-                        SQLQuery query = ((BteqSqlCommand) command).getQuery();
-                        logger.info("Processing query: {}", command.getRawText());
-                        if (query == null) {
-                            logger.warn("Query object is null for command: {}", command.getRawText());
-                            continue;
-                        }
-                        logger.info("Query class: {}", query.getClass().getName());
+                        String sql = command.getRawText();
+                        Statement statement = CCJSqlParserUtil.parse(sql);
+                        TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
 
-                        if (query instanceof SelectQuery) {
-                            SelectQuery selectQuery = (SelectQuery) query;
-                            for (SQLTableRef tableRef : selectQuery.getTables()) {
-                                readTables.add(SQLParserUtils.extractTableFromExpression(tableRef.getExpression()).toUpperCase());
+                        if (statement instanceof Select) {
+                            List<String> tableList = tablesNamesFinder.getTableList((Statement) statement);
+                            for (String table : tableList) {
+                                readTables.add(table.toUpperCase());
                             }
-                        } else if (query instanceof InsertQuery) {
-                            InsertQuery insertQuery = (InsertQuery) query;
-                            if (insertQuery.getTableName() != null) {
-                                writtenTables.add(insertQuery.getTableName().toUpperCase());
-                            } else {
-                                logger.warn("Found InsertQuery with null table name: {}", command.getRawText());
-                            }
-                            if (insertQuery.isSelect()) {
-                                for (String sourceTable : insertQuery.getSourceTables()) {
-                                    readTables.add(SQLParserUtils.extractTableFromExpression(sourceTable).toUpperCase());
+                        } else if (statement instanceof Insert) {
+                            Insert insertStatement = (Insert) statement;
+                            writtenTables.add(insertStatement.getTable().getName().toUpperCase());
+                            if (insertStatement.getSelect() != null) {
+                                List<String> tableList = tablesNamesFinder.getTableList((Statement) insertStatement.getSelect());
+                                for (String table : tableList) {
+                                    readTables.add(table.toUpperCase());
                                 }
                             }
-                        } else if (query instanceof UpdateQuery) {
-                            UpdateQuery updateQuery = (UpdateQuery) query;
-                            writtenTables.add(updateQuery.getTargetTable().toUpperCase());
-                            for (String sourceTable : updateQuery.getSourceTables()) {
-                                readTables.add(sourceTable.toUpperCase());
+                        } else if (statement instanceof Update) {
+                            Update updateStatement = (Update) statement;
+                            writtenTables.add(updateStatement.getTable().getName().toUpperCase());
+                            List<String> tableList = tablesNamesFinder.getTableList((Statement)updateStatement);
+                            for (String table : tableList) {
+                                if (!table.equalsIgnoreCase(updateStatement.getTable().getName())) {
+                                    readTables.add(table.toUpperCase());
+                                }
                             }
-                        } else if (query instanceof DeleteQuery) {
-                            DeleteQuery deleteQuery = (DeleteQuery) query;
-                            writtenTables.add(deleteQuery.getTable().toUpperCase());
-                        } else if (query instanceof CreateTableQuery) {
-                            CreateTableQuery createTableQuery = (CreateTableQuery) query;
-                            String tableName = createTableQuery.getTableName().toUpperCase();
+                        } else if (statement instanceof Delete) {
+                            Delete deleteStatement = (Delete) statement;
+                            writtenTables.add(deleteStatement.getTable().getName().toUpperCase());
+                        } else if (statement instanceof CreateTable) {
+                            CreateTable createTableStatement = (CreateTable) statement;
+                            String tableName = createTableStatement.getTable().getName().toUpperCase();
                             createdTables.add(tableName);
                             writtenTables.add(tableName);
-                        } else if (query instanceof DropTableQuery) {
-                            DropTableQuery dropTableQuery = (DropTableQuery) query;
-                            droppedTables.add(dropTableQuery.getTableName().toUpperCase());
+                        } else if (statement instanceof Drop) {
+                            Drop dropStatement = (Drop) statement;
+                            if ("TABLE".equalsIgnoreCase(dropStatement.getType())) {
+                                droppedTables.add(dropStatement.getName().getName().toUpperCase());
+                            }
                         }
-                    } catch (Exception e) {
-                        logger.error("Error processing command: " + command.getRawText(), e);
+                    } catch (JSQLParserException e) {
+                        logger.error("Error parsing SQL command: " + command.getRawText(), e);
                     }
                 }
             }
 
             FileMetadata metadata = new FileMetadata();
+            metadata.setFileName(script.getScriptName());
+            metadata.setExecutionOrder(fileOrderMap.getOrDefault(script.getScriptName(), Integer.MAX_VALUE));
+            metadata.setFileFormat("BTEQ");
+            metadata.setFileSize(script.getSize());
             metadata.setTransactions(transactionCount);
 
             Set<String> finalInputTables = new HashSet<>(readTables);
@@ -196,6 +184,19 @@ public class BteqUploadController {
             fileMetadataMap.put(script.getScriptName(), metadata);
         }
 
+        Graph chainFlowGraph = chainFlowGraphConverter.convert(scripts, fileOrderList, fileMetadataMap);
+        logger.info("Generated chain flow graph with {} nodes and {} edges", chainFlowGraph.getNodes().size(), chainFlowGraph.getEdges().size());
+
+        Map<String, Graph> bteqFlows = new LinkedHashMap<>();
+        for (BteqScript script : scripts) {
+            // Important: Create a new converter for each script as it's stateful
+            DataFlowGraphConverter dataFlowGraphConverter = new DataFlowGraphConverter();
+            Graph bteqFlowGraph = dataFlowGraphConverter.convert(script);
+            bteqFlows.put(script.getScriptName(), bteqFlowGraph);
+            logger.info("Generated data flow graph for {} with {} nodes and {} edges",
+                    script.getScriptName(), bteqFlowGraph.getNodes().size(), bteqFlowGraph.getEdges().size());
+        }
+
         GraphResponse response = new GraphResponse();
         response.chainFlow = chainFlowGraph;
         response.bteqFlows = bteqFlows;
@@ -209,6 +210,7 @@ public class BteqUploadController {
         return "Hello from BTEQ Flow Visualizer!";
     }
 
+    /*
     @PostMapping("/api/visualize-select")
     public Graph visualizeSelect(@RequestParam("scriptName") String scriptName, @RequestParam("commandId") String commandId) {
         logger.info("Request to visualize select query for script: {}, commandId: {}", scriptName, commandId);
@@ -247,4 +249,5 @@ public class BteqUploadController {
 
         return new Graph(); // Return empty graph on error
     }
+    */
 }
