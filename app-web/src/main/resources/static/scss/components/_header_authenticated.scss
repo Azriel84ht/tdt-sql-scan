@@ -4,10 +4,10 @@
 
 .header-authenticated {
   position: fixed;
-  top: $spacing-md;
+  top: $spacing-lg;
   left: 50%;
   transform: translateX(-50%);
-  width: calc(100% - #{$spacing-md * 2});
+  width: calc(100% - #{$spacing-lg * 2});
   max-width: 1200px;
   z-index: 1000;
   transition: top 0.3s ease-in-out;
