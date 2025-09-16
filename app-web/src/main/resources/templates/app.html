@@ -324,7 +324,17 @@
             return;
         }
 
-        const nodes = new vis.DataSet();
+        const sortedNodes = [...graphData.nodes].sort((a, b) => a.properties.x - b.properties.x);
+
+        const nodes = new vis.DataSet(
+            sortedNodes.map(node => {
+                let initialNode = { ...node, ...node.properties };
+                initialNode.hidden = true;
+                initialNode.size = 0;
+                return initialNode;
+            })
+        );
+
         const edges = new vis.DataSet();
 
         const networkData = {
@@ -345,62 +355,41 @@
             edges: {
                 arrows: 'to'
             },
-            physics: { enabled: false } // Disable physics during animation
+            physics: { enabled: false }
         };
 
         const network = new vis.Network(containerElement, networkData, options);
         networks[containerElement.id] = network;
 
-        // Sort nodes by x-coordinate for left-to-right animation
-        const sortedNodes = [...graphData.nodes].sort((a, b) => a.properties.x - b.properties.x);
+        network.fit();
 
         let i = 0;
-        function addNodeAndAssociatedEdges() {
+        function revealNode() {
             if (i < sortedNodes.length) {
                 const nodeData = sortedNodes[i];
-                const nodeToAdd = { ...nodeData, ...nodeData.properties };
-                nodes.add(nodeToAdd);
-
-                const originalEdges = graphData.edges || [];
-                originalEdges.forEach(edge => {
-                    if ((edge.target === nodeToAdd.id && nodes.get(edge.source)) || (edge.source === nodeToAdd.id && nodes.get(edge.target))) {
-                        edges.add({ from: edge.source, to: edge.target, ...edge.properties });
-                    }
-                });
-
-                network.focus(nodeToAdd.id, {
-                    scale: 1.2,
+                nodes.update({
+                    id: nodeData.id,
+                    hidden: false,
+                    size: nodeData.properties.size || 16,
                     animation: {
-                        duration: 800,
+                        duration: 500,
                         easingFunction: 'easeInOutQuad'
                     }
                 });
 
-                i++;
-                setTimeout(addNodeAndAssociatedEdges, 500);
-            } else {
-                setTimeout(() => {
-                    network.fit();
-                    if (!coordinatesExist) {
-                        network.setOptions({
-                            physics: {
-                                enabled: true,
-                                stabilization: { iterations: 1000, fit: true },
-                                barnesHut: {
-                                    gravitationalConstant: -8000,
-                                    springConstant: 0.04,
-                                    springLength: 95
-                                },
-                                solver: 'barnesHut'
-                            }
-                        });
-                        network.once("stabilizationIterationsDone", () => network.setOptions({ physics: false }));
+                const originalEdges = graphData.edges || [];
+                originalEdges.forEach(edge => {
+                    if (edge.target === nodeData.id && nodes.get(edge.source) && !nodes.get(edge.source).hidden) {
+                        edges.add({ from: edge.source, to: edge.target, ...edge.properties });
                     }
-                }, 1000);
+                });
+
+                i++;
+                setTimeout(revealNode, 200);
             }
                 }
 
-        addNodeAndAssociatedEdges();
+        setTimeout(revealNode, 500); // Initial delay before animation starts
 
         network.on('oncontext', function(params) {
             params.event.preventDefault();
