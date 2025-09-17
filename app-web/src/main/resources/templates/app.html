@@ -457,10 +457,11 @@
                 const bteqFlows = bteqFlowsData[activeTab.id];
                 const detailedGraph = bteqFlows ? bteqFlows[clickedNodeId] : undefined;
 
-                if (!detailedGraph) {
-                    console.error(`Validation failed: No detailed graph found for node ${clickedNodeId}.`);
+                if (!detailedGraph || !detailedGraph.nodes || !detailedGraph.edges) {
+                    console.error(`Validation failed: No detailed graph found for node ${clickedNodeId}, or graph is malformed.`);
                     return;
                 }
+                console.log("Graph to render:", detailedGraph);
 
                 // 4. Crear y Preparar la Nueva Pestaña para el Grafo
                 const newTabInfo = createNewTab();
@@ -476,8 +477,10 @@
                 const originalNode = nodes.get(clickedNodeId);
                 newTabButton.firstChild.textContent = originalNode.label || `Schema ${schemaCounter++}`;
 
-                // 6. Renderizar el Grafo Detallado
-                renderGraph(detailedGraph, graphContainer);
+                // 6. Renderizado Asíncrono del Grafo
+                setTimeout(() => {
+                    renderGraph(detailedGraph, graphContainer);
+                }, 0);
             };
                 });
 
