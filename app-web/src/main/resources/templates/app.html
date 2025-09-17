@@ -441,26 +441,48 @@
 
             const showSchemaBtn = document.getElementById('show-schema-btn');
             showSchemaBtn.onclick = function() {
+                // a. Validación de Datos Crucial
                 contextMenu.style.display = 'none';
-                const activeTab = tabs.find(t => t.contentId === containerElement.id);
-                if (!activeTab) return;
+                const clickedNodeId = nodeId; // nodeId is from the parent oncontext scope
+                const activeTab = tabs.find(t => t.id === activeTabId);
 
-                const bteqFlows = bteqFlowsData[activeTab.id];
-                if (bteqFlows && bteqFlows[nodeId]) {
-                    const newTabInfo = createNewTab();
-                    const newTabContent = document.getElementById(newTabInfo.contentId);
-                    newTabContent.innerHTML = ''; // Clear upload UI
-
-                    const graphContainer = document.createElement('div');
-                    graphContainer.style.height = '100%';
-                    newTabContent.appendChild(graphContainer);
-
-                    const newTabButton = document.getElementById(newTabInfo.id);
-                    const node = nodes.get(nodeId);
-                    newTabButton.firstChild.textContent = node.label || `Schema ${schemaCounter++}`;
-
-                    renderGraph(bteqFlows[nodeId], graphContainer);
+                if (!activeTab || !clickedNodeId) {
+                    console.error("Validation failed: Active tab or node ID is missing.");
+                    return;
                 }
+                const detailedGraph = bteqFlowsData[activeTab.id] && bteqFlowsData[activeTab.id][clickedNodeId];
+                if (!detailedGraph) {
+                    console.error(`Validation failed: No detailed graph found for node ${clickedNodeId}.`);
+                    return;
+                }
+
+                // b. Prepara el Contenedor del Grafo
+                const contentContainer = document.getElementById(activeTab.contentId);
+                contentContainer.innerHTML = '';
+                const graphHost = document.createElement('div');
+                graphHost.style.height = '100%';
+                contentContainer.appendChild(graphHost);
+
+                // c. Crea y Configura el Botón "Atrás"
+                const backButton = document.createElement('button');
+                backButton.textContent = '← Back to Main Flow';
+                backButton.id = 'back-to-main-flow-btn';
+                document.getElementById('navigation-controls').appendChild(backButton);
+
+                backButton.onclick = function() {
+                    const mainFlowGraph = graphData[activeTab.id];
+                    contentContainer.innerHTML = '';
+                    const newGraphContainer = document.createElement('div');
+                    newGraphContainer.style.height = '100%';
+                    contentContainer.appendChild(newGraphContainer);
+                    renderGraph(mainFlowGraph, newGraphContainer);
+                    backButton.remove();
+                };
+
+                // d. Renderiza el Grafo Detallado
+                setTimeout(() => {
+                    renderGraph(detailedGraph, graphHost);
+                }, 0);
             };
                 });
 
