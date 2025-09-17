@@ -441,26 +441,43 @@
 
             const showSchemaBtn = document.getElementById('show-schema-btn');
             showSchemaBtn.onclick = function() {
+                // 1. Ocultar el Menú y Capturar el Contexto
                 contextMenu.style.display = 'none';
-                const activeTab = tabs.find(t => t.contentId === containerElement.id);
-                if (!activeTab) return;
+                const clickedNodeId = nodeId; // nodeId is from the parent oncontext scope
+
+                // 2. Identificar la Pestaña Activa de Forma Robusta
+                const activeTab = tabs.find(t => t.id === activeTabId);
+
+                // 3. Validar los Datos Necesarios
+                if (!activeTab || !clickedNodeId) {
+                    console.error("Validation failed: Active tab or node ID is missing.");
+                    return;
+                }
 
                 const bteqFlows = bteqFlowsData[activeTab.id];
-                if (bteqFlows && bteqFlows[nodeId]) {
-                    const newTabInfo = createNewTab();
-                    const newTabContent = document.getElementById(newTabInfo.contentId);
-                    newTabContent.innerHTML = ''; // Clear upload UI
+                const detailedGraph = bteqFlows ? bteqFlows[clickedNodeId] : undefined;
 
-                    const graphContainer = document.createElement('div');
-                    graphContainer.style.height = '100%';
-                    newTabContent.appendChild(graphContainer);
-
-                    const newTabButton = document.getElementById(newTabInfo.id);
-                    const node = nodes.get(nodeId);
-                    newTabButton.firstChild.textContent = node.label || `Schema ${schemaCounter++}`;
-
-                    renderGraph(bteqFlows[nodeId], graphContainer);
+                if (!detailedGraph) {
+                    console.error(`Validation failed: No detailed graph found for node ${clickedNodeId}.`);
+                    return;
                 }
+
+                // 4. Crear y Preparar la Nueva Pestaña para el Grafo
+                const newTabInfo = createNewTab();
+                const newTabContent = document.getElementById(newTabInfo.contentId);
+                newTabContent.innerHTML = ''; // Limpiar la interfaz de subida
+
+                // 5. Configurar la Nueva Pestaña y su Contenedor
+                const graphContainer = document.createElement('div');
+                graphContainer.style.height = '100%';
+                newTabContent.appendChild(graphContainer);
+
+                const newTabButton = document.getElementById(newTabInfo.id);
+                const originalNode = nodes.get(clickedNodeId);
+                newTabButton.firstChild.textContent = originalNode.label || `Schema ${schemaCounter++}`;
+
+                // 6. Renderizar el Grafo Detallado
+                renderGraph(detailedGraph, graphContainer);
             };
                 });
 
