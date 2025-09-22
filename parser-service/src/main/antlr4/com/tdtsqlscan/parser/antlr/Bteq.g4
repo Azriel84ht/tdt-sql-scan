@@ -62,6 +62,77 @@ ddl_statement
     : (CREATE | DROP) TABLE text_up_to_semicolon
     ;
 
+// --- Detailed SELECT statement parsing ---
+
+// This is the new entry point for parsing a single SELECT statement.
+select_statement
+    : SELECT select_list
+      FROM from_clause
+      (WHERE where_clause)?
+      (GROUP BY group_by_clause)?
+      (SEMICOLON)? EOF
+    ;
+
+select_list
+    : column_element (',' column_element)*
+    ;
+
+column_element
+    : expression (AS? alias)?
+    ;
+
+from_clause
+    : table_reference (join_clause)*
+    ;
+
+join_clause
+    : join_operator? JOIN table_reference (ON condition=expression)?
+    ;
+
+join_operator
+    : (LEFT | RIGHT | FULL) (OUTER)?
+    | INNER
+    ;
+
+where_clause
+    : expression
+    ;
+
+group_by_clause
+    : expression (',' expression)*
+    ;
+
+table_reference
+    : table_name (AS? alias)?
+    ;
+
+expression
+    : qualified_column_name
+    | literal_value
+    // This is a simplification. A real expression parser would be much more complex.
+    // For now, we'll just capture identifiers and literals.
+    // We will capture the full text for complex expressions in the listener.
+    ;
+
+qualified_column_name
+    : (table_name '.')? column_name
+    ;
+
+table_name
+    : IDENTIFIER
+    ;
+
+column_name
+    : IDENTIFIER
+    ;
+
+alias
+    : IDENTIFIER
+    ;
+
+literal_value
+    : STRING | NUMBER
+    ;
 
 // --- Generic Helper Rules ---
 
@@ -90,6 +161,19 @@ THEN: [Tt][Hh][Ee][Nn];
 
 // SQL Keywords
 SELECT: [Ss][Ee][Ll][Ee][Cc][Tt];
+FROM: [Ff][Rr][Oo][Mm];
+WHERE: [Ww][Hh][Ee][Rr][Ee];
+JOIN: [Jj][Oo][Ii][Nn];
+ON: [Oo][Nn];
+AS: [Aa][Ss];
+GROUP: [Gg][Rr][Oo][Uu][Pp];
+BY: [Bb][Yy];
+LEFT: [Ll][Ee][Ff][Tt];
+RIGHT: [Rr][Ii][Gg][Hh][Tt];
+FULL: [Ff][Uu][Ll][Ll];
+INNER: [Ii][Nn][Nn][Ee][Rr];
+OUTER: [Oo][Uu][Tt][Ee][Rr];
+
 INSERT: [Ii][Nn][Ss][Ee][Rr][Tt];
 UPDATE: [Uu][Pp][Dd][Aa][Tt][Ee];
 DELETE: [Dd][Ee][Ll][Ee][Tt][Ee];
@@ -101,6 +185,12 @@ TABLE: [Tt][Aa][Bb][Ll][Ee];
 SEMICOLON: ';';
 EQUALS: '=';
 OPERATOR: '<>' | '!=' | '>' | '<' | '>=' | '<=';
+COMMA: ',';
+DOT: '.';
+ASTERISK: '*';
+LPAREN: '(';
+RPAREN: ')';
+
 NUMBER: [0-9]+;
 IDENTIFIER: [a-zA-Z_][a-zA-Z0-9_]*;
 STRING: '\'' (~'\'')* '\'' | '"' (~'"')* '"'; // Handles single or double quoted strings
