@@ -20,10 +20,11 @@
     <module>exporters</module>
     <module>app-cli</module>
     <module>app-web</module>
+    <module>parser-service</module>
   </modules>
 
   <properties>
-    <java.version>8</java.version>
+    <java.version>17</java.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
   </properties>
