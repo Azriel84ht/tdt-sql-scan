@@ -2,10 +2,16 @@ import React, { useState } from 'react';
 import { useAuthStore } from '../store/authStore';
 import FileUploadArea from '../components/FileUploadArea';
 import StagingPanel from '../components/StagingPanel';
+import GraphVisualizationPanel from '../components/GraphVisualizationPanel';
 import apiClient from '../api/apiClient';
 
+interface StatementDto {
+  commandName?: string;
+  rawContent: string;
+}
+
 interface AnalysisResult {
-  // Using a more specific type than any
+  statements: StatementDto[];
   [key: string]: unknown;
 }
 
@@ -71,7 +77,9 @@ const HomePage: React.FC = () => {
       {analysisResults.length > 0 && (
         <div>
           <h3>Analysis Results</h3>
-          <pre>{JSON.stringify(analysisResults, null, 2)}</pre>
+          {analysisResults.map((result, index) => (
+            <GraphVisualizationPanel key={index} analysisResult={result} />
+          ))}
         </div>
       )}
     </div>
