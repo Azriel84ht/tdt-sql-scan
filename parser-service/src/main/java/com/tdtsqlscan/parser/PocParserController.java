@@ -5,11 +5,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/parse")
 @Tag(name = "Parser POC", description = "Endpoints para el Proof of Concept del servicio de parsing")
+@SecurityRequirement(name = "bearerAuth")
 public class PocParserController {
 
     private final AntlrBteqParserService parserService;
@@ -47,10 +50,7 @@ public class PocParserController {
                     schema = @Schema(implementation = ParseResultDto.class)
             )
     )
-    public ResponseEntity<ParseResultDto> parseScript(@RequestBody ParseRequest request) {
-        if (request == null || request.getScriptContent() == null || request.getScriptContent().isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
+    public ResponseEntity<ParseResultDto> parseScript(@Valid @RequestBody ParseRequest request) {
         ParseResultDto result = parserService.parse(request.getScriptContent());
         return ResponseEntity.ok(result);
     }
