@@ -2,12 +2,11 @@ package com.tdtsqlscan.web.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tdtsqlscan.web.client.dto.ParseResultDto;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -40,13 +39,13 @@ public class ParserServiceClient {
         String jsonRequestBody = objectMapper.writeValueAsString(requestBody);
         httpPost.setEntity(new StringEntity(jsonRequestBody));
 
-        try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
-            int statusCode = response.getStatusLine().getStatusCode();
+        return httpClient.execute(httpPost, response -> {
+            int statusCode = response.getCode();
             if (statusCode != 200) {
                 throw new IOException("Failed to call parser service. Status code: " + statusCode);
             }
             String jsonResponse = EntityUtils.toString(response.getEntity());
             return objectMapper.readValue(jsonResponse, ParseResultDto.class);
-        }
+        });
     }
 }
