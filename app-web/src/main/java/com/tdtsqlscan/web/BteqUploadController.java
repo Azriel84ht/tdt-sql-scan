@@ -1,32 +1,14 @@
 package com.tdtsqlscan.web;
 
-import com.tdtsqlscan.core.QueryParser;
-import com.tdtsqlscan.ddl.CreateIndexParser;
-import com.tdtsqlscan.ddl.CreateTableParser;
-import com.tdtsqlscan.ddl.DropTableParser;
-import com.tdtsqlscan.dml.DeleteParser;
-import com.tdtsqlscan.dml.InsertParser;
-import com.tdtsqlscan.dml.UpdateParser;
-import com.tdtsqlscan.etl.BteqScript;
-import com.tdtsqlscan.etl.BteqScriptParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tdtsqlscan.core.SQLParserUtils;
-import com.tdtsqlscan.core.SQLQuery;
-import com.tdtsqlscan.core.SQLTableRef;
-import com.tdtsqlscan.ddl.CreateTableQuery;
-import com.tdtsqlscan.ddl.DropTableQuery;
-import com.tdtsqlscan.dml.DeleteQuery;
-import com.tdtsqlscan.dml.InsertQuery;
-import com.tdtsqlscan.dml.UpdateQuery;
-import com.tdtsqlscan.etl.BteqCommand;
-import com.tdtsqlscan.etl.BteqSqlCommand;
 import com.tdtsqlscan.graph.Graph;
-import com.tdtsqlscan.select.SelectParser;
-import com.tdtsqlscan.select.SelectQuery;
+import com.tdtsqlscan.web.client.ParserServiceClient;
+import com.tdtsqlscan.web.client.dto.ParseResultDto;
+import com.tdtsqlscan.web.client.dto.StatementDto;
+import com.tdtsqlscan.web.client.dto.StatementType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,24 +17,26 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
 public class BteqUploadController {
 
     private static final Logger logger = LoggerFactory.getLogger(BteqUploadController.class);
 
-    private final BteqScriptParser bteqScriptParser;
-    private final ChainFlowGraphConverter chainFlowGraphConverter;
+    private final ParserServiceClient parserServiceClient;
     private final ObjectMapper objectMapper;
-    private final Map<String, BteqScript> parsedScripts = new ConcurrentHashMap<>();
+
+    // We need to store the parsed results for later use, e.g., for visualizing SELECTs.
+    // The key will be the script name.
+    private final Map<String, ParseResultDto> parsedScriptsCache = new HashMap<>();
 
 
     public static class GraphResponse {
@@ -61,139 +45,60 @@ public class BteqUploadController {
         public Map<String, FileMetadata> fileMetadata;
     }
 
-    public BteqUploadController() {
-        logger.info("Initializing BteqUploadController");
-        List<QueryParser> sqlParsers = new ArrayList<>();
-        sqlParsers.add(new SelectParser());
-        sqlParsers.add(new CreateTableParser());
-        sqlParsers.add(new DropTableParser());
-        sqlParsers.add(new CreateIndexParser());
-        sqlParsers.add(new InsertParser());
-        sqlParsers.add(new UpdateParser());
-        sqlParsers.add(new DeleteParser());
-        this.bteqScriptParser = new BteqScriptParser(sqlParsers);
-        this.chainFlowGraphConverter = new ChainFlowGraphConverter();
-        this.objectMapper = new ObjectMapper();
-        logger.info("BteqUploadController initialized");
+    // Helper class to hold script data along with its original name and order
+    public static class ScriptData {
+        public final String name;
+        public final long size;
+        public final String encoding;
+        public final ParseResultDto parseResult;
+
+        public ScriptData(String name, long size, String encoding, ParseResultDto parseResult) {
+            this.name = name;
+            this.size = size;
+            this.encoding = encoding;
+            this.parseResult = parseResult;
+        }
+    }
+
+
+    public BteqUploadController(ParserServiceClient parserServiceClient, ObjectMapper objectMapper) {
+        this.parserServiceClient = parserServiceClient;
+        this.objectMapper = objectMapper;
     }
 
     @PostMapping("/upload")
     public GraphResponse handleFileUpload(@RequestParam("files") MultipartFile[] files, @RequestParam("fileOrder") String fileOrderJson) throws IOException {
         logger.info("Received {} files for upload", files.length);
-        parsedScripts.clear();
+        parsedScriptsCache.clear();
 
-        List<Map<String, String>> fileOrderList = objectMapper.readValue(fileOrderJson, new TypeReference<List<Map<String, String>>>(){});
+        List<Map<String, String>> fileOrderList = objectMapper.readValue(fileOrderJson, new TypeReference<List<Map<String, String>>>() {});
         Map<String, Integer> fileOrderMap = fileOrderList.stream()
                 .collect(Collectors.toMap(map -> map.get("name"), map -> Integer.parseInt(map.get("order"))));
 
-
-        List<BteqScript> scripts = new ArrayList<>();
+        List<ScriptData> scripts = new ArrayList<>();
         for (MultipartFile file : files) {
             String content = new String(file.getBytes(), StandardCharsets.UTF_8);
-            BteqScript script = bteqScriptParser.parse(content, file.getOriginalFilename());
-            script.setSize(file.getSize());
-            script.setEncoding(StandardCharsets.UTF_8.name());
-            scripts.add(script);
-            parsedScripts.put(script.getScriptName(), script);
+            ParseResultDto parseResult = parserServiceClient.parse(content);
+            ScriptData scriptData = new ScriptData(file.getOriginalFilename(), file.getSize(), StandardCharsets.UTF_8.name(), parseResult);
+            scripts.add(scriptData);
+            parsedScriptsCache.put(scriptData.name, parseResult);
         }
 
-        // Sort scripts: primary by user order, secondary by script name
-        scripts.sort(Comparator
-                .comparing((BteqScript s) -> fileOrderMap.getOrDefault(s.getScriptName(), Integer.MAX_VALUE))
-                .thenComparing(BteqScript::getScriptName));
+        scripts.sort(Comparator.comparing(s -> fileOrderMap.getOrDefault(s.name, Integer.MAX_VALUE)));
 
-
+        ChainFlowGraphConverter chainFlowGraphConverter = new ChainFlowGraphConverter();
         Graph chainFlowGraph = chainFlowGraphConverter.convert(scripts, fileOrderList);
-        logger.info("Generated chain flow graph with {} nodes and {} edges", chainFlowGraph.getNodes().size(), chainFlowGraph.getEdges().size());
 
         Map<String, Graph> bteqFlows = new LinkedHashMap<>();
-        for (BteqScript script : scripts) {
-            // Important: Create a new converter for each script as it's stateful
+        for (ScriptData script : scripts) {
             DataFlowGraphConverter dataFlowGraphConverter = new DataFlowGraphConverter();
-            Graph bteqFlowGraph = dataFlowGraphConverter.convert(script);
-            bteqFlows.put(script.getScriptName(), bteqFlowGraph);
-            logger.info("Generated data flow graph for {} with {} nodes and {} edges",
-                    script.getScriptName(), bteqFlowGraph.getNodes().size(), bteqFlowGraph.getEdges().size());
+            Graph bteqFlowGraph = dataFlowGraphConverter.convert(script.parseResult);
+            bteqFlows.put(script.name, bteqFlowGraph);
         }
 
         Map<String, FileMetadata> fileMetadataMap = new LinkedHashMap<>();
-        for (BteqScript script : scripts) {
-            Set<String> createdTables = new HashSet<>();
-            Set<String> droppedTables = new HashSet<>();
-            Set<String> readTables = new HashSet<>();
-            Set<String> writtenTables = new HashSet<>();
-            int transactionCount = 0;
-
-            for (BteqCommand command : script.getCommands()) {
-                if (command instanceof BteqSqlCommand) {
-                    transactionCount++;
-                    try {
-                        SQLQuery query = ((BteqSqlCommand) command).getQuery();
-                        logger.info("Processing query: {}", command.getRawText());
-                        if (query == null) {
-                            logger.warn("Query object is null for command: {}", command.getRawText());
-                            continue;
-                        }
-                        logger.info("Query class: {}", query.getClass().getName());
-
-                        if (query instanceof SelectQuery) {
-                            SelectQuery selectQuery = (SelectQuery) query;
-                            for (SQLTableRef tableRef : selectQuery.getTables()) {
-                                readTables.add(SQLParserUtils.extractTableFromExpression(tableRef.getExpression()).toUpperCase());
-                            }
-                        } else if (query instanceof InsertQuery) {
-                            InsertQuery insertQuery = (InsertQuery) query;
-                            if (insertQuery.getTableName() != null) {
-                                writtenTables.add(insertQuery.getTableName().toUpperCase());
-                            } else {
-                                logger.warn("Found InsertQuery with null table name: {}", command.getRawText());
-                            }
-                            if (insertQuery.isSelect()) {
-                                for (String sourceTable : insertQuery.getSourceTables()) {
-                                    readTables.add(SQLParserUtils.extractTableFromExpression(sourceTable).toUpperCase());
-                                }
-                            }
-                        } else if (query instanceof UpdateQuery) {
-                            UpdateQuery updateQuery = (UpdateQuery) query;
-                            writtenTables.add(updateQuery.getTargetTable().toUpperCase());
-                            for (String sourceTable : updateQuery.getSourceTables()) {
-                                readTables.add(sourceTable.toUpperCase());
-                            }
-                        } else if (query instanceof DeleteQuery) {
-                            DeleteQuery deleteQuery = (DeleteQuery) query;
-                            writtenTables.add(deleteQuery.getTable().toUpperCase());
-                        } else if (query instanceof CreateTableQuery) {
-                            CreateTableQuery createTableQuery = (CreateTableQuery) query;
-                            String tableName = createTableQuery.getTableName().toUpperCase();
-                            createdTables.add(tableName);
-                            writtenTables.add(tableName);
-                        } else if (query instanceof DropTableQuery) {
-                            DropTableQuery dropTableQuery = (DropTableQuery) query;
-                            droppedTables.add(dropTableQuery.getTableName().toUpperCase());
-                        }
-                    } catch (Exception e) {
-                        logger.error("Error processing command: " + command.getRawText(), e);
-                    }
-                }
-            }
-
-            FileMetadata metadata = new FileMetadata();
-            metadata.setTransactions(transactionCount);
-
-            Set<String> finalInputTables = new HashSet<>(readTables);
-            finalInputTables.removeAll(createdTables);
-
-            Set<String> finalOutputTables = new HashSet<>(writtenTables);
-            finalOutputTables.removeAll(droppedTables);
-
-            for (String table : finalInputTables) {
-                metadata.addInputTable(table);
-            }
-            for (String table : finalOutputTables) {
-                metadata.addOutputTable(table);
-            }
-
-            fileMetadataMap.put(script.getScriptName(), metadata);
+        for (ScriptData script : scripts) {
+            fileMetadataMap.put(script.name, extractFileMetadata(script.parseResult));
         }
 
         GraphResponse response = new GraphResponse();
@@ -204,47 +109,103 @@ public class BteqUploadController {
         return response;
     }
 
-    @GetMapping("/hello")
-    public String hello() {
-        return "Hello from BTEQ Flow Visualizer!";
-    }
+    private FileMetadata extractFileMetadata(ParseResultDto parseResult) {
+        Set<String> createdTables = new HashSet<>();
+        Set<String> droppedTables = new HashSet<>();
+        Set<String> readTables = new HashSet<>();
+        Set<String> writtenTables = new HashSet<>();
+        int transactionCount = 0;
 
-    @PostMapping("/api/visualize-select")
-    public Graph visualizeSelect(@RequestParam("scriptName") String scriptName, @RequestParam("commandId") String commandId) {
-        logger.info("Request to visualize select query for script: {}, commandId: {}", scriptName, commandId);
+        for (StatementDto stmt : parseResult.getStatements()) {
+            if (stmt.getType() == StatementType.SQL_DDL || stmt.getType() == StatementType.SQL_DML) {
+                transactionCount++;
+                Map<String, String> details = stmt.getDetails();
+                if (details == null) continue;
 
-        BteqScript script = parsedScripts.get(scriptName);
-        if (script == null) {
-            logger.error("Script not found: {}", scriptName);
-            return new Graph(); // Return empty graph
-        }
-
-        try {
-            // commandId is "cmd-INDEX"
-            int commandIndex = Integer.parseInt(commandId.split("-")[1]);
-            BteqCommand command = script.getCommands().get(commandIndex);
-
-            if (command instanceof BteqSqlCommand) {
-                Object query = ((BteqSqlCommand) command).getQuery();
-                SelectQuery selectQuery = null;
-
-                if (query instanceof SelectQuery) {
-                    selectQuery = (SelectQuery) query;
-                } else if (query instanceof InsertQuery && ((InsertQuery) query).isSelect()) {
-                    selectQuery = ((InsertQuery) query).getSelectQuery();
-                } else if (query instanceof CreateTableQuery && ((CreateTableQuery) query).getSelectQuery() != null) {
-                    selectQuery = ((CreateTableQuery) query).getSelectQuery();
-                }
-
-                if (selectQuery != null) {
-                    SelectGraphConverter converter = new SelectGraphConverter();
-                    return converter.convert(selectQuery);
+                switch (stmt.getCommandName().toUpperCase()) {
+                    case "CREATE TABLE":
+                        String createdTable = details.get("table_name");
+                        if (createdTable != null) {
+                            createdTables.add(createdTable.toUpperCase());
+                            writtenTables.add(createdTable.toUpperCase());
+                        }
+                        // If CREATE TABLE AS SELECT, it also reads from tables
+                        if (details.containsKey("source_tables")) {
+                            String sourceTables = details.get("source_tables");
+                            for(String tbl : sourceTables.split(",")) {
+                                readTables.add(tbl.trim().toUpperCase());
+                            }
+                        }
+                        break;
+                    case "DROP TABLE":
+                        String droppedTable = details.get("table_name");
+                        if (droppedTable != null) {
+                            droppedTables.add(droppedTable.toUpperCase());
+                        }
+                        break;
+                    case "INSERT":
+                        String targetTable = details.get("table_name");
+                        if (targetTable != null) {
+                            writtenTables.add(targetTable.toUpperCase());
+                        }
+                        if (details.containsKey("source_tables")) {
+                            String sourceTables = details.get("source_tables");
+                             for(String tbl : sourceTables.split(",")) {
+                                readTables.add(tbl.trim().toUpperCase());
+                            }
+                        }
+                        break;
+                    case "UPDATE":
+                        String updatedTable = details.get("table_name");
+                        if(updatedTable != null) {
+                            writtenTables.add(updatedTable.toUpperCase());
+                        }
+                        if (details.containsKey("source_tables")) {
+                            String sourceTables = details.get("source_tables");
+                             for(String tbl : sourceTables.split(",")) {
+                                readTables.add(tbl.trim().toUpperCase());
+                            }
+                        }
+                        break;
+                    case "DELETE":
+                         String deletedFromTable = details.get("table_name");
+                         if(deletedFromTable != null) {
+                            writtenTables.add(deletedFromTable.toUpperCase());
+                         }
+                        break;
+                    case "SELECT":
+                         if (details.containsKey("source_tables")) {
+                            String sourceTables = details.get("source_tables");
+                             for(String tbl : sourceTables.split(",")) {
+                                readTables.add(tbl.trim().toUpperCase());
+                            }
+                        }
+                        break;
                 }
             }
-        } catch (Exception e) {
-            logger.error("Error generating select visualization for script: {}, commandId: {}", scriptName, commandId, e);
         }
 
-        return new Graph(); // Return empty graph on error
+        FileMetadata metadata = new FileMetadata();
+        metadata.setTransactions(transactionCount);
+
+        Set<String> finalInputTables = new HashSet<>(readTables);
+        finalInputTables.removeAll(createdTables);
+
+        Set<String> finalOutputTables = new HashSet<>(writtenTables);
+        finalOutputTables.removeAll(droppedTables);
+
+        finalInputTables.forEach(metadata::addInputTable);
+        finalOutputTables.forEach(metadata::addOutputTable);
+
+        return metadata;
+    }
+
+    // This endpoint is now broken because it relies on BteqScript and specific command indexing.
+    // It will need to be refactored or removed. For now, it will return an empty graph.
+    // TODO: Refactor visualize-select to work with ParseResultDto
+    @PostMapping("/api/visualize-select")
+    public Graph visualizeSelect(@RequestParam("scriptName") String scriptName, @RequestParam("commandId") String commandId) {
+        logger.warn("The visualize-select endpoint is temporarily disabled pending refactoring.");
+        return new Graph();
     }
 }

@@ -1,9 +1,9 @@
 package com.tdtsqlscan.web;
 
-import com.tdtsqlscan.etl.BteqScript;
 import com.tdtsqlscan.graph.Graph;
 import com.tdtsqlscan.graph.Node;
 import com.tdtsqlscan.graph.Edge;
+import com.tdtsqlscan.web.BteqUploadController.ScriptData; // Assuming ScriptData is accessible
 
 import java.util.List;
 import java.util.Map;
@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 public class ChainFlowGraphConverter {
 
-    public Graph convert(List<BteqScript> scripts, List<Map<String, String>> fileOrder) {
+    public Graph convert(List<ScriptData> scripts, List<Map<String, String>> fileOrder) {
         Graph graph = new Graph();
         Map<String, Integer> orderByName = fileOrder.stream()
                 .collect(Collectors.toMap(
@@ -20,11 +20,11 @@ public class ChainFlowGraphConverter {
                         map -> Integer.parseInt(map.get("order"))
                 ));
 
-        Map<String, BteqScript> scriptsByName = scripts.stream()
-                .collect(Collectors.toMap(BteqScript::getScriptName, script -> script));
+        Map<String, ScriptData> scriptsByName = scripts.stream()
+                .collect(Collectors.toMap(script -> script.name, script -> script));
 
-        Map<Integer, List<BteqScript>> scriptsByOrder = scripts.stream()
-                .collect(Collectors.groupingBy(script -> orderByName.get(script.getScriptName())));
+        Map<Integer, List<ScriptData>> scriptsByOrder = scripts.stream()
+                .collect(Collectors.groupingBy(script -> orderByName.get(script.name)));
 
         int y_gap = 150;
         int max_y_offset = 0;
@@ -39,8 +39,8 @@ public class ChainFlowGraphConverter {
                             int yOffset = (scriptCount > 1) ? (scriptCount - 1) * y_gap / 2 : 0;
 
                             for (int i = 0; i < scriptCount; i++) {
-                                BteqScript script = entry.getValue().get(i);
-                                Node node = new Node(script.getScriptName(), script.getScriptName());
+                                ScriptData script = entry.getValue().get(i);
+                                Node node = new Node(script.name, script.name);
                                 int x = entry.getKey() * 400;
                                 int y = (i * y_gap) - yOffset + max_y_offset;
                                 node.getProperties().put("x", String.valueOf(x));
@@ -49,17 +49,14 @@ public class ChainFlowGraphConverter {
                                 node.getProperties().put("image", "/images/bteq_script.png");
                                 node.getProperties().put("size", "50");
 
-                                BteqScript originalScript = scriptsByName.get(script.getScriptName());
+                                ScriptData originalScript = scriptsByName.get(script.name);
                                 if (originalScript != null) {
-                                    node.getProperties().put("fileName", originalScript.getScriptName());
-                                    node.getProperties().put("fileSize", String.valueOf(originalScript.getSize()));
-                                    node.getProperties().put("fileEncoding", originalScript.getEncoding());
+                                    node.getProperties().put("fileName", originalScript.name);
+                                    node.getProperties().put("fileSize", String.valueOf(originalScript.size));
+                                    node.getProperties().put("fileEncoding", originalScript.encoding);
                                 }
                                 nodes.add(node);
                                 graph.addNode(node);
-                            }
-                            if (scriptCount > 1) {
-                               // max_y_offset += (scriptCount -1) * y_gap;
                             }
                             return nodes;
                         }
@@ -75,7 +72,6 @@ public class ChainFlowGraphConverter {
 
             for (Node fromNode : currentNodes) {
                 for (Node toNode : nextNodes) {
-                    // Create an arrow node
                     String arrowId = "arrow-" + UUID.randomUUID().toString();
                     Node arrowNode = new Node(arrowId, "");
                     int fromX = Integer.parseInt((String) fromNode.getProperties().get("x"));
