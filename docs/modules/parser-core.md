@@ -75,7 +75,7 @@ These classes represent various components of an SQL query, forming the nodes of
 
 This module has no external runtime dependencies. It relies solely on standard Java libraries. During development and testing, it uses JUnit (version 4.13.2) as a test dependency.
 
-## Ejemplos de Uso de `SQLParserUtils`
+## How to Use
 
 Para ilustrar cómo se utilizan los métodos de utilidad en `SQLParserUtils`, considere el siguiente ejemplo:
 
@@ -92,3 +92,19 @@ System.out.println("Parts: " + parts); // Salida: [col1 = 1, (col2 = 2 OR col3 =
 ```
 
 Estos ejemplos demuestran cómo las utilidades pueden ayudar a descomponer cadenas SQL complejas para su posterior análisis.
+
+## Supported Features & Limitations
+
+**Supported Features:**
+
+*   **Core Interfaces and Abstract Classes:** Provides `QueryParser` interface and `SQLQuery` abstract class for consistent parser implementation and AST representation.
+*   **Fundamental AST Nodes:** Defines basic data structures like `SQLAssignment`, `SQLCondition`, `SQLJoin`, `SQLOrderItem`, and `SQLTableRef` for building SQL Abstract Syntax Trees.
+*   **SQL Parsing Utilities (`SQLParserUtils`):** Offers a set of static methods for common string manipulation tasks crucial for parsing, including keyword extraction, top-level splitting, and table name extraction.
+*   **Custom Exception Handling:** Includes `SQLParseException` for specific error reporting during SQL parsing.
+
+**Limitations:**
+
+*   **No Standalone Parser:** This module does not provide a complete, standalone SQL parser. It offers the building blocks for other specialized parser modules.
+*   **Limited SQL Dialect Specificity:** The utility methods in `SQLParserUtils` are generic but might require careful application or extension for highly specific or complex SQL dialects.
+*   **Manual AST Construction:** Parsers built on this core module still require manual logic to construct the AST using the provided data structures, rather than automatic generation from a grammar.
+*   **No Lexical Analysis (Directly):** While `SQLParserUtils` performs tokenization-like tasks, it does not implement a full-fledged lexical analyzer that produces a formal token stream.

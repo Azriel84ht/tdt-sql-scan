@@ -119,3 +119,20 @@ public class GraphExample {
     }
 }
 ```
+
+## Supported Features & Limitations
+
+**Supported Features:**
+
+*   **Generic Graph Representation:** Provides flexible `Node`, `Edge`, and `Graph` classes to model various types of relationships and data flows.
+*   **Rich Metadata Storage:** `Node` and `Edge` objects can store arbitrary key-value pairs in their `properties` map, allowing for detailed annotation of graph elements.
+*   **Directed Edges:** Edges explicitly define a `source` and `target`, enabling the representation of directional relationships (e.g., data flow).
+*   **Basic Graph Construction:** Simple API for adding nodes and edges to a graph.
+*   **Layout Hints:** Includes fields (`horizontalLaneYs`, `verticalLabelXs`) that can be used by visualization tools to suggest layout.
+
+**Limitations:**
+
+*   **No Graph Algorithms:** This module focuses solely on data structures and does not include any graph traversal algorithms (e.g., shortest path, cycle detection), graph analysis functions (e.g., centrality measures), or layout algorithms.
+*   **No Persistence Layer:** The module does not provide mechanisms for persisting graphs to disk or databases; it's an in-memory representation.
+*   **No Built-in Visualization:** While it provides hints for visualization, it does not include any actual rendering or visualization capabilities.
+*   **Manual Graph Construction:** Graphs must be constructed programmatically by adding individual nodes and edges; there are no higher-level abstractions for automatic graph generation from raw data (this is handled by other modules like `parser-etl` and `app-web`).

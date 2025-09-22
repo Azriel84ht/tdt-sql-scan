@@ -124,7 +124,7 @@ public class DmlExample {
 }
 ```
 
-## Sentencias DML Soportadas y Limitaciones
+## Supported Features & Limitations
 
 El módulo `parser-dml` está diseñado para manejar las siguientes sentencias DML:
 

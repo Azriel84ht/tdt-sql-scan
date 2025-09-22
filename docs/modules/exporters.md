@@ -8,7 +8,7 @@ The `exporters` module is intended to be responsible for converting the in-memor
 
 As of the current project structure, the `exporters` module is present as a Maven module (`pom.xml`) but does not yet contain any Java source code or concrete implementations for export functionalities. It serves as a placeholder for future development.
 
-## Intended Functionality (Future Development)
+## Planned Functionality
 
 In its complete form, this module is expected to support:
 
@@ -40,6 +40,21 @@ Once implemented, users would typically interact with exporter services or class
 //     }
 // }
 ```
+
+## Supported Features & Limitations
+
+**Current Status:**
+
+*   **Supported Features:** As a placeholder module, `exporters` currently does not support any specific features.
+*   **Limitations:** The module is not yet implemented and therefore cannot perform any export operations.
+
+**Planned Features:**
+
+*   **JSON Export:** Support for converting `Graph` objects and parsed data into JSON format.
+*   **XML Export:** Support for providing XML representations of parsed data.
+*   **CSV Export:** Support for exporting tabular data into CSV format.
+*   **Image Export:** Integration with graph visualization libraries to export graphs as image files.
+*   **Custom Formats:** Support for specialized output formats.
 
 ## Consideraciones de Diseño para Extensibilidad
 

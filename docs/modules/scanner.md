@@ -8,6 +8,10 @@ While the TDT SQL Scan project's architecture document mentions a `scanner` as a
 
 Instead, the lexical analysis and tokenization functionalities are integrated into the `parser-core` module, primarily through the `SQLParserUtils` utility class. This class provides a set of static methods that perform the necessary operations to identify and extract meaningful segments (tokens) from raw SQL strings, which are then used by the various SQL parsers.
 
+## Key Components
+
+The conceptual `scanner` functionality is primarily provided by the utility class `com.tdtsqlscan.core.SQLParserUtils` within the `parser-core` module. This class encapsulates the methods responsible for lexical analysis and tokenization.
+
 ## Functionality (Provided by `parser-core/SQLParserUtils`)
 
 The lexical analysis capabilities are provided by the `com.tdtsqlscan.core.SQLParserUtils` class, which includes methods such as:
@@ -29,6 +33,22 @@ The conceptual `scanner` functionality is part of the `parser-core` module and t
 ## How to Use
 
 The functionalities of the conceptual `scanner` are implicitly used by all `QueryParser` implementations across the `parser-*` modules. Developers do not directly interact with a `scanner` component but rather utilize the `SQLParserUtils` methods within their parser implementations.
+
+## Supported Features & Limitations
+
+**Supported Features:**
+
+*   **Keyword-based Extraction:** Ability to extract content between or after specific keywords, handling nested parentheses.
+*   **Top-Level Keyword Identification:** Can find keywords that are not nested within parentheses.
+*   **Table Name Extraction:** Utility methods for extracting table names from expressions and after specific keywords.
+*   **String Splitting:** Splits strings by delimiters while respecting nested structures.
+
+**Limitations:**
+
+*   **Not a Full Lexical Analyzer:** This is not a traditional, standalone lexical analyzer that generates a stream of tokens based on a grammar. It's a collection of utility methods for string manipulation and keyword-based extraction.
+*   **Limited Error Recovery:** Error handling is primarily through exceptions for malformed input, rather than robust error recovery mechanisms typical of a dedicated scanner.
+*   **SQL Dialect Specificity:** While designed for SQL, its keyword-based approach might require adjustments for highly divergent SQL dialects.
+*   **No Explicit Token Stream:** Does not produce an explicit, iterable token stream, which might limit certain advanced parsing techniques.
 
 ## Justificación de la Integración
 

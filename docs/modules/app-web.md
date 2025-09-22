@@ -21,6 +21,54 @@ The `app-web` module provides the web-based graphical user interface (GUI) for t
         *   `POST /api/visualize-select`: Takes a script name and command ID, extracts the relevant `SELECT` query (or sub-query from `INSERT` or `CREATE TABLE AS SELECT`), and converts it into a `Graph` using `SelectGraphConverter` for detailed visualization.
     *   **Dependencies:** Utilizes `BteqScriptParser` (from `parser-etl`) for script parsing, `ChainFlowGraphConverter`, `DataFlowGraphConverter`, `SelectGraphConverter`, and `ObjectMapper` for JSON processing.
 
+### Diagrama de Secuencia: Flujo de `POST /upload`
+
+```mermaid
+sequenceDiagram
+    participant Cliente
+    participant BteqUploadController
+    participant BteqScriptParser
+    participant QueryParsers
+    participant ChainFlowGraphConverter
+    participant DataFlowGraphConverter
+    participant SelectGraphConverter
+    participant GraphResponse
+
+    Cliente->>BteqUploadController: POST /upload (files, orderJson)
+    activate BteqUploadController
+
+    loop for each BTEQ script file
+        BteqUploadController->>BteqScriptParser: parse(scriptContent, scriptName)
+        activate BteqScriptParser
+        BteqScriptParser->>QueryParsers: parse(sqlStatement) (for embedded SQL)
+        activate QueryParsers
+        QueryParsers-->>BteqScriptParser: SQLQuery AST
+        deactivate QueryParsers
+        BteqScriptParser-->>BteqUploadController: BteqScript (parsed)
+        deactivate BteqScriptParser
+    end
+
+    BteqUploadController->>ChainFlowGraphConverter: convert(List<BteqScript>)
+    activate ChainFlowGraphConverter
+    ChainFlowGraphConverter-->>BteqUploadController: ChainFlowGraph
+    deactivate ChainFlowGraphConverter
+
+    loop for each BteqScript
+        BteqUploadController->>DataFlowGraphConverter: convert(BteqScript)
+        activate DataFlowGraphConverter
+        DataFlowGraphConverter-->>BteqUploadController: DataFlowGraph
+        deactivate DataFlowGraphConverter
+    end
+
+    BteqUploadController->>GraphResponse: new(chainFlowGraph, dataFlowGraphs, fileMetadata)
+    activate GraphResponse
+    GraphResponse-->>BteqUploadController: GraphResponse Object
+    deactivate GraphResponse
+
+    BteqUploadController-->>Cliente: 200 OK (GraphResponse JSON)
+    deactivate BteqUploadController
+```
+
 *   **`controller/AdminController.java` (and others)**
     *   **Description:** (Based on naming convention) These classes likely handle administrative functionalities, such as user management, FAQ content management, and "What's New" updates, providing endpoints for the `/admin` section of the application.
 
@@ -134,10 +182,34 @@ La interfaz de usuario web de `app-web` se construye utilizando una combinación
 *   **Bootstrap:** Un framework CSS popular para el diseño responsivo y la creación rápida de interfaces de usuario modernas y atractivas.
 *   **Bibliotecas JavaScript Adicionales:** Para funcionalidades específicas como la visualización de gráficos (ej. D3.js, vis.js) o efectos visuales (ej. particles.js).
 
-## Base de Datos
+## Arquitectura Frontend
 
-El módulo `app-web` utiliza una base de datos para persistir información como usuarios, roles, contenido de blog y FAQs. La configuración por defecto para el desarrollo y las pruebas utiliza:
+La interfaz de usuario web de `app-web` se construye utilizando una combinación de tecnologías de renderizado del lado del servidor y bibliotecas de cliente para ofrecer una experiencia interactiva y dinámica.
 
-*   **H2 Database:** Una base de datos en memoria (o basada en archivos) ligera, ideal para entornos de desarrollo y pruebas. Se accede a su consola a través de `/h2-console` en modo de desarrollo.
+### Thymeleaf para el Renderizado del Lado del Servidor
 
-Para entornos de producción, la aplicación está diseñada para ser compatible con bases de datos relacionales estándar como PostgreSQL, MySQL u Oracle, configurándose a través de las propiedades de Spring Boot en `application.properties` o `application-production.properties`.
+*   **Motor de Plantillas**: Thymeleaf es el motor de plantillas principal utilizado para generar las vistas HTML en el lado del servidor. Permite la integración fluida de datos del backend en el frontend, facilitando la creación de páginas dinámicas y la gestión de la lógica de presentación directamente en el servidor.
+*   **Ventajas**: Proporciona una sintaxis natural que se puede previsualizar directamente en navegadores estáticos, mejora la seguridad al prevenir XSS por defecto y se integra perfectamente con Spring Framework.
+
+### Visualización de Grafos con `vis-network.js`
+
+*   **Librería de Visualización**: La librería JavaScript `vis-network.js` (parte de la suite `vis.js`) es la herramienta central para la visualización interactiva de grafos en el frontend. Esta librería es capaz de renderizar redes complejas de nodos y aristas, permitiendo a los usuarios explorar las relaciones de flujo de datos y control de manera intuitiva.
+*   **Funcionalidades Clave**: `vis-network.js` ofrece:
+    *   **Renderizado Dinámico**: Creación y actualización de grafos en tiempo real.
+    *   **Interactividad**: Zoom, paneo, arrastre de nodos, selección de elementos y eventos de clic.
+    *   **Personalización**: Amplias opciones para estilizar nodos, aristas y el diseño general del grafo.
+    *   **Diseños Automáticos**: Algoritmos de diseño de grafos para organizar visualmente los nodos y aristas de manera legible.
+
+### Lógica Principal en `app.html`
+
+El archivo `app.html` es la plantilla principal que orquesta la interacción del usuario con la aplicación. Su lógica JavaScript se encarga de:
+
+1.  **Gestión de Subida de Ficheros**: Maneja el formulario de subida de ficheros, enviando las solicitudes POST al endpoint `/upload` del `BteqUploadController`. Recopila los ficheros seleccionados y el orden de ejecución especificado por el usuario.
+2.  **Interacción con los Grafos**: Una vez que el backend devuelve una `GraphResponse` (que contiene los grafos de flujo de cadena y flujo de datos), el JavaScript en `app.html` utiliza `vis-network.js` para:
+    *   **Renderizar el Grafo de Flujo de Cadena**: Muestra la secuencia de ejecución de los scripts BTEQ.
+    *   **Renderizar los Grafos de Flujo de Datos**: Permite al usuario seleccionar un script BTEQ individual para visualizar su grafo de flujo de datos detallado.
+    *   **Manejo de Eventos de Clic**: Detecta clics en nodos del grafo para, por ejemplo, mostrar información detallada del nodo o activar la visualización de un sub-grafo (como el grafo de `SELECT` para una consulta específica).
+3.  **Actualización de la Barra de Metadatos**: Extrae y muestra la información de `FileMetadata` (número de transacciones, tablas de entrada/salida) en una barra lateral o sección dedicada, proporcionando un resumen rápido del script analizado.
+4.  **Visualización de Consultas SELECT**: Cuando el usuario interactúa con un nodo que representa una consulta `SELECT`, el JavaScript realiza una llamada AJAX al endpoint `/api/visualize-select` para obtener el grafo específico de esa consulta y lo renderiza en un área dedicada.
+
+En resumen, `app.html` actúa como el orquestador del lado del cliente, conectando la entrada del usuario, la visualización de datos y la interacción con los resultados del análisis de SQL y BTEQ proporcionados por el backend.

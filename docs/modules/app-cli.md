@@ -8,7 +8,7 @@ The `app-cli` module is designed to provide a Command-Line Interface (CLI) for i
 
 As of the current project structure, the `app-cli` module is present as a Maven module (`pom.xml`) but does not yet contain any Java source code or concrete implementations for CLI functionalities. It serves as a placeholder for future development.
 
-## Intended Functionality (Future Development)
+## Planned Functionality
 
 In its complete form, this module is expected to provide:
 
@@ -32,6 +32,21 @@ Once implemented, users would execute the CLI application from their terminal, p
 # java -jar app-cli-<version>.jar analyze-lineage --dir ./sql_scripts --output json > lineage.json
 # java -jar app-cli-<version>.jar generate-graph --file complex_etl.bteq --format png --output graph.png
 ```
+
+## Supported Features & Limitations
+
+**Current Status:**
+
+*   **Supported Features:** As a placeholder module, `app-cli` currently does not support any specific features.
+*   **Limitations:** The module is not yet implemented and therefore cannot perform any CLI operations.
+
+**Planned Features:**
+
+*   **Script Parsing:** Support for parsing individual SQL or BTEQ files.
+*   **Graph Generation:** Generation of data flow or control flow graphs.
+*   **Data Lineage:** Analysis and reporting on data lineage.
+*   **Configuration:** Command-line arguments and configuration files for operational parameters.
+*   **Batch Processing:** Ability to process multiple files or directories.
 
 ## Consideraciones de Diseño para la Implementación
 

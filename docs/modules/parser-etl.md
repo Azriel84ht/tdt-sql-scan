@@ -117,7 +117,7 @@ INSERT INTO another_table (c1) VALUES ('test');
 }
 ```
 
-## Comandos BTEQ Soportados y Limitaciones
+## Supported Features & Limitations
 
 El módulo `parser-etl` está diseñado para reconocer y procesar los siguientes tipos de comandos BTEQ, categorizados por `BteqCommandType`:
 

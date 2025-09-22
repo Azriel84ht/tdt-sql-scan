@@ -111,7 +111,7 @@ public class DdlExample {
 }
 ```
 
-## Sentencias DDL Soportadas y Limitaciones
+## Supported Features & Limitations
 
 El módulo `parser-ddl` está diseñado para manejar las siguientes sentencias DDL:
 

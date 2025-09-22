@@ -83,11 +83,21 @@ public class SelectExample {
 }
 ```
 
-## Limitaciones
+## Supported Features & Limitations
 
-Actualmente, el `parser-select` tiene las siguientes limitaciones:
+**Supported Features:**
 
-*   **Cláusulas `LIMIT` y `OFFSET`:** Aunque `SelectQuery` tiene campos para `limit` y `offset`, la implementación actual de `SelectParser` no analiza completamente estas cláusulas. Se requiere una implementación futura para extraer estos valores del SQL.
-*   **Subconsultas Complejas:** El parser puede tener dificultades con subconsultas muy anidadas o complejas en la lista `SELECT` o en la cláusula `FROM` que no sean referencias directas a tablas.
-*   **Funciones de Ventana y Expresiones Analíticas:** No hay soporte explícito para el análisis de funciones de ventana (ej. `OVER (PARTITION BY ... ORDER BY ...)`) o expresiones analíticas.
-*   **Sentencias `CASE` Avanzadas:** Las sentencias `CASE` complejas dentro de la lista `SELECT` o las condiciones pueden no ser completamente desglosadas en sus componentes individuales.
+*   **Basic SELECT statements:** Parsing of standard `SELECT` queries.
+*   **Column Extraction:** Identification of selected columns and expressions.
+*   **FROM Clause:** Extraction of primary tables in the `FROM` clause.
+*   **JOIN Clauses:** Parsing of `INNER`, `LEFT`, `RIGHT`, `FULL` joins with `ON` conditions.
+*   **WHERE Clause:** Extraction of filtering conditions.
+*   **GROUP BY Clause:** Identification of grouping expressions.
+*   **ORDER BY Clause:** Parsing of ordering items, including ASC/DESC direction.
+
+**Limitations:**
+
+*   **`LIMIT` and `OFFSET` Clauses:** Although `SelectQuery` has fields for `limit` and `offset`, the current `SelectParser` implementation does not fully parse these clauses. Future implementation is required to extract these values from the SQL.
+*   **Complex Subqueries:** The parser may struggle with deeply nested or complex subqueries in the `SELECT` list or `FROM` clause that are not direct table references.
+*   **Window Functions and Analytical Expressions:** There is no explicit support for parsing window functions (e.g., `OVER (PARTITION BY ... ORDER BY ...)`) or analytical expressions.
+*   **Advanced `CASE` Statements:** Complex `CASE` statements within the `SELECT` list or conditions may not be fully broken down into their individual components.
