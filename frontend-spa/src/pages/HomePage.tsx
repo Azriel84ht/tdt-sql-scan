@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { useAuthStore } from '../store/authStore';
+import { toast } from 'react-hot-toast';
+import apiClient from '../api/apiClient';
 import FileUploadArea from '../components/FileUploadArea';
 import StagingPanel from '../components/StagingPanel';
 import GraphVisualizationPanel from '../components/GraphVisualizationPanel';
-import apiClient from '../api/apiClient';
+import Spinner from '../components/common/Spinner';
 
 interface StatementDto {
   commandName?: string;
@@ -16,7 +17,6 @@ interface AnalysisResult {
 }
 
 const HomePage: React.FC = () => {
-  const { logout } = useAuthStore();
   const [stagedFiles, setStagedFiles] = useState<File[]>([]);
   const [analysisResults, setAnalysisResults] = useState<AnalysisResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -30,18 +30,16 @@ const HomePage: React.FC = () => {
   };
 
   const handleAnalyze = async () => {
+    if (stagedFiles.length === 0) return;
+
     setIsLoading(true);
     setAnalysisResults([]);
 
     const fileReadPromises = stagedFiles.map(file => {
       return new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
-        reader.onload = (event) => {
-          resolve(event.target?.result as string);
-        };
-        reader.onerror = (error) => {
-          reject(error);
-        };
+        reader.onload = (event) => resolve(event.target?.result as string);
+        reader.onerror = (error) => reject(error);
         reader.readAsText(file);
       });
     });
@@ -55,33 +53,46 @@ const HomePage: React.FC = () => {
       setAnalysisResults(responses.map(res => res.data));
     } catch (error) {
       console.error('Error during analysis:', error);
-      // Optionally, set an error state to display to the user
+      toast.error('An error occurred during analysis. Please check the console for details.');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div>
-      <h1>Home Page</h1>
-      <p>Welcome! You are logged in.</p>
-      <button onClick={logout}>Logout</button>
-
-      <FileUploadArea onFilesUpload={handleFilesUpload} />
-      <StagingPanel files={stagedFiles} onRemoveFile={handleRemoveFile} />
-
-      <button onClick={handleAnalyze} disabled={stagedFiles.length === 0 || isLoading}>
-        {isLoading ? 'Analyzing...' : 'Analyze'}
-      </button>
-
-      {analysisResults.length > 0 && (
-        <div>
-          <h3>Analysis Results</h3>
-          {analysisResults.map((result, index) => (
-            <GraphVisualizationPanel key={index} analysisResult={result} />
-          ))}
-        </div>
-      )}
+    <div className="grid md:grid-cols-3 gap-4 h-full">
+      <div className="md:col-span-1 space-y-4">
+        <FileUploadArea onFilesUpload={handleFilesUpload} />
+        <StagingPanel
+          files={stagedFiles}
+          onRemoveFile={handleRemoveFile}
+          onAnalyze={handleAnalyze}
+          isLoading={isLoading}
+        />
+      </div>
+      <div className="md:col-span-2 relative">
+        {isLoading && (
+          <div className="absolute inset-0 bg-gray-900 bg-opacity-75 flex flex-col items-center justify-center z-10 rounded-lg">
+            <Spinner className="w-16 h-16 text-white" />
+            <p className="text-white text-2xl mt-4">Analyzing...</p>
+          </div>
+        )}
+        {analysisResults.length > 0 ? (
+          <div className="space-y-4">
+            {analysisResults.map((result, index) => (
+              <GraphVisualizationPanel key={index} analysisResult={result} />
+            ))}
+          </div>
+        ) : (
+          !isLoading && (
+            <div className="flex items-center justify-center h-full bg-gray-800 rounded-lg">
+              <p className="text-gray-400 text-2xl text-center p-4">
+                Upload files and click Analyze to see the results.
+              </p>
+            </div>
+          )
+        )}
+      </div>
     </div>
   );
 };
