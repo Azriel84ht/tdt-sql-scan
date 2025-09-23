@@ -6,7 +6,7 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  login: (username, password) => Promise<void>;
+  login: (username: string, password: string) => Promise<void>;
   logout: () => void;
   setToken: (token: string | null) => void;
 }
@@ -31,7 +31,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       const { token } = response.data;
       set({ token, isAuthenticated: true, isLoading: false });
       localStorage.setItem('token', token);
-    } catch (error) {
+    } catch (error: any) {
       const errorMessage = error.response?.data?.message || 'An unexpected error occurred.';
       set({ error: errorMessage, isLoading: false });
     }
