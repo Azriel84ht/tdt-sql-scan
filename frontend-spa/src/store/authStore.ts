@@ -31,8 +31,14 @@ export const useAuthStore = create<AuthState>((set) => ({
       const { token } = response.data;
       set({ token, isAuthenticated: true, isLoading: false });
       localStorage.setItem('token', token);
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'An unexpected error occurred.';
+    } catch (error: unknown) {
+      let errorMessage = 'An unexpected error occurred.';
+      if (typeof error === 'object' && error !== null && 'response' in error) {
+        const response = (error as { response?: { data?: { message?: string } } }).response;
+        if (response?.data?.message) {
+          errorMessage = response.data.message;
+        }
+      }
       set({ error: errorMessage, isLoading: false });
     }
   },
