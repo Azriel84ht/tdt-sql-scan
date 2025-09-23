@@ -10,16 +10,7 @@
   <packaging>pom</packaging>
 
   <modules>
-    <module>parser-core</module>
-    <module>parser-select</module>
-    <module>parser-ddl</module>
-    <module>parser-dml</module>
-    <module>parser-etl</module>
-    <module>scanner</module>
-    <module>graph</module>
-    <module>exporters</module>
     <module>app-cli</module>
-    <module>app-web</module>
     <module>parser-service</module>
     <module>config-server</module>
     <module>api-gateway</module>
