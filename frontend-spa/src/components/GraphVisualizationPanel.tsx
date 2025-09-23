@@ -30,22 +30,18 @@ const GraphVisualizationPanel: React.FC<GraphVisualizationPanelProps> = ({ analy
   }, [analysisResult, setNodes, setEdges]);
 
   return (
-    <div className="bg-gray-800 rounded-lg shadow-lg p-4 h-[600px]">
-      <h3 className="text-lg font-semibold text-white mb-4">Query Plan</h3>
-      <div className="w-full h-full rounded-md overflow-hidden">
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          fitView
-          className="bg-gray-700"
-        >
-          <Controls />
-          <MiniMap nodeColor="#6366f1" />
-          <Background color="#4b5563" gap={16} />
-        </ReactFlow>
-      </div>
+    <div style={{ width: '100%', height: '500px', border: '1px solid #ccc' }}>
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        fitView
+      >
+        <Controls />
+        <MiniMap />
+        <Background />
+      </ReactFlow>
     </div>
   );
 };
