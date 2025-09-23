@@ -15,23 +15,8 @@
   <dependencies>
     <dependency>
       <groupId>com.tdtsqlscan</groupId>
-      <artifactId>parser-core</artifactId>
-      <version>0.4.1</version>
-    </dependency>
-    <dependency>
-      <groupId>com.tdtsqlscan</groupId>
-      <artifactId>scanner</artifactId>
-      <version>0.4.1</version>
-    </dependency>
-    <dependency>
-      <groupId>com.tdtsqlscan</groupId>
-      <artifactId>graph</artifactId>
-      <version>0.4.1</version>
-    </dependency>
-    <dependency>
-      <groupId>com.tdtsqlscan</groupId>
-      <artifactId>exporters</artifactId>
-      <version>0.4.1</version>
+      <artifactId>parser-service</artifactId>
+      <version>1.0.0-POC</version>
     </dependency>
 
     <!-- Para CLI argument parsing -->

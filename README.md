@@ -6,62 +6,54 @@ TDT SQL Scan is a comprehensive tool designed for the in-depth analysis of SQL s
 
 ## Features
 
-*   **Advanced SQL Parsing:** Capable of parsing various SQL dialects, including Data Definition Language (DDL), Data Manipulation Language (DML), SELECT statements, and Teradata BTEQ specific commands.
-*   **Data Flow and Dependency Graph Generation:** Automatically generates graphical representations of data lineage and dependencies between tables, views, and other database objects.
-*   **Web Application:** Provides an intuitive web interface for uploading SQL/BTEQ scripts, visualizing the generated graphs, and exploring analysis results.
+*   **Advanced SQL Parsing:** A microservice-based architecture for parsing various SQL dialects, including DDL, DML, SELECT statements, and Teradata BTEQ commands.
+*   **Data Flow and Dependency Graph Generation:** The frontend SPA, powered by React, now handles the generation and visualization of data lineage and dependency graphs.
+*   **React-based Single Page Application (SPA):** A modern, intuitive user interface for uploading SQL/BTEQ scripts, visualizing graphs, and exploring analysis results.
 *   **Command-Line Interface (CLI):** Offers a powerful CLI for batch processing, scripting, and integrating SQL analysis into automated workflows.
-*   **Modular Architecture:** Designed with a clear separation of concerns, making it extensible and maintainable.
+*   **Microservices Architecture:** The backend functionality is decomposed into independent services for parsing, user management, and API gateway routing, enhancing scalability and maintainability.
 
 ## Technologies Used
 
-*   **Core Language:** Java 8
+*   **Core Language:** Java 17
+*   **Backend Framework:** Spring Boot 3
+*   **Frontend Framework:** React
 *   **Build Tool:** Apache Maven
-*   **Web Framework:** Spring Boot (for the `app-web` module)
 *   **Code Quality:**
     *   Checkstyle (with Google Java Format)
     *   Spotless (for code formatting)
 
 ## Project Structure
 
-The project is organized into several modules, each responsible for a specific aspect of the SQL scanning and analysis process:
+The project has been migrated to a microservices architecture:
 
-*   **`parser-core`**: Contains the foundational components for SQL parsing, including common utilities, abstract syntax tree (AST) elements, and basic SQL constructs.
-*   **`parser-select`**: Dedicated to parsing `SELECT` statements and extracting relevant information such as columns, tables, joins, and conditions.
-*   **`parser-ddl`**: Handles the parsing of Data Definition Language (DDL) statements like `CREATE TABLE`, `DROP TABLE`, and `CREATE INDEX`.
-*   **`parser-dml`**: Manages the parsing of Data Manipulation Language (DML) statements, including `INSERT`, `UPDATE`, and `DELETE`.
-*   **`parser-etl`**: Specifically designed for parsing ETL-related scripts, such as Teradata BTEQ scripts, to understand their control flow and embedded SQL commands.
-*   **`scanner`**: Likely responsible for lexical analysis and tokenization of SQL input before parsing.
-*   **`graph`**: Provides the data structures and algorithms for building and manipulating graph representations of SQL dependencies and data flow.
-*   **`exporters`**: Contains logic for exporting the analysis results and generated graphs into various formats (e.g., JSON, image files).
-*   **`app-cli`**: The command-line interface application, allowing users to perform analysis tasks directly from the terminal.
-*   **`app-web`**: The web application that provides a graphical user interface for interacting with the SQL analysis functionalities.
+*   **`parser-service`**: A dedicated service for parsing all types of SQL and BTEQ scripts.
+*   **`user-service`**: Manages user authentication and authorization.
+*   **`api-gateway`**: A single entry point for all client requests, routing them to the appropriate backend service.
+*   **`config-server`**: Centralized configuration management for all microservices.
+*   **`frontend-spa`**: A Single Page Application built with React that provides the user interface.
+*   **`app-cli`**: The command-line interface application for terminal-based analysis.
 
 ## Getting Started
 
 ### Prerequisites
 
-*   Java Development Kit (JDK) 8 or higher
+*   Java Development Kit (JDK) 17 or higher
 *   Apache Maven 3.x
+*   Node.js and npm (for the frontend-spa)
 
 ### Building the Project
 
-To build the entire project, navigate to the root directory (`tdt-sql-scan/`) and execute the following Maven command:
+To build the entire project, navigate to the root directory and execute the following Maven command:
 
 ```bash
 mvn clean install
 ```
 
-This command will compile all modules, run tests, and package the applications into JAR files in their respective `target/` directories.
+This command will compile all backend modules and package them into JAR files.
 
-### Running the Web Application
+### Running the Ecosystem
 
-After building, you can run the web application from the `app-web` module:
-
-```bash
-java -jar app-web/target/app-web-<version>.jar
-```
-
-Replace `<version>` with the actual version number (e.g., `0.4.1`). Once started, the web application will typically be accessible in your browser at `http://localhost:8080` (or another port if configured).
+To run the full application, you need to start the microservices and the frontend SPA. Refer to the `docs/deployment.md` for detailed instructions on running the services.
 
 ### Running the CLI Application
 
@@ -79,12 +71,12 @@ java -jar app-cli/target/app-cli-<version>.jar --help
 
 ## Usage
 
-### Web Application
+### Web Application (SPA)
 
-1.  Navigate to the web application URL (e.g., `http://localhost:8080`).
-2.  Upload your SQL or BTEQ script using the provided interface.
-3.  View the generated data flow and dependency graphs.
-4.  Explore the analysis results and identified relationships.
+1.  Ensure the backend services and the `frontend-spa` are running.
+2.  Navigate to the frontend application URL (typically `http://localhost:5173`).
+3.  Upload your SQL or BTEQ script using the interface.
+4.  View the generated data flow and dependency graphs.
 
 ### CLI Application
 
