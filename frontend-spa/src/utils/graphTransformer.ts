@@ -1,4 +1,4 @@
-import { Edge, Node } from 'reactflow';
+import type { Edge, Node } from 'reactflow';
 
 // Assuming ParseResultDto and StatementDto types are defined elsewhere,
 // for example in an `api-client` or `types` module.

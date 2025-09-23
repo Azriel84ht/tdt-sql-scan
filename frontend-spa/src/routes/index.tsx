@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouteObject } from 'react-router-dom';
+import { createBrowserRouter, type RouteObject } from 'react-router-dom';
 import LoginPage from '../pages/LoginPage';
 import HomePage from '../pages/HomePage';
 import ProtectedRoute from './ProtectedRoute';

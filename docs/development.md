@@ -1,14 +1,13 @@
 # Development Guidelines
 
-This document outlines the guidelines and best practices for developing within the TDT SQL Scan project.
+This document outlines the guidelines for developing within the TDT SQL Scan project using Docker.
 
-## Setting up Your Development Environment
+## Setting up Your Development Environment with Docker
+
+The entire development environment is orchestrated using Docker Compose, which radically simplifies the setup process.
 
 1.  **Prerequisites:**
-    *   Java Development Kit (JDK) 8 or higher.
-    *   Apache Maven 3.6.0 or higher.
-    *   Git.
-    *   An Integrated Development Environment (IDE) such as IntelliJ IDEA, Eclipse, or VS Code with Java extensions.
+    *   **Docker and Docker Compose:** Ensure you have Docker Desktop (for Mac/Windows) or Docker Engine with Docker Compose (for Linux) installed. No other dependencies like Java, Node, or Maven are required on your host machine.
 
 2.  **Cloning the Repository:**
     ```bash
@@ -16,17 +15,31 @@ This document outlines the guidelines and best practices for developing within t
     cd tdt-sql-scan
     ```
 
-3.  **Building the Project:**
-    The project uses Maven. You can build the entire project from the root directory:
+3.  **Building and Running the Entire Application:**
+    To build the Docker images for all services and start the application stack, run the following command from the root of the project:
     ```bash
-    mvn clean install
+    docker-compose up --build
     ```
-    This command compiles the code, runs tests, and packages the modules.
+    This command will:
+    - Build the images for each microservice (`config-server`, `user-service`, `parser-service`, `api-gateway`) and the `frontend-spa`.
+    - Start a container for each service, including the `postgres` database.
+    - Display the aggregated logs from all services in your terminal.
 
-4.  **Importing into IDE:**
-    Most IDEs can import Maven projects directly.
-    *   **IntelliJ IDEA:** Open -> Navigate to the `tdt-sql-scan` directory -> Select `pom.xml` -> Open as Project.
-    *   **Eclipse:** File -> Import -> Maven -> Existing Maven Projects -> Browse to `tdt-sql-scan` directory.
+4.  **Stopping the Application:**
+    To stop and remove all the running containers, networks, and volumes defined in the `docker-compose.yml`, simply press `Ctrl+C` in the terminal where `docker-compose up` is running, or run the following command from the project root in another terminal:
+    ```bash
+    docker-compose down
+    ```
+
+## Accessing the Services
+
+Once the application is running, you can access the different parts of the system at the following URLs:
+
+*   **API Gateway:** `http://localhost:8080`
+*   **Frontend Application:** `http://localhost:5173`
+*   **Config Server:** `http://localhost:8888`
+*   **User Service:** `http://localhost:8081`
+*   **Parser Service:** `http://localhost:8082`
 
 ## Code Style and Formatting
 
@@ -36,29 +49,12 @@ This document outlines the guidelines and best practices for developing within t
 
 ## Testing
 
-*   **Unit Tests:** Write unit tests for new features and bug fixes. Place them in the `src/test/java` directory of the respective module.
-*   **Running Tests:**
-    ```bash
-    mvn test
-    ```
-    To skip tests during build:
-    ```bash
-    mvn clean install -DskipTests
-    ```
+While the Docker Compose setup does not run tests by default, you can still run them within the individual service containers or locally if you choose to set up a local Java/Maven environment.
 
-## Local Server Setup (for `app-web`)
-
-Para ejecutar la aplicación web localmente, navega al módulo `app-web` y utiliza el siguiente comando de Maven:
-
+To run tests for a specific service (e.g., `user-service`):
 ```bash
-mvn spring-boot:run
+docker-compose run user-service mvn test
 ```
-
-Esto iniciará el servidor web en el puerto configurado (por defecto, 8080). Podrás acceder a la aplicación en `http://localhost:8080`.
-
-## Guías de Depuración
-
-Para depurar el proyecto, puedes configurar tu IDE para adjuntar un depurador a la aplicación en ejecución. Para la `app-web`, puedes iniciarla en modo depuración directamente desde tu IDE o adjuntar un depurador remoto si la ejecutas a través de Maven con las opciones de depuración adecuadas. Se recomienda configurar puntos de interrupción en las áreas de código relevantes para inspeccionar el flujo de ejecución y los valores de las variables.
 
 ## Contributing
 
