@@ -17,6 +17,7 @@ public class AuthenticationFilter {
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchange -> exchange
                         .pathMatchers("/api/v1/auth/**", "/api/v1/users/**").permitAll()
+                        .pathMatchers("/api/v1/parse/**").permitAll()
                         .anyExchange().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));

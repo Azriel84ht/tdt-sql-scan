@@ -9,13 +9,12 @@ export const routes: RouteObject[] = [
     element: <LoginPage />,
   },
   {
+    path: '/',
+    element: <HomePage />,
+  },
+  {
     element: <ProtectedRoute />,
-    children: [
-      {
-        path: '/',
-        element: <HomePage />,
-      },
-    ],
+    children: [],
   },
 ];
 
