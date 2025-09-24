@@ -1,14 +1,21 @@
-import { Route, Routes } from 'react-router-dom';
-import LoginPage from 'pages/login';
-import HomePage from 'pages/home';
-import { ProtectedRoute } from './ProtectedRoute';
+import { createBrowserRouter } from 'react-router-dom';
+import LoginPage from '../pages/LoginPage';
+import HomePage from '../pages/HomePage';
+import ProtectedRoute from './ProtectedRoute';
 
-export const AppRouter: React.FC = () => {
-  return (
-    <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route element={<ProtectedRoute />}></Route>
-    </Routes>
-  );
-};
+export const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <HomePage />,
+  },
+  {
+    path: '/login',
+    element: <LoginPage />,
+  },
+  {
+    element: <ProtectedRoute />,
+    children: [
+      // Futuras rutas protegidas
+    ],
+  },
+]);
